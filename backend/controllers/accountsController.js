@@ -1,5 +1,37 @@
 import accountsModel from "../models/accountsModel.js"
 import asyncHandler from "../middlewares/asyncHandler.js"
+import generateToken from "../utils/generateToken.js"
+import ErrorHandler from "../utils/errorHandler.js"
+
+// @desc    Login user & get token
+// @route   POST /api/accounts/auth
+// sphegatti code
+const login = asyncHandler(async (req, res, next) => {
+  const { username, password } = req.body
+
+  // Check if username exists
+  const results = await accountsModel.queryFindAccountByUsername(username)
+
+  if (results.length === 0) {
+    // no username found
+    throw new ErrorHandler("Invalid username or password", 401)
+  }
+
+  const user = results[0];
+  const isMatch = await accountsModel.matchPassword(password, user.password);
+
+  if (isMatch) {
+    generateToken(res, user._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful"
+    })
+  } else {
+    // wrong password
+    throw new ErrorHandler("Invalid username or password", 401)
+  }
+})
 
 // @desc    Get all accounts
 // @route   GET /api/accounts
@@ -9,11 +41,11 @@ const getAllAccounts = asyncHandler(async (req, res, next) => {
   if (results.length > 0) {
     res.status(200).json({
       success: true,
-      data: results,
-      message: "Accounts successfully retrieved"
+      message: "Accounts successfully retrieved",
+      data: results
     })
   } else {
-    throw new Error("No accounts found")
+    throw new ErrorHandler("No accounts found")
   }
 });
 
@@ -34,4 +66,4 @@ const addNewAccount = asyncHandler(async (req, res, next) => {
   }
 });
 
-export { getAllAccounts, addNewAccount }
+export { getAllAccounts, addNewAccount, login }
