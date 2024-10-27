@@ -13,13 +13,18 @@ const login = asyncHandler(async (req, res, next) => {
 
   if (results.length === 0) {
     // no username found
-    throw new ErrorHandler("Invalid username or password", 401)
+    throw new ErrorHandler("Invalid credentials", 401)
   }
 
   const user = results[0];
   const isMatch = await accountsModel.matchPassword(password, user.password);
 
   if (isMatch) {
+    // check if user active
+    if (user.accountstatus !== "Active") {
+      throw new ErrorHandler("Invalid credentials", 401)
+    }
+
     generateToken(res, user.username);
 
     res.status(200).json({
@@ -28,7 +33,7 @@ const login = asyncHandler(async (req, res, next) => {
     })
   } else {
     // wrong password
-    throw new ErrorHandler("Invalid username or password", 401)
+    throw new ErrorHandler("Invalid credentials", 401)
   }
 })
 
