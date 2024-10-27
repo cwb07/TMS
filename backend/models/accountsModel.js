@@ -5,8 +5,11 @@ const matchPassword = async (enteredPassword, hashPassword) => {
   return await bcrypt.compare(enteredPassword, hashPassword);
 };
 
-const queryFindAccountByUsername = async (username) => {
-  const query = `SELECT * FROM accounts WHERE username = ?`
+const queryFindAccountByUsername = async (username, getPassword = false) => {
+  const columns = getPassword ? '*' : 'username, email, accountstatus';
+
+  const query = `SELECT ${columns} FROM accounts WHERE username = ?`;
+
   const [results] = await pool.query(query, [username])
   return results
 }
