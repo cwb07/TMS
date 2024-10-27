@@ -7,9 +7,7 @@ export const actions = {
 		const username = form.get('username');
 		const password = form.get('password');
 
-		if (!username || !password) {
-			return { errors: 'Invalid credentials' }
-		} else {
+		if (username && password) {
 			const response = await fetch('http://localhost:3000/api/accounts/login', {
 				method: 'POST',
 				headers: {
@@ -27,10 +25,9 @@ export const actions = {
 				}
 
 				redirect(303, '/user_management');
-			} else {
-				const data = await response.json();
-				return { error: data.message }
 			}
 		}
+
+		return { error: 'Invalid credentials' }
 	}
 };

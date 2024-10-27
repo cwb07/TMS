@@ -8,21 +8,19 @@ import ErrorHandler from "../utils/errorHandler.js"
 const login = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body
 
-  // Check if username exists
+  // check if username exists
   const results = await accountsModel.queryFindAccountByUsername(username, true)
 
   if (results.length === 0) {
-    // no username found
-    throw new ErrorHandler("Invalid credentials", 401)
+    throw new ErrorHandler("No username found", 401)
   }
 
   const user = results[0];
   const isMatch = await accountsModel.matchPassword(password, user.password);
 
   if (isMatch) {
-    // check if user active
     if (user.accountstatus !== "Active") {
-      throw new ErrorHandler("Invalid credentials", 401)
+      throw new ErrorHandler("Inactive user", 401)
     }
 
     generateToken(res, user.username);
@@ -32,8 +30,7 @@ const login = asyncHandler(async (req, res, next) => {
       message: "Login successful"
     })
   } else {
-    // wrong password
-    throw new ErrorHandler("Invalid credentials", 401)
+    throw new ErrorHandler("Wrong password", 401)
   }
 })
 
