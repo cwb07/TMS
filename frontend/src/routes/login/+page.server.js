@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import { ACCOUNTS_URL } from '../../../constants';
 
 export const actions = {
 	default: async ({ request, cookies }) => {
@@ -8,7 +9,7 @@ export const actions = {
 		const password = form.get('password');
 
 		if (username && password) {
-			const response = await fetch('http://localhost:3000/api/accounts/login', {
+			const response = await fetch(`${ACCOUNTS_URL}/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -28,6 +29,6 @@ export const actions = {
 			}
 		}
 
-		return { error: 'Invalid credentials' }
+		return { error: 'Invalid credentials' };
 	}
 };

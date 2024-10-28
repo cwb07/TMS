@@ -1,29 +1,34 @@
-import jwt from 'jsonwebtoken';
-import accountsModel from '../models/accountsModel.js';
-import asyncHandler from './asyncHandler.js';
-import ErrorHandler from '../utils/errorHandler.js';
+import jwt from "jsonwebtoken"
+import pool from "../config/db.js"
 
 // User must be logged in
-const isLoggedIn = asyncHandler(async (req, res, next) => {
-    let token = req.cookies.jwt;
+const isLoggedIn = async (req, res, next) => {
+  let token = req.cookies.jwt
 
-    if (token) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-        // get username from jwt cookies, store in req.user to access it
-        const results = await accountsModel.queryFindAccountByUsername(decoded.username, false)
+    // get username from jwt cookies, store in req.user to access it
+    const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
+    const [results] = await pool.query(query, [decoded.username])
 
-        if (results.length === 0) {
-            // no username found
-            throw new ErrorHandler("No user found", 401)
-        } else {
-            // store in req.user to access it anywhere
-            req.user = results[0];
-            next();
-        }
+    if (results.length === 0) {
+      // no username found
+      return res.status(401).json({
+        success: false,
+        message: "No user found"
+      })
     } else {
-        throw new ErrorHandler('Login first to access this resource', 401)
+      // store in req.user to access it anywhere
+      req.user = results[0]
+      next()
     }
-});
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "Login first to access this resource"
+    })
+  }
+}
 
-export { isLoggedIn };
+export { isLoggedIn }
