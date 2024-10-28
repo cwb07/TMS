@@ -4,7 +4,6 @@ node_modules
 .output
 .vercel
 /build
-frontend/.svelte-kit/
 .svelte-kit
 
 # OS
