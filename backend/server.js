@@ -16,6 +16,6 @@ app.use(express.json())
 app.use(cookieParser())
 
 // routes
-app.use("/api/accounts", accountsRoutes)
+app.use("/accounts", accountsRoutes)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
