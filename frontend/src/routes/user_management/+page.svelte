@@ -92,11 +92,22 @@
 			<table class="table table-bordered text-center">
 				<tbody>
 					<tr>
-						<th><input type="text" class="form-control" placeholder="Username" /></th>
-						<th><input type="text" class="form-control" placeholder="Email" /></th>
-						<th><input type="text" class="form-control" placeholder="Password" /></th>
-						<th><input type="text" class="form-control" placeholder="Group" /></th>
-						<th><input type="text" class="form-control" placeholder="Active" /></th>
+						<th><input type="text" class="form-control" placeholder="Username*" /></th>
+						<th><input type="text" class="form-control" placeholder="Email (optional)" /></th>
+						<th><input type="text" class="form-control" placeholder="Password*" /></th>
+						<th
+							><select class="selectpicker" multiple title="Group (optional)">
+								<option>Mustard</option>
+								<option>Ketchup</option>
+								<option>Relish</option>
+							</select>
+						</th>
+						<th
+							><select class="selectpicker">
+								<option default>Active</option>
+								<option>Disabled</option>
+							</select>
+						</th>
 						<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>
 					</tr>
 				</tbody>
