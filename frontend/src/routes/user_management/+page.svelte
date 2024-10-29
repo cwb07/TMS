@@ -1,3 +1,7 @@
+<script>
+	export let form;
+</script>
+
 <nav class="navbar navbar-expand-lg" style="background-color: #99cdf4; margin-bottom: 10px">
 	<div class="container-fluid">
 		<span class="navbar-brand" id="userId" style="flex-grow: 1; text-align: left;">
@@ -41,24 +45,44 @@
 	</div>
 
 	<!-- Error Message Display -->
-	<div class="row mb-2">
-		<div class="col-12">
-			<div class="alert alert-danger" role="alert" id="errorAlert">Error: Error Message</div>
+	{#if form?.error}
+		<div class="row mb-2">
+			<div class="col-12">
+				<div class="alert alert-danger" role="alert" id="errorAlert">{form?.error}</div>
+			</div>
 		</div>
-	</div>
+	{/if}
+
+	<!-- Success Message Display -->
+	{#if form?.success}
+		<div class="row mb-2">
+			<div class="col-12">
+				<div class="alert alert-success" role="alert" id="successAlert">{form?.success}</div>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Create Group Table -->
 	<div class="row">
 		<div class="col-6"></div>
 		<div class="col-6">
-			<table class="table table-bordered text-center">
-				<tbody>
-					<tr>
-						<th><input type="text" class="form-control" placeholder="Active" /></th>
-						<th><input type="text" class="form-control" placeholder="Action" /></th>
-					</tr>
-				</tbody>
-			</table>
+			<form method="POST" action="?/createGroup">
+				<table class="table table-bordered text-center">
+					<tbody>
+						<tr>
+							<th
+								><input
+									type="text"
+									class="form-control"
+									placeholder="Group Name"
+									name="groupname"
+								/></th
+							>
+							<th><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
+						</tr>
+					</tbody>
+				</table>
+			</form>
 		</div>
 	</div>
 
@@ -73,7 +97,7 @@
 						<th><input type="text" class="form-control" placeholder="Password" /></th>
 						<th><input type="text" class="form-control" placeholder="Group" /></th>
 						<th><input type="text" class="form-control" placeholder="Active" /></th>
-						<th><input type="text" class="form-control" placeholder="Action" /></th>
+						<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>
 					</tr>
 				</tbody>
 			</table>

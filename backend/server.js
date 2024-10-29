@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import userRoutes from "./routes/userRoutes.js"
+import groupRoutes from "./routes/groupRoutes.js"
 import cookieParser from "cookie-parser"
 
 // load environment variables
@@ -17,5 +18,6 @@ app.use(cookieParser())
 
 // routes
 app.use("/user", userRoutes)
+app.use("/group", groupRoutes)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

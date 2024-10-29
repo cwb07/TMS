@@ -4,8 +4,15 @@ import bcrypt from "bcrypt"
 
 // @desc    Login user & get token
 // @route   POST /user/login
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { username, password } = req.body
+
+  if (!username || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid credentials"
+    })
+  }
 
   try {
     // check if username exists
@@ -21,44 +28,34 @@ const login = async (req, res, next) => {
     }
 
     const user = results[0]
-    const isMatch = await bcrypt.compare(password, user.password)
 
-    if (isMatch) {
-      if (user.accountstatus !== "Active") {
-        // account is not active
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials"
-        })
-      }
-
-      // Generate a token
-      const token = jwt.sign({ username }, process.env.JWT_SECRET, {
-        expiresIn: "60m"
-      })
-
-      // Set JWT as an HTTP-Only cookie
-      res.cookie("jwt", token, {
-        httpOnly: true, // jwt is transmitted w every HTTP req, prevents xss - disallow javascript from accessing cookies
-        maxAge: 60 * 60 * 1000 // 60 minutes in milliseconds
-      })
-
-      return res.status(200).json({
-        success: true,
-        message: "Login successful"
-      })
-    } else {
-      // wrong password
+    if (!(await bcrypt.compare(password, user.password)) || user.accountstatus !== "Active") {
+      // account is not active or password not matching
       return res.status(401).json({
         success: false,
         message: "Invalid credentials"
       })
     }
+
+    // Generate a token
+    const token = jwt.sign({ username }, process.env.JWT_SECRET, {
+      expiresIn: "60m"
+    })
+
+    // Set JWT as an HTTP-Only cookie
+    res.cookie("jwt", token, {
+      httpOnly: true, // jwt is transmitted w every HTTP req, prevents xss - disallow javascript from accessing cookies
+      maxAge: 60 * 60 * 1000 // 60 minutes in milliseconds
+    })
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful"
+    })
   } catch (err) {
-    // db call error
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Unable to login user",
       stack: err.stack
     })
   }
