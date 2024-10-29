@@ -1,5 +1,16 @@
 <script>
+	import { onMount } from 'svelte';
+
 	export let form;
+	export let data;
+
+	// Reactive declaration for `groups` array
+	$: groups = data.groups;
+
+	// Initialize selectpicker on client-side after component is mounted
+	onMount(() => {
+		globalThis.$('.selectpicker').selectpicker();
+	});
 </script>
 
 <nav class="navbar navbar-expand-lg" style="background-color: #99cdf4; margin-bottom: 10px">
@@ -89,29 +100,54 @@
 	<!-- Create User Table -->
 	<div class="row">
 		<div class="col-12">
-			<table class="table table-bordered text-center">
-				<tbody>
-					<tr>
-						<th><input type="text" class="form-control" placeholder="Username*" /></th>
-						<th><input type="text" class="form-control" placeholder="Email (optional)" /></th>
-						<th><input type="text" class="form-control" placeholder="Password*" /></th>
-						<th
-							><select class="selectpicker" multiple title="Group (optional)">
-								<option>Mustard</option>
-								<option>Ketchup</option>
-								<option>Relish</option>
-							</select>
-						</th>
-						<th
-							><select class="selectpicker">
-								<option default>Active</option>
-								<option>Disabled</option>
-							</select>
-						</th>
-						<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>
-					</tr>
-				</tbody>
-			</table>
+			<form method="POST" action="?/createUser">
+				<table class="table table-bordered text-center">
+					<tbody>
+						<tr>
+							<th
+								><input
+									type="text"
+									class="form-control"
+									name="username"
+									placeholder="Username*"
+								/></th
+							>
+							<th
+								><input
+									type="text"
+									class="form-control"
+									name="email"
+									placeholder="Email (optional)"
+								/></th
+							>
+							<th
+								><input
+									type="text"
+									class="form-control"
+									name="password"
+									placeholder="Password*"
+								/></th
+							>
+							<th>
+								{#if groups && typeof window !== 'undefined'}
+									<select class="selectpicker" name="groups[]" multiple>
+										{#each groups as group}
+											<option>{group}</option>
+										{/each}
+									</select>
+								{/if}
+							</th>
+							<th
+								><select class="selectpicker" name="status">
+									<option default>Active</option>
+									<option>Disabled</option>
+								</select>
+							</th>
+							<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>
+						</tr>
+					</tbody>
+				</table>
+			</form>
 		</div>
 	</div>
 
@@ -159,11 +195,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.right-aligned-table {
-		display: block;
-		margin-left: auto;
-		margin-right: 0;
-	}
-</style>

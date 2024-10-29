@@ -63,4 +63,28 @@ const addNewGroup = async (req, res) => {
   }
 }
 
-export { addNewGroup }
+// @desc    Get all groups
+// @route   GET /group
+const getAllGroups = async (req, res) => {
+  try {
+    const query = `SELECT DISTINCT user_group FROM usergroup`
+    const [results] = await pool.query(query)
+
+    // Extract the user_group names into a new array
+    const groupNames = results.map(row => row.user_group)
+
+    return res.status(200).json({
+      success: true,
+      message: "Groups successfully retrieved",
+      data: groupNames
+    })
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch groups",
+      stack: err.stack
+    })
+  }
+}
+
+export { addNewGroup, getAllGroups }
