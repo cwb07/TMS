@@ -1,6 +1,6 @@
 import express from "express"
 import dotenv from "dotenv"
-import accountsRoutes from "./routes/accountsRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
 import cookieParser from "cookie-parser"
 
 // load environment variables
@@ -16,6 +16,6 @@ app.use(express.json())
 app.use(cookieParser())
 
 // routes
-app.use("/accounts", accountsRoutes)
+app.use("/user", userRoutes)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

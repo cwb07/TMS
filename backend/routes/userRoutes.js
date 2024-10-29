@@ -1,10 +1,10 @@
 import express from "express"
-import { getAllAccounts, addNewAccount, login, logout } from "../controllers/accountsController.js"
+import { login, logout, getAllUsers, addNewUser } from "../controllers/userController.js"
 import { isLoggedIn } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 
-router.route("/").get(isLoggedIn, getAllAccounts).post(addNewAccount)
+router.route("/").get(isLoggedIn, getAllUsers).post(addNewUser)
 
 router.route("/login").post(login)
 

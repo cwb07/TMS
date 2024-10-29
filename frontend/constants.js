@@ -1,2 +1,2 @@
 export const API_BASE_URL = 'http://localhost:3000';
-export const ACCOUNTS_URL = `${API_BASE_URL}/accounts`;
+export const USER_URL = `${API_BASE_URL}/user`;

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 // @desc    Login user & get token
-// @route   POST /accounts/login
+// @route   POST /user/login
 const login = async (req, res, next) => {
   const { username, password } = req.body
 
@@ -65,7 +65,7 @@ const login = async (req, res, next) => {
 }
 
 // @desc    Logout user / clear cookie
-// @route   POST /accounts/logout
+// @route   POST /user/logout
 const logout = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
@@ -78,9 +78,9 @@ const logout = (req, res) => {
   })
 }
 
-// @desc    Get all accounts
-// @route   GET /accounts
-const getAllAccounts = async (req, res, next) => {
+// @desc    Get all users
+// @route   GET /user
+const getAllUsers = async (req, res, next) => {
   const query = `SELECT * FROM accounts`
   const [results] = await pool.query(query)
 
@@ -93,9 +93,9 @@ const getAllAccounts = async (req, res, next) => {
   }
 }
 
-// @desc    Add a new account
-// @route   POST /accounts
-const addNewAccount = async (req, res, next) => {
+// @desc    Add a new user
+// @route   POST /user
+const addNewUser = async (req, res, next) => {
   const { username, password, email } = req.body
 
   // Generate a salt and hash the password
@@ -130,4 +130,4 @@ const addNewAccount = async (req, res, next) => {
   }
 }
 
-export { getAllAccounts, addNewAccount, login, logout }
+export { getAllUsers, addNewUser, login, logout }
