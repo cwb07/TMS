@@ -158,8 +158,6 @@ const addNewUser = async (req, res) => {
     const query = `SELECT * FROM accounts WHERE username = ?`
     const [results] = await pool.query(query, [username])
 
-    console.log("CHECK IF USERNAME EXISTS" + results.length)
-
     if (results.length === 0) {
       //username is unique, able to create user
       const salt = await bcrypt.genSalt(10)

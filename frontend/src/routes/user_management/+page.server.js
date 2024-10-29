@@ -33,7 +33,7 @@ export const actions = {
 			const data = await response.json();
 
 			if (response.ok) {
-				return { success: data.message };
+				return { success: data.message, newGroup: groupname };
 			} else {
 				return { error: data.message };
 			}

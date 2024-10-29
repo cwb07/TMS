@@ -1,11 +1,22 @@
 <script>
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
 
 	export let form;
 	export let data;
 
 	// Reactive declaration for `groups` array
 	$: groups = data.groups;
+
+	// Reactively update the groups array when newGroup changes
+	$: if (form?.newGroup) {
+		const newGroup = form?.newGroup;
+		groups = [...groups, newGroup];
+		console.log('final grouping' + groups);
+		// Optionally, reset form.newGroup if necessary
+		form.newGroup = null;
+		globalThis.$('.selectpicker').selectpicker('refresh');
+	}
 
 	// Initialize selectpicker on client-side after component is mounted
 	onMount(() => {
@@ -77,7 +88,7 @@
 	<div class="row">
 		<div class="col-6"></div>
 		<div class="col-6">
-			<form method="POST" action="?/createGroup">
+			<form method="POST" action="?/createGroup" use:enhance>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
@@ -89,10 +100,7 @@
 									name="groupname"
 								/></th
 							>
-							<th
-								><button on:submit|preventDefault class="btn btn-primary w-100">Create Group</button
-								>
-							</th>
+							<th><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
 						</tr>
 					</tbody>
 				</table>
@@ -103,7 +111,7 @@
 	<!-- Create User Table -->
 	<div class="row">
 		<div class="col-12">
-			<form method="POST" action="?/createUser">
+			<form method="POST" action="?/createUser" use:enhance>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
