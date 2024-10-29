@@ -1,4 +1,4 @@
-import { GROUP_URL } from '../../../constants';
+import { GROUP_URL, USER_URL } from '../../../constants';
 
 export const load = async () => {
 	const response = await fetch(`${GROUP_URL}`);
@@ -48,14 +48,59 @@ export const actions = {
 		const email = form.get('email');
 		const password = form.get('password');
 		const groups = form.getAll('groups[]');
-		const status = form.getAll('status');
+		const accountstatus = form.get('accountstatus');
 
-		console.log('username: ', username);
-		console.log('email: ', email);
-		console.log('password: ', password);
-		console.log('groups: ', groups);
-		console.log('status: ', status[0]);
+		// username, password and status must be filled
+		if (!username) {
+			return { error: 'Username is mandatory' };
+		}
 
-		return {};
+		if (!password) {
+			return { error: 'Password is mandatory' };
+		}
+
+		if (!accountstatus) {
+			return { error: 'Active is mandatory' };
+		}
+
+		// username regex
+		// max 50 characters, alphanumeric with no spaces
+		const usernameRegex = /^[a-zA-Z0-9]{1,50}$/;
+
+		if (!usernameRegex.test(username)) {
+			return { error: 'Username must be alphanumeric' };
+		}
+
+		// password regex
+		// min 8 char & max 10 char consisting of alphabets, numbers and special characters
+		const passwordRegex = /^[^\s]{8,10}$/;
+
+		if (!passwordRegex.test(password)) {
+			return { error: 'Invalid password format' };
+		}
+
+		// email regex if user did enter email (optional)
+		const emailRegex = /^[^\s]+@[^\s]+.com$/;
+
+		if (email && !emailRegex.test(email)) {
+			return { error: 'Invalid email format' };
+		}
+
+		// add new user
+		const response = await fetch(`${USER_URL}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, email, password, groups, accountstatus })
+		});
+
+		const data = await response.json();
+
+		if (response.ok) {
+			return { success: data.message };
+		} else {
+			return { error: data.message };
+		}
 	}
 };

@@ -92,38 +92,123 @@ const getAllUsers = async (req, res, next) => {
 
 // @desc    Add a new user
 // @route   POST /user
-const addNewUser = async (req, res, next) => {
-  const { username, password, email } = req.body
+const addNewUser = async (req, res) => {
+  const { username, password, email, groups, accountstatus } = req.body
 
-  // Generate a salt and hash the password
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
+  // username, password and status must be filled
+  if (!username) {
+    return res.status(409).json({
+      success: false,
+      message: "Username is mandatory"
+    })
+  }
 
+  if (!password) {
+    return res.status(409).json({
+      success: false,
+      message: "Password is mandatory"
+    })
+  }
+
+  if (!accountstatus) {
+    return res.status(409).json({
+      success: false,
+      message: "Active is mandatoryserver"
+    })
+  }
+
+  // username regex
+  // max 50 characters, alphanumeric with no spaces
+  const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
+
+  if (!usernameRegex.test(username)) {
+    return res.status(409).json({
+      success: false,
+      message: "Username must be alphanumeric"
+    })
+  }
+
+  // password regex
+  // min 8 char & max 10 char consisting of alphabets, numbers and special characters
+  const passwordRegex = /^[^\s]{8,10}$/
+
+  if (!passwordRegex.test(password)) {
+    return res.status(409).json({
+      success: false,
+      message: "Invalid password format"
+    })
+  }
+
+  // email regex if user did enter email (optional)
+  const emailRegex = /^[^\s]+@[^\s]+.com$/
+
+  if (email && !emailRegex.test(email)) {
+    return res.status(409).json({
+      success: false,
+      message: "Invalid email format"
+    })
+  }
+
+  const connection = await pool.getConnection()
   try {
-    const query = `
-      INSERT INTO accounts(username, password, email)
-      VALUES (?, ?, ?)
-    `
+    // start transaction
+    await connection.beginTransaction()
 
-    const [results] = await pool.query(query, [username, hashedPassword, email])
+    //check if username exists
+    const query = `SELECT * FROM accounts WHERE username = ?`
+    const [results] = await pool.query(query, [username])
 
-    if (results.affectedRows > 0) {
-      return res.status(201).json({
-        success: true,
-        message: "Account successfully created"
-      })
+    console.log("CHECK IF USERNAME EXISTS" + results.length)
+
+    if (results.length === 0) {
+      //username is unique, able to create user
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(password, salt)
+
+      const query = `
+        INSERT INTO accounts(username, email, password, accountstatus)
+        VALUES (?, ?, ?, ?)
+      `
+      const [results] = await pool.query(query, [username, email, hashedPassword, accountstatus])
+
+      // inserted new account
+      if (results.affectedRows > 0) {
+        // insert user into user groups
+        if (groups) {
+          for (let group of groups) {
+            const query = `
+              INSERT INTO usergroup(username, user_group)
+              VALUES (?, ?)
+            `
+
+            await pool.query(query, [username, group])
+          }
+        }
+
+        // inserted user into user group
+        return res.status(201).json({
+          success: true,
+          message: "User successfully created"
+        })
+      }
     } else {
-      return res.status(500).json({
-        success: true,
-        message: "Failed to create account"
+      return res.status(409).json({
+        success: false,
+        message: "Username needs to be uniqueserver"
       })
     }
   } catch (err) {
+    // rollback in case of error
+    await connection.rollback()
+
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Unable to create user",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 

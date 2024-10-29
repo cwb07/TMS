@@ -89,7 +89,10 @@
 									name="groupname"
 								/></th
 							>
-							<th><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
+							<th
+								><button on:submit|preventDefault class="btn btn-primary w-100">Create Group</button
+								>
+							</th>
 						</tr>
 					</tbody>
 				</table>
@@ -130,7 +133,7 @@
 							>
 							<th>
 								{#if groups && typeof window !== 'undefined'}
-									<select class="selectpicker" name="groups[]" multiple>
+									<select class="selectpicker" title="Group (optional)" name="groups[]" multiple>
 										{#each groups as group}
 											<option>{group}</option>
 										{/each}
@@ -138,7 +141,7 @@
 								{/if}
 							</th>
 							<th
-								><select class="selectpicker" name="status">
+								><select class="selectpicker" name="accountstatus">
 									<option default>Active</option>
 									<option>Disabled</option>
 								</select>
