@@ -45,7 +45,6 @@
 	$: editingAccountStatus = '' || form?.editFormData?.accountstatus;
 	$: editingSelectedGroups =
 		form?.editFormData?.groups.length > 0 ? form?.editFormData?.groups : [];
-	let passwordChange = false;
 
 	function editRow(user) {
 		currentlyEditing = true;
