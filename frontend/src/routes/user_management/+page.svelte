@@ -1,28 +1,30 @@
 <script>
 	import { enhance } from '$app/forms';
 
-	// data from form actions
+	// data from form actions and load
 	export let form;
-
-	// loaded data
 	export let data;
 
-	// form values
+	// load existing groups and users
+	$: groupsList = data.groupsList;
+	$: usersList = data.usersList;
+
+	// group form fields
 	$: groupname = form?.groupname;
+
+	// user form fields
 	$: username = '' || form?.formData?.username;
 	$: email = '' || form?.formData?.email;
 	$: password = '' || form?.formData?.password;
 	$: accountstatus = 'Active' || form?.formData?.accountstatus;
-
-	// store data from server into groupsList list
-	$: groupsList = data.groupsList;
 	$: selectedGroups = form?.formData?.groups.length > 0 ? form?.formData?.groups : [];
 
-	// select logic
+	// select groups logic for create user
 	let isDropdownOpen = false;
 
 	function toggleDropdown() {
 		isDropdownOpen = !isDropdownOpen;
+		isEditDropdownOpen = false;
 	}
 
 	function selectGroup(group) {
@@ -35,11 +37,57 @@
 		selectedGroups = selectedGroups.filter((group) => group !== groupToRemove);
 	}
 
+	// edit user form fields
+	$: currentlyEditing = null;
+	$: editingUsername = '';
+	$: editingEmail = '';
+	$: editingPassword = '';
+	$: editingSelectedGroups = [];
+	$: editingAccountStatus = '';
+
+	function editRow(user) {
+		currentlyEditing = true;
+		editingUsername = user.username;
+		editingEmail = user.email;
+		editingPassword = '';
+		editingSelectedGroups = user.user_group.split(', ');
+		editingAccountStatus = user.accountstatus;
+	}
+
+	function cancelEdit() {
+		currentlyEditing = false;
+		editingUsername = '';
+		editingEmail = '';
+		editingPassword = '';
+		editingSelectedGroups = [];
+		editingAccountStatus = '';
+	}
+
+	// select groups logic for editing user
+	let isEditDropdownOpen = false;
+
+	function toggleEditDropdown() {
+		isEditDropdownOpen = !isEditDropdownOpen;
+		isDropdownOpen = false;
+	}
+
+	function selectEditGroup(group) {
+		if (!editingSelectedGroups.includes(group)) {
+			editingSelectedGroups = [...editingSelectedGroups, group];
+		}
+	}
+
+	function removeEditGroup(groupToRemove) {
+		editingSelectedGroups = editingSelectedGroups.filter((group) => group !== groupToRemove);
+	}
+
 	// close dropdown when clicking outside
 	function handleClickOutside(event) {
 		const multiSelect = event.target.closest('.multi-select-container');
 		if (!multiSelect) {
+			// close all dropdowns
 			isDropdownOpen = false;
+			isEditDropdownOpen = false;
 		}
 	}
 </script>
@@ -227,44 +275,129 @@
 	<!-- User Table -->
 	<div class="row">
 		<div class="col-12">
-			<table class="table table-bordered text-center">
-				<thead class="table-light">
-					<tr>
-						<th>Username</th>
-						<th>Email</th>
-						<th>Password</th>
-						<th>Group</th>
-						<th>Active</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-					</tr>
-					<tr>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-					</tr>
-					<tr>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-						<td>user1</td>
-						<td>user2</td>
-					</tr>
-				</tbody>
-			</table>
+			<form method="POST" action="?/editUser" use:enhance>
+				<table class="table table-bordered text-center">
+					<thead class="table-light">
+						<tr>
+							<th>Username</th>
+							<th>Email</th>
+							<th>Password</th>
+							<th>Group</th>
+							<th>Active</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each usersList as user}
+							{#if editingUsername != user.username}
+								<tr>
+									<td>{user.username}</td>
+									<td>{user.email}</td>
+									<td>******</td>
+									<td>{user.user_group}</td>
+									<td>{user.accountstatus}</td>
+									<td>
+										<button
+											disabled={currentlyEditing}
+											type="button"
+											on:click={() => editRow(user)}
+											class="btn btn-primary"
+										>
+											Edit
+										</button>
+									</td>
+								</tr>
+							{:else}
+								<tr>
+									<td>
+										<input type="hidden" name="username" value={user.username} />
+										{user.username}
+									</td>
+									<td
+										><input
+											type="text"
+											class="form-control"
+											name="email"
+											placeholder="Email (optional)"
+											bind:value={editingEmail}
+										/></td
+									>
+									<td
+										><input
+											type="text"
+											class="form-control"
+											name="password"
+											placeholder="Password*"
+											bind:value={editingPassword}
+										/></td
+									>
+									<td>
+										<input type="hidden" name="selectedGroups" bind:value={editingSelectedGroups} />
+										<div class="multi-select-container">
+											<button
+												type="button"
+												class="form-control multi-select-field"
+												on:click={toggleEditDropdown}
+												on:keydown={(e) => e.key === 'Enter' && toggleEditDropdown()}
+												aria-haspopup="listbox"
+											>
+												{#if editingSelectedGroups.length === 0}
+													<span class="text-muted">Select groups (Optional)</span>
+												{:else}
+													{#each editingSelectedGroups as group}
+														<div class="selected-item">
+															{group}
+															<span
+																class="remove-item"
+																on:click|stopPropagation={() => removeEditGroup(group)}
+																on:keydown={(e) => e.key === 'Enter' && removeEditGroup(group)}
+																aria-label="Remove group"
+																role="button"
+																tabindex="0"
+															>
+																&times;
+															</span>
+														</div>
+													{/each}
+												{/if}
+											</button>
+											<div class="dropdown-menu {isEditDropdownOpen ? 'show' : ''}">
+												{#each groupsList as group}
+													<button
+														type="button"
+														class="dropdown-item"
+														on:click={() => selectEditGroup(group)}
+														on:keydown={(e) => e.key === 'Enter' && selectEditGroup(group)}
+														role="menuitem"
+													>
+														{group}
+													</button>
+												{/each}
+											</div>
+										</div>
+									</td>
+									<td
+										><select
+											class="form-select"
+											name="accountstatus"
+											bind:value={editingAccountStatus}
+										>
+											<option default value="Active">Active</option>
+											<option value="Disabled">Disabled</option>
+										</select></td
+									>
+									<td
+										><button type="submit" class="btn btn-primary">Submit</button>
+										<button type="button" on:click={() => cancelEdit()} class="btn btn-primary"
+											>Cancel</button
+										></td
+									>
+								</tr>
+							{/if}
+						{/each}
+					</tbody>
+				</table>
+			</form>
 		</div>
 	</div>
 </div>

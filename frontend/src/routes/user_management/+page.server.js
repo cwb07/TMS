@@ -1,11 +1,21 @@
 import { GROUP_URL, USER_URL } from '../../../constants';
 
 export const load = async () => {
-	const response = await fetch(`${GROUP_URL}`);
-	const data = await response.json();
+	// Fetch groups first
+	const groupResponse = await fetch(GROUP_URL);
+	const groupsData = await groupResponse.json();
 
-	if (response.ok) {
-		return { groupsList: data.data };
+	// Proceed to fetch users only after fetching groups
+	const userResponse = await fetch(USER_URL);
+	const usersData = await userResponse.json();
+
+	if (groupResponse.ok && userResponse.ok) {
+		return {
+			groupsList: groupsData.data,
+			usersList: usersData.data
+		};
+	} else {
+		return { error: 'Failed to load data' };
 	}
 };
 
@@ -113,5 +123,24 @@ export const actions = {
 		} else {
 			return { error: data.message, formData };
 		}
+	},
+	editUser: async ({ request }) => {
+		const form = await request.formData();
+
+		const username = form.get('username');
+		const email = form.get('email');
+		const password = form.get('password');
+
+		// get as an array
+		let groups = form.get('selectedGroups').split(',');
+		groups = groups.filter((group) => group !== '');
+
+		const accountstatus = form.get('accountstatus');
+
+		console.log('username11', username);
+		console.log('email', email);
+		console.log('password', password);
+		console.log('groups', groups);
+		console.log('accountstatus', accountstatus);
 	}
 };
