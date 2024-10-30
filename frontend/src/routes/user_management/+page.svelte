@@ -1,28 +1,50 @@
 <script>
-	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 
+	// data from form actions
 	export let form;
+
+	// loaded data
 	export let data;
 
-	// Reactive declaration for `groups` array
-	$: groups = data.groups;
+	// form values
+	$: groupname = form?.groupname;
+	$: username = '' || form?.formData?.username;
+	$: email = '' || form?.formData?.email;
+	$: password = '' || form?.formData?.password;
+	$: accountstatus = 'Active' || form?.formData?.accountstatus;
 
-	// Reactively update the groups array when newGroup changes
-	$: if (form?.newGroup) {
-		const newGroup = form?.newGroup;
-		groups = [...groups, newGroup];
-		console.log('final grouping' + groups);
-		// Optionally, reset form.newGroup if necessary
-		form.newGroup = null;
-		globalThis.$('.selectpicker').selectpicker('refresh');
+	// store data from server into groupsList list
+	$: groupsList = data.groupsList;
+	$: selectedGroups = form?.formData?.groups.length > 0 ? form?.formData?.groups : [];
+
+	// select logic
+	let isDropdownOpen = false;
+
+	function toggleDropdown() {
+		isDropdownOpen = !isDropdownOpen;
 	}
 
-	// Initialize selectpicker on client-side after component is mounted
-	onMount(() => {
-		globalThis.$('.selectpicker').selectpicker();
-	});
+	function selectGroup(group) {
+		if (!selectedGroups.includes(group)) {
+			selectedGroups = [...selectedGroups, group];
+		}
+	}
+
+	function removeGroup(groupToRemove) {
+		selectedGroups = selectedGroups.filter((group) => group !== groupToRemove);
+	}
+
+	// close dropdown when clicking outside
+	function handleClickOutside(event) {
+		const multiSelect = event.target.closest('.multi-select-container');
+		if (!multiSelect) {
+			isDropdownOpen = false;
+		}
+	}
 </script>
+
+<svelte:window on:click={handleClickOutside} />
 
 <nav class="navbar navbar-expand-lg" style="background-color: #99cdf4; margin-bottom: 10px">
 	<div class="container-fluid">
@@ -98,6 +120,7 @@
 									class="form-control"
 									placeholder="Group Name"
 									name="groupname"
+									bind:value={groupname}
 								/></th
 							>
 							<th><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
@@ -121,6 +144,7 @@
 									class="form-control"
 									name="username"
 									placeholder="Username*"
+									bind:value={username}
 								/></th
 							>
 							<th
@@ -129,6 +153,7 @@
 									class="form-control"
 									name="email"
 									placeholder="Email (optional)"
+									bind:value={email}
 								/></th
 							>
 							<th
@@ -137,21 +162,58 @@
 									class="form-control"
 									name="password"
 									placeholder="Password*"
+									bind:value={password}
 								/></th
 							>
 							<th>
-								{#if groups && typeof window !== 'undefined'}
-									<select class="selectpicker" title="Group (optional)" name="groups[]" multiple>
-										{#each groups as group}
-											<option>{group}</option>
+								<input type="hidden" name="selectedGroups" bind:value={selectedGroups} />
+								<div class="multi-select-container">
+									<button
+										type="button"
+										class="form-control multi-select-field"
+										on:click={toggleDropdown}
+										on:keydown={(e) => e.key === 'Enter' && toggleDropdown()}
+										aria-haspopup="listbox"
+									>
+										{#if selectedGroups.length === 0}
+											<span class="text-muted">Select groups (Optional)</span>
+										{:else}
+											{#each selectedGroups as group}
+												<div class="selected-item">
+													{group}
+													<span
+														class="remove-item"
+														on:click|stopPropagation={() => removeGroup(group)}
+														on:keydown={(e) => e.key === 'Enter' && removeGroup(group)}
+														aria-label="Remove group"
+														role="button"
+														tabindex="0"
+													>
+														&times;
+													</span>
+												</div>
+											{/each}
+										{/if}
+									</button>
+									<div class="dropdown-menu {isDropdownOpen ? 'show' : ''}">
+										{#each groupsList as group}
+											<button
+												type="button"
+												class="dropdown-item"
+												on:click={() => selectGroup(group)}
+												on:keydown={(e) => e.key === 'Enter' && selectGroup(group)}
+												role="menuitem"
+											>
+												{group}
+											</button>
 										{/each}
-									</select>
-								{/if}
+									</div>
+								</div>
 							</th>
 							<th
-								><select class="selectpicker" name="accountstatus">
-									<option default>Active</option>
-									<option>Disabled</option>
+								><select class="form-select" name="accountstatus" bind:value={accountstatus}>
+									<option default value="Active">Active</option>
+									<option value="Disabled">Disabled</option>
 								</select>
 							</th>
 							<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>

@@ -5,7 +5,7 @@ export const load = async () => {
 	const data = await response.json();
 
 	if (response.ok) {
-		return { groups: data.data };
+		return { groupsList: data.data };
 	}
 };
 
@@ -14,12 +14,12 @@ export const actions = {
 		const form = await request.formData();
 		const groupname = form.get('groupname');
 
-		if (groupname) {
+		if (groupname && groupname.trim().length > 0) {
 			// max 50 characters, alphanumeric with possible underscore
 			const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/;
 
 			if (!groupnameRegex.test(groupname)) {
-				return { error: 'Invalid group format' };
+				return { error: 'Invalid group format', groupname };
 			}
 
 			const response = await fetch(`${GROUP_URL}`, {
@@ -35,11 +35,11 @@ export const actions = {
 			if (response.ok) {
 				return { success: data.message, newGroup: groupname };
 			} else {
-				return { error: data.message };
+				return { error: data.message, groupname };
 			}
 		}
 
-		return { error: 'Group is mandatory' };
+		return { error: 'Group is mandatory', groupname };
 	},
 	createUser: async ({ request }) => {
 		const form = await request.formData();
@@ -47,20 +47,31 @@ export const actions = {
 		const username = form.get('username');
 		const email = form.get('email');
 		const password = form.get('password');
-		const groups = form.getAll('groups[]');
+
+		// get as an array
+		let groups = form.get('selectedGroups').split(',');
+		groups = groups.filter((group) => group !== '');
+
 		const accountstatus = form.get('accountstatus');
 
+		// // return back the form data
+		// // to repopulate the form fields
+		// // in case of error
+		const formData = { username, email, password, groups, accountstatus };
+
 		// username, password and status must be filled
-		if (!username) {
-			return { error: 'Username is mandatory' };
+		// check null, undefined or empty ""
+		// check is not string of whitespaces
+		if (!username || username.trim().length === 0) {
+			return { error: 'Username is mandatory', formData };
 		}
 
-		if (!password) {
-			return { error: 'Password is mandatory' };
+		if (!password || password.trim().length === 0) {
+			return { error: 'Password is mandatory', formData };
 		}
 
 		if (!accountstatus) {
-			return { error: 'Active is mandatory' };
+			return { error: 'Active is mandatory', formData };
 		}
 
 		// username regex
@@ -68,7 +79,7 @@ export const actions = {
 		const usernameRegex = /^[a-zA-Z0-9]{1,50}$/;
 
 		if (!usernameRegex.test(username)) {
-			return { error: 'Username must be alphanumeric' };
+			return { error: 'Username must be alphanumeric', formData };
 		}
 
 		// password regex
@@ -76,14 +87,14 @@ export const actions = {
 		const passwordRegex = /^[^\s]{8,10}$/;
 
 		if (!passwordRegex.test(password)) {
-			return { error: 'Invalid password format' };
+			return { error: 'Invalid password format', formData };
 		}
 
 		// email regex if user did enter email (optional)
-		const emailRegex = /^[^\s]+@[^\s]+.com$/;
+		const emailRegex = /^[^\s]+@[^\s]+\.com$/;
 
 		if (email && !emailRegex.test(email)) {
-			return { error: 'Invalid email format' };
+			return { error: 'Invalid email format', formData };
 		}
 
 		// add new user
@@ -100,7 +111,7 @@ export const actions = {
 		if (response.ok) {
 			return { success: data.message };
 		} else {
-			return { error: data.message };
+			return { error: data.message, formData };
 		}
 	}
 };
