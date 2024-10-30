@@ -39,17 +39,19 @@
 
 	// edit user form fields
 	$: currentlyEditing = null;
-	$: editingUsername = '';
-	$: editingEmail = '';
-	$: editingPassword = '';
-	$: editingSelectedGroups = [];
-	$: editingAccountStatus = '';
+	$: editingUsername = '' || form?.editFormData?.username;
+	$: editingEmail = '' || form?.editFormData?.email;
+	$: editingPassword = '' || form?.editFormData?.password;
+	$: editingAccountStatus = '' || form?.editFormData?.accountstatus;
+	$: editingSelectedGroups =
+		form?.editFormData?.groups.length > 0 ? form?.editFormData?.groups : [];
+	let passwordChange = false;
 
 	function editRow(user) {
 		currentlyEditing = true;
 		editingUsername = user.username;
 		editingEmail = user.email;
-		editingPassword = '';
+		editingPassword = user.password;
 		editingSelectedGroups = user.user_group.split(', ');
 		editingAccountStatus = user.accountstatus;
 	}
@@ -206,7 +208,7 @@
 							>
 							<th
 								><input
-									type="text"
+									type="password"
 									class="form-control"
 									name="password"
 									placeholder="Password*"
@@ -298,7 +300,7 @@
 									<td>{user.accountstatus}</td>
 									<td>
 										<button
-											disabled={currentlyEditing}
+											disabled={currentlyEditing && form?.editSucess}
 											type="button"
 											on:click={() => editRow(user)}
 											class="btn btn-primary"
@@ -324,7 +326,7 @@
 									>
 									<td
 										><input
-											type="text"
+											type="password"
 											class="form-control"
 											name="password"
 											placeholder="Password*"

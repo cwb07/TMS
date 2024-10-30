@@ -139,17 +139,6 @@ const editUser = async (req, res) => {
     })
   }
 
-  // password regex
-  // min 8 char & max 10 char consisting of alphabets, numbers and special characters
-  const passwordRegex = /^[^\s]{8,10}$/
-
-  if (!passwordRegex.test(password)) {
-    return res.status(409).json({
-      success: false,
-      message: "Invalid password format"
-    })
-  }
-
   // email regex if user did enter email (optional)
   const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
@@ -169,7 +158,9 @@ const editUser = async (req, res) => {
     SELECT A.*, GROUP_CONCAT(UG.user_group SEPARATOR ', ') AS user_group
     FROM accounts A
     LEFT JOIN usergroup UG ON A.username = UG.username
-    GROUP BY A.username`
+    WHERE A.username = ?
+    GROUP BY A.username
+     `
     const [results] = await pool.query(query, [username])
 
     const user = results[0]
@@ -178,11 +169,22 @@ const editUser = async (req, res) => {
     if (results.length !== 0) {
       // can update user
       // check if need to rehash password
-      if (await bcrypt.compare(password, user.password)) {
+      if (password === user.password) {
         // password is the same, no need to rehash
         const updateQuery = `UPDATE accounts SET email = ?, accountstatus = ? WHERE username = ?`
         await pool.query(updateQuery, [email, accountstatus, username])
       } else {
+        // password regex
+        // min 8 char & max 10 char consisting of alphabets, numbers and special characters
+        const passwordRegex = /^[^\s]{8,10}$/
+
+        if (!passwordRegex.test(password)) {
+          return res.status(409).json({
+            success: false,
+            message: "Invalid password forma11t"
+          })
+        }
+
         // password is different, rehash
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -193,7 +195,10 @@ const editUser = async (req, res) => {
 
       // update user groups
       // if user groups is same as before, no need to update
-      if (groups.sort().toString() !== user.user_group.split(", ").sort().toString()) {
+      const userGroups = (user.user_group || "").split(", ").sort().toString()
+      const sortedGroups = groups.sort().toString()
+
+      if (sortedGroups !== userGroups) {
         const deleteQuery = `DELETE FROM usergroup WHERE username = ?`
         await pool.query(deleteQuery, [username])
 

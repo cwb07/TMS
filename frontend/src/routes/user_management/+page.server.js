@@ -137,10 +137,22 @@ export const actions = {
 
 		const accountstatus = form.get('accountstatus');
 
-		console.log('username11', username);
-		console.log('email', email);
-		console.log('password', password);
-		console.log('groups', groups);
-		console.log('accountstatus', accountstatus);
+		const editFormData = { username, email, password, groups, accountstatus };
+
+		const response = await fetch(`${USER_URL}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, email, password, groups, accountstatus })
+		});
+
+		const data = await response.json();
+
+		if (response.ok) {
+			return { success: data.message, editSuccess: true };
+		} else {
+			return { error: data.message, editFormData };
+		}
 	}
 };
