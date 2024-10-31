@@ -8,30 +8,31 @@
 	$: password = '' || form?.formData?.password;
 </script>
 
-<!-- Error Message Display -->
-{#if form?.error}
-	<div class="row mb-2">
-		<div class="col-12">
-			<div class="alert alert-danger" role="alert" id="errorAlert">{form?.error}</div>
-		</div>
-	</div>
-{/if}
-
-<!-- Success Message Display -->
-{#if form?.success}
-	<div class="row mb-2">
-		<div class="col-12">
-			<div class="alert alert-success" role="alert" id="successAlert">{form?.success}</div>
-		</div>
-	</div>
-{/if}
-
 <div class="container">
-	<div class="row justify-content-center align-items-center" style="margin-top: 250px">
+	<div class="row justify-content-center align-items-center" style="margin-top: 200px">
 		<div class="col-md-6 col-lg-4">
 			<div class="card">
 				<div class="card-body">
 					<h3 class="card-title text-center mb-4">Update Info</h3>
+					<!-- Error Message Display -->
+					{#if form?.error}
+						<div class="row mb-2">
+							<div class="col-12">
+								<div class="alert alert-danger" role="alert" id="errorAlert">{form?.error}</div>
+							</div>
+						</div>
+					{/if}
+
+					<!-- Success Message Display -->
+					{#if form?.success}
+						<div class="row mb-2">
+							<div class="col-12">
+								<div class="alert alert-success" role="alert" id="successAlert">
+									{form?.success}
+								</div>
+							</div>
+						</div>
+					{/if}
 					<form method="POST" use:enhance>
 						<input type="hidden" name="username" value={data.username} />
 						<div class="mb-3">
