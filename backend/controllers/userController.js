@@ -75,9 +75,19 @@ const logout = (req, res) => {
   })
 }
 
-// @desc    Get all users w groups
+// @desc    Get user
 // @route   GET /user
-const getAllUsers = async (req, res, next) => {
+const getUser = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "User retrieved",
+    data: req.user
+  })
+}
+
+// @desc    Get all users w groups
+// @route   GET /user/all
+const getAllUsers = async (req, res) => {
   try {
     const query = `
     SELECT A.*, GROUP_CONCAT(UG.user_group SEPARATOR ', ') AS user_group
@@ -359,4 +369,4 @@ const addNewUser = async (req, res) => {
   }
 }
 
-export { getAllUsers, addNewUser, login, logout, editUser }
+export { getAllUsers, addNewUser, login, logout, editUser, getUser }

@@ -116,7 +116,7 @@
 				<li class="nav-item">
 					<a
 						class="nav-link border border-dark rounded px-2 py-1"
-						href="/user_management"
+						href="/profile"
 						style="margin-right: 10px;">Edit Profile</a
 					>
 				</li>
