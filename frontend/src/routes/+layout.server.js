@@ -11,7 +11,7 @@ export const load = async ({ cookies }) => {
 
 	if (response.ok) {
 		const data = await response.json();
-		return { user: data.data.username };
+		return { username: data.data.username, email: data.data.email };
 	} else {
 		return { user: null };
 	}

@@ -5,8 +5,9 @@ export const load = async () => {
 	const groupResponse = await fetch(GROUP_URL);
 	const groupsData = await groupResponse.json();
 
+
 	// Proceed to fetch users only after fetching groups
-	const userResponse = await fetch(USER_URL);
+	const userResponse = await fetch(`${USER_URL}/all`);
 	const usersData = await userResponse.json();
 
 	if (groupResponse.ok && userResponse.ok) {
@@ -64,9 +65,9 @@ export const actions = {
 
 		const accountstatus = form.get('accountstatus');
 
-		// // return back the form data
-		// // to repopulate the form fields
-		// // in case of error
+		// return back the form data
+		// to repopulate the form fields
+		// in case of error
 		const formData = { username, email, password, groups, accountstatus };
 
 		// username, password and status must be filled
@@ -139,7 +140,38 @@ export const actions = {
 
 		const editFormData = { username, email, password, groups, accountstatus };
 
-		const response = await fetch(`${USER_URL}`, {
+		// username, password and status must be filled
+		// check null, undefined or empty ""
+		// check is not string of whitespaces
+		if (!username || username.trim().length === 0) {
+			return { error: 'Username is mandatory', editFormData };
+		}
+
+		if (!password || password.trim().length === 0) {
+			return { error: 'Password is mandatory', editFormData };
+		}
+
+		if (!accountstatus) {
+			return { error: 'Active is mandatory', editFormData };
+		}
+
+		// username regex
+		// max 50 characters, alphanumeric with no spaces
+		const usernameRegex = /^[a-zA-Z0-9]{1,50}$/;
+
+		if (!usernameRegex.test(username)) {
+			return { error: 'Username must be alphanumeric', editFormData };
+		}
+
+		// email regex if user did enter email (optional)
+		const emailRegex = /^[^\s]+@[^\s]+\.com$/;
+
+		if (email && !emailRegex.test(email)) {
+			return { error: 'Invalid email format', editFormData };
+		}
+
+		// edit user
+		const response = await fetch(`${USER_URL}/edit`, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'

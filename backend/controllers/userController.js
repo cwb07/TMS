@@ -111,8 +111,84 @@ const getAllUsers = async (req, res) => {
   }
 }
 
-// @desc Edit a user
+// @desc Update profile
 // @route PUT /user
+const updateProfile = async (req, res) => {
+  const { username, email, password } = req.body
+
+  if (!username) {
+    return res.status(409).json({
+      success: false,
+      message: "Username is mandatory"
+    })
+  }
+
+  // email regex if user did enter email (optional)
+  const emailRegex = /^[^\s]+@[^\s]+\.com$/
+
+  if (email && !emailRegex.test(email)) {
+    return res.status(409).json({
+      success: false,
+      message: "Invalid email format"
+    })
+  }
+
+  // password regex
+  // min 8 char & max 10 char consisting of alphabets, numbers and special characters
+  const passwordRegex = /^[^\s]{8,10}$/
+
+  if (password && !passwordRegex.test(password)) {
+    return res.status(409).json({
+      success: false,
+      message: "Invalid password format"
+    })
+  }
+
+  // create update query string
+  let updateQuery = 'UPDATE accounts SET'
+  const values = [];
+
+  // add email if given
+  if (email) {
+    updateQuery += ' email = ?,';
+    values.push(email);
+  }
+
+  // add password if given
+  if (password) {
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    updateQuery += ' password = ?,';
+    values.push(hashedPassword);
+  }
+
+  // Remove trailing comma
+  updateQuery = updateQuery.slice(0, -1);
+
+  // add where clause
+  updateQuery += ' WHERE username = ?';
+  values.push(username);
+
+  try {
+    // execute query
+    await pool.query(updateQuery, values);
+
+    return res.status(200).json({
+      success: true,
+      message: "Your profile has been updated"
+    })
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update user profile",
+      stack: err.stack
+    })
+  }
+}
+
+
+// @desc Edit a user
+// @route PUT /user/edit
 const editUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
@@ -191,7 +267,7 @@ const editUser = async (req, res) => {
         if (!passwordRegex.test(password)) {
           return res.status(409).json({
             success: false,
-            message: "Invalid password forma11t"
+            message: "Invalid password format"
           })
         }
 
@@ -369,4 +445,4 @@ const addNewUser = async (req, res) => {
   }
 }
 
-export { getAllUsers, addNewUser, login, logout, editUser, getUser }
+export { getAllUsers, addNewUser, login, logout, editUser, getUser, updateProfile }

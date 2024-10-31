@@ -6,22 +6,29 @@ const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
   if (token) {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    // get username from jwt cookies, store in req.user to access it
-    const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
-    const [results] = await pool.query(query, [decoded.username])
+      // get username from jwt cookies, store in req.user to access it
+      const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
+      const [results] = await pool.query(query, [decoded.username])
 
-    if (results.length === 0) {
-      // no username found
-      return res.status(401).json({
+      if (results.length === 0) {
+        // no username found
+        return res.status(401).json({
+          success: false,
+          message: "No user found"
+        })
+      } else {
+        // store in req.user to access it anywhere
+        req.user = results[0]
+        next()
+      }
+    } catch (error) {
+      return res.status(500).json({
         success: false,
-        message: "No user found"
+        message: "An error occurred while checking if user is logged in"
       })
-    } else {
-      // store in req.user to access it anywhere
-      req.user = results[0]
-      next()
     }
   } else {
     return res.status(401).json({
