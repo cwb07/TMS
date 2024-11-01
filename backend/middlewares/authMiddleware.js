@@ -40,18 +40,26 @@ const isLoggedIn = async (req, res, next) => {
 
 // checkgroup function
 const checkGroup = async (username, groupname) => {
-  const query = `
-  SELECT user_group 
-  FROM usergroup 
-  WHERE username = ? AND user_group = ?;`
+  try {
+    const query = `
+    SELECT user_group 
+    FROM usergroup 
+    WHERE username = ? AND user_group = ?;`
 
-  const [results] = await pool.query(query, [username, groupname])
+    const [results] = await pool.query(query, [username, groupname])
 
-  if (results.length === 0) {
-    // user not in group
-    return false
-  } else {
-    return true
+    if (results.length === 0) {
+      // user not in group
+      return false
+    } else {
+      return true
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while checking if user is in group",
+      stack: err.stack
+    })
   }
 }
 
