@@ -12,9 +12,12 @@ const PORT = process.env.PORT
 const app = express()
 
 // requests from frontend origin are permitted
+// allow cookies to be sent from frontend
+
 app.use(
   cors({
-    origin: "http://localhost:5173"
+    origin: "http://localhost:5173",
+    credentials: true
   })
 )
 

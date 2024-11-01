@@ -1,16 +1,21 @@
 <script>
+	import { USER_URL, GROUP_URL } from '$lib/constants';
+	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import axios from 'axios';
 
 	// data from form actions and load
 	export let form;
 	export let data;
+	let bannerMessage = '';
+	let bannerStatus = null;
 
 	// load existing groups and users
 	$: groupsList = data.groupsList;
 	$: usersList = data.usersList;
 
 	// group form fields
-	$: groupname = form?.groupname;
+	let groupname = '';
 
 	// user form fields
 	$: username = '' || form?.formData?.username;
@@ -18,6 +23,47 @@
 	$: password = '' || form?.formData?.password;
 	$: accountstatus = 'Active' || form?.formData?.accountstatus;
 	$: selectedGroups = form?.formData?.groups.length > 0 ? form?.formData?.groups : [];
+
+	const setBannerMessage = (message, status) => {
+		bannerMessage = message;
+		bannerStatus = status;
+	};
+
+	const createGroup = async (e) => {
+		e.preventDefault();
+
+		if (groupname && groupname.trim().length > 0) {
+			// max 50 characters, alphanumeric with possible underscore
+			const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/;
+
+			if (!groupnameRegex.test(groupname)) {
+				error =
+					'Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters';
+				return;
+			}
+
+			try {
+				const response = await axios.post(
+					`${GROUP_URL}`,
+					{ groupname },
+					{
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						withCredentials: true
+					}
+				);
+
+				if (response.status === 201) {
+					setBannerMessage(response.data.message, true);
+				}
+			} catch (error) {
+				setBannerMessage(error.response.data.message, false);
+			}
+		} else {
+			setBannerMessage('Group name is mandatory', false);
+		}
+	};
 
 	// select groups logic for create user
 	let isDropdownOpen = false;
@@ -104,20 +150,17 @@
 	</div>
 
 	<!-- Error Message Display -->
-	{#if form?.error}
+	{#if true}
 		<div class="row mb-2">
 			<div class="col-12">
-				<div class="alert alert-danger" role="alert" id="errorAlert">Error: {form?.error}</div>
+				<div class="alert alert-danger" role="alert" id="errorAlert">Error: {bannerMessage}</div>
 			</div>
 		</div>
-	{/if}
-
-	<!-- Success Message Display -->
-	{#if form?.success}
+	{:else if true}
 		<div class="row mb-2">
 			<div class="col-12">
 				<div class="alert alert-success" role="alert" id="successAlert">
-					Success: {form?.success}
+					Success: {bannerMessage}
 				</div>
 			</div>
 		</div>
@@ -127,7 +170,7 @@
 	<div class="row">
 		<div class="col-6"></div>
 		<div class="col-6">
-			<form method="POST" action="?/createGroup" use:enhance>
+			<form on:submit={createGroup}>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>

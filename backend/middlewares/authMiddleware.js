@@ -9,7 +9,7 @@ const isLoggedIn = async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-      // check if the IP and User-Agent match the current request
+      //check if the IP and User-Agent match the current request
       if (decoded.ip !== req.ip || decoded.userAgent !== req.headers["user-agent"]) {
         return res.status(401).json({
           success: false,
@@ -35,7 +35,8 @@ const isLoggedIn = async (req, res, next) => {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "An error occurred while checking if user is logged in"
+        message: "An error occurred while checking if user is logged in",
+        stack: error.stack
       })
     }
   } else {

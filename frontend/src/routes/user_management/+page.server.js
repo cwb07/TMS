@@ -28,42 +28,6 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	createGroup: async ({ request, cookies }) => {
-		const form = await request.formData();
-		const groupname = form.get('groupname');
-
-		if (groupname && groupname.trim().length > 0) {
-			// max 50 characters, alphanumeric with possible underscore
-			const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/;
-
-			if (!groupnameRegex.test(groupname)) {
-				return {
-					error:
-						'Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters',
-					groupname
-				};
-			}
-
-			const response = await fetch(`${GROUP_URL}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					cookie: cookies.get('token')
-				},
-				body: JSON.stringify({ groupname })
-			});
-
-			const data = await response.json();
-
-			if (response.ok) {
-				return { success: data.message, newGroup: groupname };
-			} else {
-				return { error: data.message, groupname };
-			}
-		}
-
-		return { error: 'Group name is mandatory', groupname };
-	},
 	createUser: async ({ request, cookies }) => {
 		const form = await request.formData();
 

@@ -33,6 +33,7 @@ const addNewGroup = async (req, res) => {
     const [results] = await pool.query(query, [groupname])
 
     if (results.length > 0) {
+      console.log("ALREADY EXISTS")
       // groupname already exists
       return res.status(409).json({
         success: false,
@@ -44,6 +45,7 @@ const addNewGroup = async (req, res) => {
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
     await pool.query(insertQuery, [groupname])
 
+    console.log("GROUP CREATED")
     return res.status(201).json({
       success: true,
       message: "Group created"
