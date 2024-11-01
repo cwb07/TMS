@@ -37,7 +37,11 @@
 						<input type="hidden" name="username" value={data.username} />
 						<div class="mb-3">
 							<label for="email" class="form-label">Current Email Address</label>
-							<p id="email"><b>{data.email}</b></p>
+							{#if data.email}
+								<p id="email"><b>{data.email}</b></p>
+							{:else}
+								<p id="email"><b>No email</b></p>
+							{/if}
 						</div>
 						<div class="mb-3">
 							<label for="email" class="form-label">New Email</label>

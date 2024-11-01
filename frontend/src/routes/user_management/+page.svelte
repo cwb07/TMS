@@ -51,7 +51,7 @@
 		editingUsername = user.username;
 		editingEmail = user.email;
 		editingPassword = user.password;
-		editingSelectedGroups = user.user_group.split(', ');
+		editingSelectedGroups = user.user_group ? user.user_group.split(', ') : [];
 		editingAccountStatus = user.accountstatus;
 	}
 
