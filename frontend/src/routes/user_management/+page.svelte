@@ -1,14 +1,15 @@
 <script>
 	import { USER_URL, GROUP_URL } from '$lib/constants';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll, invalidate } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import axios from 'axios';
+	import MultiSelect from 'svelte-multiselect';
 
 	// data from form actions and load
 	export let form;
 	export let data;
-	let bannerMessage = '';
-	let bannerStatus = null;
+	let errorMessage = '';
+	let successMessage = '';
 
 	// load existing groups and users
 	$: groupsList = data.groupsList;
@@ -18,51 +19,42 @@
 	let groupname = '';
 
 	// user form fields
-	$: username = '' || form?.formData?.username;
-	$: email = '' || form?.formData?.email;
-	$: password = '' || form?.formData?.password;
-	$: accountstatus = 'Active' || form?.formData?.accountstatus;
-	$: selectedGroups = form?.formData?.groups.length > 0 ? form?.formData?.groups : [];
-
-	const setBannerMessage = (message, status) => {
-		bannerMessage = message;
-		bannerStatus = status;
-	};
+	let username = '';
+	let email = '';
+	let password = '';
+	let accountstatus = 'Active';
+	let selectedGroups = [];
+	$: options = groupsList || [];
 
 	const createGroup = async (e) => {
 		e.preventDefault();
 
-		if (groupname && groupname.trim().length > 0) {
-			// max 50 characters, alphanumeric with possible underscore
-			const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/;
-
-			if (!groupnameRegex.test(groupname)) {
-				error =
-					'Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters';
-				return;
-			}
-
-			try {
-				const response = await axios.post(
-					`${GROUP_URL}`,
-					{ groupname },
-					{
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						withCredentials: true
-					}
-				);
-
-				if (response.status === 201) {
-					setBannerMessage(response.data.message, true);
+		try {
+			const response = await axios.post(
+				`${GROUP_URL}`,
+				{ groupname },
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					withCredentials: true
 				}
-			} catch (error) {
-				setBannerMessage(error.response.data.message, false);
+			);
+
+			if (response.status === 201) {
+				successMessage = response.data.message;
+				errorMessage = '';
+				groupname = '';
+				invalidate('loadUserManagement');
 			}
-		} else {
-			setBannerMessage('Group name is mandatory', false);
+		} catch (error) {
+			errorMessage = error.response.data.message;
+			successMessage = '';
 		}
+	};
+
+	const createUser = async (e) => {
+		e.preventDefault();
 	};
 
 	// select groups logic for create user
@@ -149,18 +141,21 @@
 		</div>
 	</div>
 
-	<!-- Error Message Display -->
-	{#if true}
+	<!-- Message Display -->
+	{#if errorMessage}
 		<div class="row mb-2">
 			<div class="col-12">
-				<div class="alert alert-danger" role="alert" id="errorAlert">Error: {bannerMessage}</div>
+				<div class="alert alert-danger" role="alert">
+					Error: {errorMessage}
+				</div>
 			</div>
 		</div>
-	{:else if true}
+	{/if}
+	{#if successMessage}
 		<div class="row mb-2">
 			<div class="col-12">
-				<div class="alert alert-success" role="alert" id="successAlert">
-					Success: {bannerMessage}
+				<div class="alert alert-success" role="alert">
+					Success: {successMessage}
 				</div>
 			</div>
 		</div>
@@ -194,7 +189,7 @@
 	<!-- Create User Table -->
 	<div class="row">
 		<div class="col-12">
-			<form method="POST" action="?/createUser" use:enhance>
+			<form on:submit={createUser}>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
@@ -225,50 +220,17 @@
 									bind:value={password}
 								/></th
 							>
-							<th>
-								<input type="hidden" name="selectedGroups" bind:value={selectedGroups} />
-								<div class="multi-select-container">
-									<button
-										type="button"
-										class="form-control multi-select-field"
-										on:click={toggleDropdown}
-										on:keydown={(e) => e.key === 'Enter' && toggleDropdown()}
-										aria-haspopup="listbox"
-									>
-										{#if selectedGroups.length === 0}
-											<span class="text-muted">Select groups (Optional)</span>
-										{:else}
-											{#each selectedGroups as group}
-												<div class="selected-item">
-													{group}
-													<span
-														class="remove-item"
-														on:click|stopPropagation={() => removeGroup(group)}
-														on:keydown={(e) => e.key === 'Enter' && removeGroup(group)}
-														aria-label="Remove group"
-														role="button"
-														tabindex="0"
-													>
-														&times;
-													</span>
-												</div>
-											{/each}
-										{/if}
-									</button>
-									<div class="dropdown-menu {isDropdownOpen ? 'show' : ''}">
-										{#each groupsList as group}
-											<button
-												type="button"
-												class="dropdown-item"
-												on:click={() => selectGroup(group)}
-												on:keydown={(e) => e.key === 'Enter' && selectGroup(group)}
-												role="menuitem"
-											>
-												{group}
-											</button>
-										{/each}
-									</div>
-								</div>
+							<th style="width: 300px">
+								<MultiSelect
+									class="multi-select-input"
+									placeholder="Groups (Optional)"
+									bind:selectedGroups
+									--sms-placeholder-color="#6c757d"
+									highlightMatches={false}
+									{options}
+								>
+									<span slot="expand-icon"></span>
+								</MultiSelect>
 							</th>
 							<th
 								><select class="form-select" name="accountstatus" bind:value={accountstatus}>
@@ -413,3 +375,15 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	:global(div.multiselect) {
+		min-height: 38px;
+		font-weight: normal;
+	}
+
+	:global(div.multiselect > *) {
+		margin: 0;
+		padding: 0;
+	}
+</style>

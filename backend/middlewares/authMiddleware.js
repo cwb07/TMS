@@ -9,15 +9,15 @@ const isLoggedIn = async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-      //check if the IP and User-Agent match the current request
-      if (decoded.ip !== req.ip || decoded.userAgent !== req.headers["user-agent"]) {
+      // //check if the IP and User-Agent match the current request
+      if (decoded.ip !== req.ip) {
         return res.status(401).json({
           success: false,
-          message: "Your session is not valid with this device or IP address"
+          message: "Your session is not valid with this IP address"
         })
       }
 
-      // get username from jwt cookies, store in req.user to access it
+      //get username from jwt cookies, store in req.user to access it
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
       const [results] = await pool.query(query, [decoded.username])
 

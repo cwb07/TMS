@@ -1,29 +1,36 @@
 import { GROUP_URL, USER_URL } from '../../../constants';
+import axios from 'axios';
 
-export const load = async ({ cookies }) => {
+export const load = async ({ request, depends }) => {
+	depends("loadUserManagement");
+
 	// Fetch groups first
-	const groupResponse = await fetch(GROUP_URL, {
-		headers: {
-			cookie: cookies.get('token')
+	const groupResponse = await axios.get(
+		`${GROUP_URL}`,
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				cookie: request.headers.get('cookie')
+			}
 		}
-	});
-	const groupsData = await groupResponse.json();
+	);
 
 	// Proceed to fetch users only after fetching groups
-	const userResponse = await fetch(`${USER_URL}/all`, {
-		headers: {
-			cookie: cookies.get('token')
+	const userResponse = await axios.get(
+		`${USER_URL}/all`,
+		{
+			headers: {
+				'Content-Type': 'application/json',
+				cookie: request.headers.get('cookie')
+			}
 		}
-	});
-	const usersData = await userResponse.json();
+	);
 
-	if (groupResponse.ok && userResponse.ok) {
+	if (groupResponse.status === 200 && userResponse.status === 200) {
 		return {
-			groupsList: groupsData.data,
-			usersList: usersData.data
+			groupsList: groupResponse.data.data,
+			usersList: userResponse.data.data
 		};
-	} else {
-		return { error: 'Failed to load data' };
 	}
 };
 

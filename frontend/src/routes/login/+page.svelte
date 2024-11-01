@@ -5,12 +5,12 @@
 
 	let username = '';
 	let password = '';
-	let error = '';
+	let errorMessage = '';
 
 	const submitHandler = async (e) => {
 		e.preventDefault();
 
-		if (username && password) {
+		try {
 			const response = await axios.post(
 				`${USER_URL}/login`,
 				{
@@ -27,12 +27,10 @@
 
 			if (response.status === 200) {
 				goto('/user_management');
-			} else {
-				error = 'Invalid credentials';
 			}
+		} catch (error) {
+			errorMessage = error.response.data.message;
 		}
-
-		error = 'Invalid credentials';
 	};
 </script>
 
@@ -42,8 +40,8 @@
 			<div class="card">
 				<div class="card-body">
 					<h3 class="card-title text-center mb-4">Login</h3>
-					{#if error}
-						<div class="alert alert-danger" role="alert">Error: {error}</div>
+					{#if errorMessage}
+						<div class="alert alert-danger" role="alert">Error: {errorMessage}</div>
 					{/if}
 					<form on:submit={submitHandler}>
 						<div class="mb-3">
@@ -67,9 +65,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	:global(body) {
-		background-color: #f5f5f5; /* Light grey background */
-	}
-</style>

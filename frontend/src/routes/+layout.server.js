@@ -1,8 +1,6 @@
 import { USER_URL } from '../../constants';
 
 export const load = async ({ cookies }) => {
-	console.log('LAYOUT RELOADED');
-
 	const response = await fetch(`${USER_URL}`, {
 		headers: {
 			cookie: cookies.get('token')

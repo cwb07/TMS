@@ -1,5 +1,6 @@
 <script>
 	import { page } from '$app/stores';
+
 	export let data;
 </script>
 
@@ -42,4 +43,12 @@
 	</nav>
 {/if}
 
-<slot />
+<div class={$page.url.pathname === '/login' ? 'login-background' : ''}>
+	<slot />
+</div>
+
+<style>
+	.login-background {
+		background-color: #f5f5f5;
+	}
+</style>
