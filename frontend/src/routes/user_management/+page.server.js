@@ -1,12 +1,20 @@
 import { GROUP_URL, USER_URL } from '../../../constants';
 
-export const load = async () => {
+export const load = async ({ cookies }) => {
 	// Fetch groups first
-	const groupResponse = await fetch(GROUP_URL);
+	const groupResponse = await fetch(GROUP_URL, {
+		headers: {
+			cookie: cookies.get('token')
+		}
+	});
 	const groupsData = await groupResponse.json();
 
 	// Proceed to fetch users only after fetching groups
-	const userResponse = await fetch(`${USER_URL}/all`);
+	const userResponse = await fetch(`${USER_URL}/all`, {
+		headers: {
+			cookie: cookies.get('token')
+		}
+	});
 	const usersData = await userResponse.json();
 
 	if (groupResponse.ok && userResponse.ok) {
@@ -20,7 +28,7 @@ export const load = async () => {
 };
 
 export const actions = {
-	createGroup: async ({ request }) => {
+	createGroup: async ({ request, cookies }) => {
 		const form = await request.formData();
 		const groupname = form.get('groupname');
 
@@ -39,7 +47,8 @@ export const actions = {
 			const response = await fetch(`${GROUP_URL}`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					cookie: cookies.get('token')
 				},
 				body: JSON.stringify({ groupname })
 			});
@@ -55,7 +64,7 @@ export const actions = {
 
 		return { error: 'Group name is mandatory', groupname };
 	},
-	createUser: async ({ request }) => {
+	createUser: async ({ request, cookies }) => {
 		const form = await request.formData();
 
 		const username = form.get('username');
@@ -77,7 +86,8 @@ export const actions = {
 		const response = await fetch(`${USER_URL}`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				cookie: cookies.get('token')
 			},
 			body: JSON.stringify({ username, email, password, groups, accountstatus })
 		});
@@ -90,7 +100,7 @@ export const actions = {
 			return { error: data.message, formData };
 		}
 	},
-	editUser: async ({ request }) => {
+	editUser: async ({ request, cookies }) => {
 		const form = await request.formData();
 
 		const username = form.get('username');
@@ -109,7 +119,8 @@ export const actions = {
 		const response = await fetch(`${USER_URL}/edit`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				cookie: cookies.get('token')
 			},
 			body: JSON.stringify({ username, email, password, groups, accountstatus })
 		});

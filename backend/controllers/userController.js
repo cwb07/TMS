@@ -75,7 +75,7 @@ const logout = (req, res) => {
   })
 }
 
-// @desc    Get user
+// @desc    Get user info
 // @route   GET /user
 const getUser = async (req, res) => {
   return res.status(200).json({

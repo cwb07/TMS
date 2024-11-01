@@ -1,7 +1,36 @@
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
 
-// User must be logged in
+// checkgroup function
+const checkGroup = async (username, groupname) => {
+  const query = `
+  SELECT user_group 
+  FROM usergroup 
+  WHERE username = ? AND user_group = ?;`
+
+  const [results] = await pool.query(query, [username, groupname])
+
+  if (results.length === 0) {
+    // user not in group
+    return false
+  } else {
+    return true
+  }
+}
+
+// User must be an admin
+const isAdmin = async (req, res, next) => {
+  if (await checkGroup(req.user.username, "admin")) {
+    next()
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "You must be an admin to access this resource"
+    })
+  }
+}
+
+// User must be logged in and authenticated
 const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
@@ -33,9 +62,9 @@ const isLoggedIn = async (req, res, next) => {
   } else {
     return res.status(401).json({
       success: false,
-      message: "Login first to access this resource",
+      message: "Login first to access this resource"
     })
   }
 }
 
-export { isLoggedIn }
+export { isLoggedIn, isAdmin }

@@ -1,11 +1,9 @@
 import { USER_URL } from '../../../constants';
 
 export const load = async ({ cookies }) => {
-	const token = cookies.get('token');
-
 	const response = await fetch(`${USER_URL}`, {
 		headers: {
-			cookie: token
+			cookie: cookies.get('token')
 		}
 	});
 
@@ -18,7 +16,7 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ request, cookies }) => {
 		const form = await request.formData();
 
 		const email = form.get('email');
@@ -56,7 +54,8 @@ export const actions = {
 		const response = await fetch(`${USER_URL}`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				cookie: cookies.get('token')
 			},
 			body: JSON.stringify({ username, email, password })
 		});

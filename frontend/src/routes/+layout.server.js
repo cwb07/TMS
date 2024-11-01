@@ -1,11 +1,9 @@
-import { USER_URL } from "../../constants";
+import { USER_URL } from '../../constants';
 
 export const load = async ({ cookies }) => {
-	const token = cookies.get('token');
-
 	const response = await fetch(`${USER_URL}`, {
 		headers: {
-			cookie: token
+			cookie: cookies.get('token')
 		}
 	});
 

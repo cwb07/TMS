@@ -1,17 +1,17 @@
 import express from "express"
 import { login, logout, getAllUsers, addNewUser, editUser, getUser, updateProfile } from "../controllers/userController.js"
-import { isLoggedIn } from "../middlewares/authMiddleware.js"
+import { isLoggedIn, isAdmin } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 
-router.route("/").get(isLoggedIn, getUser).post(addNewUser).put(updateProfile)
+router.route("/").get(isLoggedIn, getUser).post(isLoggedIn, isAdmin, addNewUser).put(isLoggedIn, updateProfile)
 
-router.route("/edit").put(editUser)
+router.route("/edit").put(isLoggedIn, isAdmin, editUser)
 
-router.route("/all").get(getAllUsers)
+router.route("/all").get(isLoggedIn, isAdmin, getAllUsers)
 
 router.route("/login").post(login)
 
-router.route("/logout").post(logout)
+router.route("/logout").post(isLoggedIn, logout)
 
 export default router
