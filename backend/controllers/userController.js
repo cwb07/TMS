@@ -219,13 +219,6 @@ const editUser = async (req, res) => {
     })
   }
 
-  if (!password) {
-    return res.status(409).json({
-      success: false,
-      message: "Password is mandatory"
-    })
-  }
-
   if (!accountstatus) {
     return res.status(409).json({
       success: false,
@@ -263,7 +256,7 @@ const editUser = async (req, res) => {
     if (results.length !== 0) {
       // can update user
       // check if need to rehash password
-      if (password === user.password) {
+      if (!password) {
         // password is the same, no need to rehash
         const updateQuery = `UPDATE accounts SET email = ?, accountstatus = ? WHERE username = ?`
         await pool.query(updateQuery, [email, accountstatus, username])

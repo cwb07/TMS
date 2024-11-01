@@ -50,7 +50,7 @@
 		currentlyEditing = true;
 		editingUsername = user.username;
 		editingEmail = user.email;
-		editingPassword = user.password;
+		editingPassword = '';
 		editingSelectedGroups = user.user_group ? user.user_group.split(', ') : [];
 		editingAccountStatus = user.accountstatus;
 	}
@@ -296,7 +296,7 @@
 											type="password"
 											class="form-control"
 											name="password"
-											placeholder="Password*"
+											placeholder="Password"
 											bind:value={editingPassword}
 										/></td
 									>
