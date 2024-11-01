@@ -37,12 +37,21 @@ const login = async (req, res) => {
       })
     }
 
-    // Generate a token
-    const token = jwt.sign({ username }, process.env.JWT_SECRET, {
-      expiresIn: "60m"
-    })
+    // generate token
+    // include ip and user-agent browser
+    const token = jwt.sign(
+      {
+        username,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"]
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "60m" // expiration 60 minutes
+      }
+    )
 
-    // Set JWT as an HTTP-Only cookie
+    // set JWT as an HTTP-Only cookie
     res.cookie("jwt", token, {
       httpOnly: true, // jwt is transmitted w every HTTP req, prevents xss - disallow javascript from accessing cookies
       maxAge: 60 * 60 * 1000 // 60 minutes in milliseconds
@@ -66,7 +75,7 @@ const login = async (req, res) => {
 const logout = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
-    expires: new Date(0) // Set expiration to a past date
+    expires: new Date(0) // set expiration to a past date
   })
 
   return res.status(200).json({
