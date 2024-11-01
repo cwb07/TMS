@@ -129,7 +129,7 @@ const updateProfile = async (req, res) => {
   if (email && !emailRegex.test(email)) {
     return res.status(409).json({
       success: false,
-      message: "Invalid email format"
+      message: "Email format entered must match the pattern username@domain.com"
     })
   }
 
@@ -140,38 +140,38 @@ const updateProfile = async (req, res) => {
   if (password && !passwordRegex.test(password)) {
     return res.status(409).json({
       success: false,
-      message: "Invalid password format"
+      message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters"
     })
   }
 
   // create update query string
-  let updateQuery = 'UPDATE accounts SET'
-  const values = [];
+  let updateQuery = "UPDATE accounts SET"
+  const values = []
 
   // add email if given
   if (email) {
-    updateQuery += ' email = ?,';
-    values.push(email);
+    updateQuery += " email = ?,"
+    values.push(email)
   }
 
   // add password if given
   if (password) {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    updateQuery += ' password = ?,';
-    values.push(hashedPassword);
+    updateQuery += " password = ?,"
+    values.push(hashedPassword)
   }
 
   // Remove trailing comma
-  updateQuery = updateQuery.slice(0, -1);
+  updateQuery = updateQuery.slice(0, -1)
 
   // add where clause
-  updateQuery += ' WHERE username = ?';
-  values.push(username);
+  updateQuery += " WHERE username = ?"
+  values.push(username)
 
   try {
     // execute query
-    await pool.query(updateQuery, values);
+    await pool.query(updateQuery, values)
 
     return res.status(200).json({
       success: true,
@@ -186,7 +186,6 @@ const updateProfile = async (req, res) => {
   }
 }
 
-
 // @desc Edit a user
 // @route PUT /user/edit
 const editUser = async (req, res) => {
@@ -197,6 +196,17 @@ const editUser = async (req, res) => {
     return res.status(409).json({
       success: false,
       message: "Username is mandatory"
+    })
+  }
+
+  // username regex
+  // max 50 characters, alphanumeric with no spaces
+  const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
+
+  if (!usernameRegex.test(username)) {
+    return res.status(409).json({
+      success: false,
+      message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters"
     })
   }
 
@@ -214,24 +224,13 @@ const editUser = async (req, res) => {
     })
   }
 
-  // username regex
-  // max 50 characters, alphanumeric with no spaces
-  const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
-
-  if (!usernameRegex.test(username)) {
-    return res.status(409).json({
-      success: false,
-      message: "Username must be alphanumeric"
-    })
-  }
-
   // email regex if user did enter email (optional)
   const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
   if (email && !emailRegex.test(email)) {
     return res.status(409).json({
       success: false,
-      message: "Invalid email format"
+      message: "Email format entered must match the pattern username@domain.com"
     })
   }
 
@@ -267,7 +266,7 @@ const editUser = async (req, res) => {
         if (!passwordRegex.test(password)) {
           return res.status(409).json({
             success: false,
-            message: "Invalid password format"
+            message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters"
           })
         }
 
@@ -338,52 +337,6 @@ const addNewUser = async (req, res) => {
     })
   }
 
-  if (!password) {
-    return res.status(409).json({
-      success: false,
-      message: "Password is mandatory"
-    })
-  }
-
-  if (!accountstatus) {
-    return res.status(409).json({
-      success: false,
-      message: "Active is mandatory"
-    })
-  }
-
-  // username regex
-  // max 50 characters, alphanumeric with no spaces
-  const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
-
-  if (!usernameRegex.test(username)) {
-    return res.status(409).json({
-      success: false,
-      message: "Username must be alphanumeric"
-    })
-  }
-
-  // password regex
-  // min 8 char & max 10 char consisting of alphabets, numbers and special characters
-  const passwordRegex = /^[^\s]{8,10}$/
-
-  if (!passwordRegex.test(password)) {
-    return res.status(409).json({
-      success: false,
-      message: "Invalid password format"
-    })
-  }
-
-  // email regex if user did enter email (optional)
-  const emailRegex = /^[^\s]+@[^\s]+\.com$/
-
-  if (email && !emailRegex.test(email)) {
-    return res.status(409).json({
-      success: false,
-      message: "Invalid email format"
-    })
-  }
-
   const connection = await pool.getConnection()
   try {
     // start transaction
@@ -394,7 +347,54 @@ const addNewUser = async (req, res) => {
     const [results] = await pool.query(query, [username])
 
     if (results.length === 0) {
-      //username is unique, able to create user
+      //username is unique
+
+      // username regex
+      // max 50 characters, alphanumeric with no spaces
+      const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
+
+      if (!usernameRegex.test(username)) {
+        return res.status(409).json({
+          success: false,
+          message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters"
+        })
+      }
+
+      if (!password) {
+        return res.status(409).json({
+          success: false,
+          message: "Password is mandatory"
+        })
+      }
+
+      // password regex
+      // min 8 char & max 10 char consisting of alphabets, numbers and special characters
+      const passwordRegex = /^[^\s]{8,10}$/
+
+      if (!passwordRegex.test(password)) {
+        return res.status(409).json({
+          success: false,
+          message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters"
+        })
+      }
+
+      if (!accountstatus) {
+        return res.status(409).json({
+          success: false,
+          message: "Active is mandatory"
+        })
+      }
+
+      // email regex if user did enter email (optional)
+      const emailRegex = /^[^\s]+@[^\s]+\.com$/
+
+      if (email && !emailRegex.test(email)) {
+        return res.status(409).json({
+          success: false,
+          message: "Email format entered must match the pattern username@domain.com"
+        })
+      }
+
       const salt = await bcrypt.genSalt(10)
       const hashedPassword = await bcrypt.hash(password, salt)
 

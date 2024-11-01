@@ -9,7 +9,7 @@
 				<div class="card-body">
 					<h3 class="card-title text-center mb-4">Login</h3>
 					{#if form?.error}
-						<div class="alert alert-danger" role="alert">{form?.error}</div>
+						<div class="alert alert-danger" role="alert">Error: {form?.error}</div>
 					{/if}
 					<form method="POST">
 						<div class="mb-3">

@@ -8,7 +8,18 @@ const addNewGroup = async (req, res) => {
   if (!groupname) {
     return res.status(400).json({
       success: false,
-      message: "Group is mandatory"
+      message: "Group name is mandatory"
+    })
+  }
+
+  // max 50 characters, alphanumeric with possible underscore
+  const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
+
+  if (!groupnameRegex.test(groupname)) {
+    // group name format wrong
+    return res.status(401).json({
+      success: false,
+      message: "Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters"
     })
   }
 
@@ -16,17 +27,6 @@ const addNewGroup = async (req, res) => {
   try {
     // start transaction
     await connection.beginTransaction()
-
-    // max 50 characters, alphanumeric with possible underscore
-    const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
-
-    if (!groupnameRegex.test(groupname)) {
-      // group name format wrong
-      return res.status(401).json({
-        success: false,
-        message: "Invalid group format"
-      })
-    }
 
     // check if groupname exists
     const query = `SELECT * FROM usergroup WHERE user_group = ?`

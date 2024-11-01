@@ -107,7 +107,7 @@
 	{#if form?.error}
 		<div class="row mb-2">
 			<div class="col-12">
-				<div class="alert alert-danger" role="alert" id="errorAlert">{form?.error}</div>
+				<div class="alert alert-danger" role="alert" id="errorAlert">Error: {form?.error}</div>
 			</div>
 		</div>
 	{/if}
@@ -116,7 +116,9 @@
 	{#if form?.success}
 		<div class="row mb-2">
 			<div class="col-12">
-				<div class="alert alert-success" role="alert" id="successAlert">{form?.success}</div>
+				<div class="alert alert-success" role="alert" id="successAlert">
+					Success: {form?.success}
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -354,7 +356,7 @@
 										</select></td
 									>
 									<td
-										><button type="submit" class="btn btn-primary">Submit</button>
+										><button type="submit" class="btn btn-primary">Save</button>
 										<button type="button" on:click={() => cancelEdit()} class="btn btn-primary"
 											>Cancel</button
 										></td
