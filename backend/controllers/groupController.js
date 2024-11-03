@@ -44,6 +44,8 @@ const createGroup = async (req, res) => {
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
     await pool.query(insertQuery, [groupname])
 
+    await connection.commit();
+
     return res.status(201).json({
       success: true,
       message: "Group created"

@@ -1,12 +1,10 @@
 <script>
 	import { USER_URL, GROUP_URL } from '$lib/constants';
-	import { goto, invalidateAll, invalidate } from '$app/navigation';
-	import { enhance } from '$app/forms';
+	import { invalidate } from '$app/navigation';
 	import axios from 'axios';
 	import MultiSelect from 'svelte-multiselect';
 
 	// data from form actions and load
-	export let form;
 	export let data;
 	let errorMessage = '';
 	let successMessage = '';
@@ -17,14 +15,6 @@
 
 	// group form fields
 	let groupname = '';
-
-	// user form fields
-	let username = '';
-	let email = '';
-	let password = '';
-	let selectedGroups = [];
-	let accountstatus = 'Active';
-	$: options = groupsList || [];
 
 	const createGroup = async (e) => {
 		e.preventDefault();
@@ -51,6 +41,14 @@
 			successMessage = '';
 		}
 	};
+
+	// user form fields
+	let username = '';
+	let email = '';
+	let password = '';
+	let selectedGroups = [];
+	let accountstatus = 'Active';
+	$: options = groupsList || [];
 
 	const createUser = async (e) => {
 		e.preventDefault();
@@ -84,60 +82,69 @@
 	};
 
 	// edit user form fields
-	$: currentlyEditing = null;
-	$: editingUsername = '' || form?.editFormData?.username;
-	$: editingEmail = '' || form?.editFormData?.email;
-	$: editingPassword = '' || form?.editFormData?.password;
-	$: editingAccountStatus = '' || form?.editFormData?.accountstatus;
-	$: editingSelectedGroups =
-		form?.editFormData?.groups.length > 0 ? form?.editFormData?.groups : [];
+	let editUsername = '';
+	let editEmail = '';
+	let editPassword = '';
+	let editPreselectedGroups = [];
+	let editSelectedGroups = [];
+	let editAccountstatus = 'Active';
 
-	function editRow(user) {
-		currentlyEditing = true;
-		editingUsername = user.username;
-		editingEmail = user.email;
-		editingPassword = '';
-		editingSelectedGroups = user.user_group ? user.user_group.split(', ') : [];
-		editingAccountStatus = user.accountstatus;
-	}
+	const editRow = (user) => {
+		editUsername = user.username;
+		editEmail = user.email;
+		editPreselectedGroups = user.user_group ? user.user_group.split(', ') : [];
+		editSelectedGroups = editPreselectedGroups;
+		editAccountstatus = user.accountstatus;
+	};
 
-	function cancelEdit() {
-		currentlyEditing = false;
-		editingUsername = '';
-		editingEmail = '';
-		editingPassword = '';
-		editingSelectedGroups = [];
-		editingAccountStatus = '';
-	}
+	const cancelEdit = () => {
+		editUsername = '';
+		editEmail = '';
+		editPassword = '';
+		editPreselectedGroups = [];
+		editSelectedGroups = [];
+		editAccountstatus = 'Active';
+	};
 
-	// select groups logic for editing user
-	let isEditDropdownOpen = false;
+	const editUser = async (e) => {
+		e.preventDefault();
 
-	function toggleEditDropdown() {
-		isEditDropdownOpen = !isEditDropdownOpen;
-	}
+		try {
+			const response = await axios.put(
+				`${USER_URL}/edit`,
+				{
+					username: editUsername,
+					email: editEmail,
+					password: editPassword,
+					groups: editSelectedGroups,
+					accountstatus: editAccountstatus
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					withCredentials: true
+				}
+			);
 
-	function selectEditGroup(group) {
-		if (!editingSelectedGroups.includes(group)) {
-			editingSelectedGroups = [...editingSelectedGroups, group];
+			if (response.status === 200) {
+				successMessage = response.data.message;
+				errorMessage = '';
+				editUsername = '';
+				editEmail = '';
+				editPassword = '';
+				editPreselectedGroups = [];
+				editSelectedGroups = [];
+				editAccountstatus = 'Active';
+				invalidate('loadUserManagement');
+				invalidate('loadLayout');
+			}
+		} catch (error) {
+			errorMessage = error.response.data.message;
+			successMessage = '';
 		}
-	}
-
-	function removeEditGroup(groupToRemove) {
-		editingSelectedGroups = editingSelectedGroups.filter((group) => group !== groupToRemove);
-	}
-
-	// close dropdown when clicking outside
-	function handleClickOutside(event) {
-		const multiSelect = event.target.closest('.multi-select-container');
-		if (!multiSelect) {
-			// close all dropdowns
-			isEditDropdownOpen = false;
-		}
-	}
+	};
 </script>
-
-<svelte:window on:click={handleClickOutside} />
 
 <div style="padding: 20px">
 	<!-- Page Title and Welcome Message -->
@@ -156,8 +163,7 @@
 				</div>
 			</div>
 		</div>
-	{/if}
-	{#if successMessage}
+	{:else if successMessage}
 		<div class="row mb-2">
 			<div class="col-12">
 				<div class="alert alert-success" role="alert">
@@ -230,9 +236,9 @@
 								<MultiSelect
 									class="multi-select-input"
 									placeholder="Groups (Optional)"
-									bind:value={selectedGroups}
 									--sms-placeholder-color="#6c757d"
 									highlightMatches={false}
+									bind:value={selectedGroups}
 									{options}
 								>
 									<span slot="expand-icon"></span>
@@ -255,7 +261,7 @@
 	<!-- User Table -->
 	<div class="row">
 		<div class="col-12">
-			<form method="POST" action="?/editUser" use:enhance>
+			<form on:submit={editUser}>
 				<table class="table table-bordered text-center">
 					<thead class="table-light">
 						<tr>
@@ -269,28 +275,9 @@
 					</thead>
 					<tbody>
 						{#each usersList as user}
-							{#if editingUsername != user.username}
-								<tr>
-									<td>{user.username}</td>
-									<td>{user.email}</td>
-									<td>******</td>
-									<td>{user.user_group}</td>
-									<td>{user.accountstatus}</td>
-									<td>
-										<button
-											disabled={currentlyEditing && form?.editSucess}
-											type="button"
-											on:click={() => editRow(user)}
-											class="btn btn-primary"
-										>
-											Edit
-										</button>
-									</td>
-								</tr>
-							{:else}
+							{#if editUsername && editUsername == user.username}
 								<tr>
 									<td>
-										<input type="hidden" name="username" value={user.username} />
 										{user.username}
 									</td>
 									<td
@@ -299,7 +286,7 @@
 											class="form-control"
 											name="email"
 											placeholder="Email (optional)"
-											bind:value={editingEmail}
+											bind:value={editEmail}
 										/></td
 									>
 									<td
@@ -308,59 +295,27 @@
 											class="form-control"
 											name="password"
 											placeholder="Password"
-											bind:value={editingPassword}
+											bind:value={editPassword}
 										/></td
 									>
-									<td>
-										<input type="hidden" name="selectedGroups" bind:value={editingSelectedGroups} />
-										<div class="multi-select-container">
-											<button
-												type="button"
-												class="form-control multi-select-field"
-												on:click={toggleEditDropdown}
-												on:keydown={(e) => e.key === 'Enter' && toggleEditDropdown()}
-												aria-haspopup="listbox"
-											>
-												{#if editingSelectedGroups.length === 0}
-													<span class="text-muted">Select groups (Optional)</span>
-												{:else}
-													{#each editingSelectedGroups as group}
-														<div class="selected-item">
-															{group}
-															<span
-																class="remove-item"
-																on:click|stopPropagation={() => removeEditGroup(group)}
-																on:keydown={(e) => e.key === 'Enter' && removeEditGroup(group)}
-																aria-label="Remove group"
-																role="button"
-																tabindex="0"
-															>
-																&times;
-															</span>
-														</div>
-													{/each}
-												{/if}
-											</button>
-											<div class="dropdown-menu {isEditDropdownOpen ? 'show' : ''}">
-												{#each groupsList as group}
-													<button
-														type="button"
-														class="dropdown-item"
-														on:click={() => selectEditGroup(group)}
-														on:keydown={(e) => e.key === 'Enter' && selectEditGroup(group)}
-														role="menuitem"
-													>
-														{group}
-													</button>
-												{/each}
-											</div>
-										</div>
+									<td style="width: 300px">
+										<MultiSelect
+											class="multi-select-input"
+											placeholder="Groups (Optional)"
+											--sms-placeholder-color="#6c757d"
+											highlightMatches={false}
+											bind:selected={editPreselectedGroups}
+											bind:value={editSelectedGroups}
+											{options}
+										>
+											<span slot="expand-icon"></span>
+										</MultiSelect>
 									</td>
 									<td
 										><select
 											class="form-select"
 											name="accountstatus"
-											bind:value={editingAccountStatus}
+											bind:value={editAccountstatus}
 										>
 											<option default value="Active">Active</option>
 											<option value="Disabled">Disabled</option>
@@ -372,6 +327,19 @@
 											>Cancel</button
 										></td
 									>
+								</tr>
+							{:else}
+								<tr>
+									<td>{user.username}</td>
+									<td>{user.email}</td>
+									<td>******</td>
+									<td>{user.user_group}</td>
+									<td>{user.accountstatus}</td>
+									<td>
+										<button type="button" on:click={() => editRow(user)} class="btn btn-primary">
+											Edit
+										</button>
+									</td>
 								</tr>
 							{/if}
 						{/each}

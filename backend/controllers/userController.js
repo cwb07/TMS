@@ -131,6 +131,13 @@ const updateProfile = async (req, res) => {
     })
   }
 
+  if (!email && !password) {
+    return res.status(409).json({
+      success: false,
+      message: "Please enter either a email or password"
+    })
+  }
+
   // email regex if user did enter email (optional)
   const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
@@ -300,6 +307,8 @@ const editUser = async (req, res) => {
         }
       }
 
+      await connection.commit();
+
       return res.status(200).json({
         success: true,
         message: "Account updated"
@@ -420,6 +429,8 @@ const createUser = async (req, res) => {
             await pool.query(query, [username, group])
           }
         }
+
+        await connection.commit();
 
         // inserted user into user group
         return res.status(201).json({
