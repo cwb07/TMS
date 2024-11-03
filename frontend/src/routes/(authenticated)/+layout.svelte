@@ -1,5 +1,32 @@
 <script>
+	import { goto } from '$app/navigation';
+	import axios from 'axios';
+	import { USER_URL } from '$lib/constants';
+
 	export let data;
+
+	const logout = async (e) => {
+		e.preventDefault();
+
+		try {
+			const response = await axios.post(
+				`${USER_URL}/logout`,
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					withCredentials: true
+				}
+			);
+
+			if (response.status === 200) {
+				goto('/login');
+			}
+		} catch (err) {
+			invalidate('loadUserCheck');
+		}
+	};
 </script>
 
 <nav class="navbar navbar-expand-lg" style="background-color: #99cdf4; margin-bottom: 10px">
@@ -8,7 +35,18 @@
 			<b>Welcome, {data.username}</b>
 		</span>
 
-		<a class="navbar-brand mx-auto" href="/user_management"><u><b>USER MANAGEMENT SYSTEM</b></u></a>
+		{#if data.isAdmin}
+			<a class="navbar-brand mx-auto" href="/user_management"
+				><u><b>USER MANAGEMENT SYSTEM</b></u></a
+			>
+			&nbsp;|&nbsp;
+			<a class="navbar-brand mx-auto" href="/task_management"
+				><u><b>TASK MANAGEMENT SYSTEM</b></u></a
+			>
+		{:else}
+			<a class="navbar-brand mx-auto" href="/task_management"><b>TASK MANAGEMENT SYSTEM</b></a>
+		{/if}
+
 		<button
 			class="navbar-toggler"
 			type="button"
@@ -28,7 +66,8 @@
 					>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link border border-dark rounded px-2 py-1" href="/user_management">Logout</a
+					<a href="/logout" class="nav-link border border-dark rounded px-2 py-1" on:click={logout}
+						>Logout</a
 					>
 				</li>
 			</ul>

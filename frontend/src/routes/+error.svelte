@@ -5,7 +5,6 @@
 
 	let countdown = 3;
 
-	// Start the countdown when the component is first added to the DOM
 	onMount(() => {
 		if ($page.error.redirect) {
 			setInterval(() => {

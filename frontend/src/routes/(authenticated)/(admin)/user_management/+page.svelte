@@ -34,11 +34,15 @@
 			if (response.status === 201) {
 				successMessage = response.data.message;
 				errorMessage = '';
-				invalidate('loadUserManagement');
+				invalidate('loadFetchGroupsUsers');
 			}
-		} catch (error) {
-			errorMessage = error.response.data.message;
-			successMessage = '';
+		} catch (err) {
+			if (err.response.status === 403) {
+				invalidate('loadAdminCheck');
+			} else {
+				errorMessage = err.response.data.message;
+				successMessage = '';
+			}
 		}
 	};
 
@@ -73,11 +77,15 @@
 				password = '';
 				selectedGroups = [];
 				accountstatus = 'Active';
-				invalidate('loadUserManagement');
+				invalidate('loadFetchGroupsUsers');
 			}
-		} catch (error) {
-			errorMessage = error.response.data.message;
-			successMessage = '';
+		} catch (err) {
+			if (err.response.status === 403) {
+				invalidate('loadAdminCheck');
+			} else {
+				errorMessage = err.response.data.message;
+				successMessage = '';
+			}
 		}
 	};
 
@@ -136,12 +144,16 @@
 				editPreselectedGroups = [];
 				editSelectedGroups = [];
 				editAccountstatus = 'Active';
-				invalidate('loadUserManagement');
-				invalidate('loadLayout');
+				invalidate('loadFetchGroupsUsers');
+				invalidate('loadUserCheck');
 			}
-		} catch (error) {
-			errorMessage = error.response.data.message;
-			successMessage = '';
+		} catch (err) {
+			if (err.response.status === 403) {
+				invalidate('loadAdminCheck');
+			} else {
+				errorMessage = err.response.data.message;
+				successMessage = '';
+			}
 		}
 	};
 </script>
@@ -311,16 +323,21 @@
 											<span slot="expand-icon"></span>
 										</MultiSelect>
 									</td>
-									<td
-										><select
-											class="form-select"
-											name="accountstatus"
-											bind:value={editAccountstatus}
-										>
-											<option default value="Active">Active</option>
-											<option value="Disabled">Disabled</option>
-										</select></td
-									>
+									<td>
+										{#if user.user_group?.includes('admin')}
+											{editAccountstatus}
+										{:else}
+											<select
+												class="form-select"
+												name="accountstatus"
+												readOnly="true"
+												bind:value={editAccountstatus}
+											>
+												<option default value="Active">Active</option>
+												<option value="Disabled">Disabled</option>
+											</select>
+										{/if}
+									</td>
 									<td
 										><button type="submit" class="btn btn-primary">Save</button>
 										<button type="button" on:click={() => cancelEdit()} class="btn btn-primary"

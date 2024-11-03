@@ -32,11 +32,17 @@
 				errorMessage = '';
 				password = '';
 				email = '';
-				invalidate('loadLayout');
+				// update user info
+				invalidate('loadUserCheck');
 			}
-		} catch (error) {
-			errorMessage = error.response.data.message;
-			successMessage = '';
+		} catch (err) {
+			if (err.response.status === 401) {
+				// show error page, redirect user to login page
+				invalidate('loadUserCheck');
+			} else {
+				errorMessage = err.response.data.message;
+				successMessage = '';
+			}
 		}
 	};
 </script>

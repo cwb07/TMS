@@ -26,10 +26,10 @@
 			);
 
 			if (response.status === 200) {
-				goto('/user_management');
+				goto('/task_management');
 			}
-		} catch (error) {
-			errorMessage = error.response.data.message;
+		} catch (err) {
+			errorMessage = err.response.data.message;
 		}
 	};
 </script>

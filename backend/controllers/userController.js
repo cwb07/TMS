@@ -339,8 +339,6 @@ const editUser = async (req, res) => {
 const createUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
-  console.log(groups)
-
   // username, password and status must be filled
   if (!username) {
     return res.status(409).json({

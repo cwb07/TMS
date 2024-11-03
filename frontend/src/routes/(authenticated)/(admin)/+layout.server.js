@@ -3,7 +3,9 @@ import axios from 'axios';
 import { error } from '@sveltejs/kit';
 
 // check if admin
-export const load = async ({ request }) => {
+export const load = async ({ request, depends }) => {
+    depends("loadAdminCheck")
+
     try {
         await axios.get(
             `${USER_URL}/admin`,

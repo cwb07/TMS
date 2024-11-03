@@ -21,7 +21,6 @@ const isLoggedIn = async (req, res, next) => {
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
       const [results] = await pool.query(query, [decoded.username])
 
-
       if (results.length === 0) {
         // no username found
         return res.status(401).json({
@@ -31,19 +30,20 @@ const isLoggedIn = async (req, res, next) => {
       } else {
         // store in req.user to access it anywhere
         req.user = results[0]
+        req.user.isAdmin = await checkGroup(req.user.username, "admin")
         next()
       }
-    } catch (error) {
+    } catch (err) {
       return res.status(500).json({
         success: false,
         message: "An error occurred while checking if user is logged in",
-        stack: error.stack
+        stack: err.stack
       })
     }
   } else {
     return res.status(401).json({
       success: false,
-      message: "Login first to access this resource"
+      message: "Login first to access this resourc222e"
     })
   }
 }
@@ -64,7 +64,7 @@ const checkGroup = async (username, groupname) => {
     } else {
       return true
     }
-  } catch (error) {
+  } catch (err) {
     return res.status(500).json({
       success: false,
       message: "An error occurred while checking if user is in group",
@@ -80,7 +80,7 @@ const isAdmin = async (req, res, next) => {
   } else {
     return res.status(403).json({
       success: false,
-      message: "You must be an admin to access this resource"
+      message: "You must be an admin to access this"
     })
   }
 }

@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 
 // page not found
 export const load = async ({ url }) => {
-    const validPaths = ['/login', '/user_management', '/profile', '/logout'];
+    const validPaths = ['/login', '/user_management', '/profile', '/task_management'];
 
     if (url.pathname === '/') {
         redirect(302, '/login');
