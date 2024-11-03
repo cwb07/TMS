@@ -78,7 +78,7 @@ const isAdmin = async (req, res, next) => {
   if (await checkGroup(req.user.username, "admin")) {
     next()
   } else {
-    return res.status(401).json({
+    return res.status(403).json({
       success: false,
       message: "You must be an admin to access this resource"
     })

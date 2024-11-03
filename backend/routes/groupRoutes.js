@@ -4,6 +4,6 @@ import { isLoggedIn, isAdmin } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 
-router.route("/").get(isLoggedIn, isAdmin, getAllGroups).post(isLoggedIn, isAdmin, createGroup)
+router.route("/").get(getAllGroups).post(createGroup)
 
 export default router
