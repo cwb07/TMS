@@ -4,10 +4,10 @@ import { isLoggedIn, isAdmin } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 
-router.route("/").get(isLoggedIn, getUser).post(createUser).put(updateProfile)
+router.route("/").get(isLoggedIn, getUser).post(isLoggedIn, isAdmin, createUser).put(isLoggedIn, updateProfile)
 router.route("/admin").get(isLoggedIn, isAdmin, getUser)
 
-router.route("/edit").put(editUser)
+router.route("/edit").put(isLoggedIn, isAdmin, editUser)
 
 router.route("/all").get(isLoggedIn, isAdmin, getAllUsers)
 

@@ -2,7 +2,7 @@ import { USER_URL } from '$lib/constants';
 import axios from 'axios';
 import { error } from '@sveltejs/kit';
 
-// ensure user is logged in, return user info to data
+// check if admin
 export const load = async ({ request }) => {
     try {
         await axios.get(
