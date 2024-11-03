@@ -1,8 +1,8 @@
 import pool from "../config/db.js"
 
-// @desc    Add a new group
+// @desc    Create group
 // @route   POST /group
-const addNewGroup = async (req, res) => {
+const createGroup = async (req, res) => {
   const { groupname } = req.body
 
   if (!groupname) {
@@ -87,4 +87,4 @@ const getAllGroups = async (req, res) => {
   }
 }
 
-export { addNewGroup, getAllGroups }
+export { createGroup, getAllGroups }

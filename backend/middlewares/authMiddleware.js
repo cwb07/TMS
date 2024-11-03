@@ -21,6 +21,7 @@ const isLoggedIn = async (req, res, next) => {
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
       const [results] = await pool.query(query, [decoded.username])
 
+
       if (results.length === 0) {
         // no username found
         return res.status(401).json({

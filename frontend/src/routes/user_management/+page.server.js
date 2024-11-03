@@ -35,42 +35,6 @@ export const load = async ({ request, depends }) => {
 };
 
 export const actions = {
-	createUser: async ({ request, cookies }) => {
-		const form = await request.formData();
-
-		const username = form.get('username');
-		const email = form.get('email');
-		const password = form.get('password');
-
-		// get as an array
-		let groups = form.get('selectedGroups').split(',');
-		groups = groups.filter((group) => group !== '');
-
-		const accountstatus = form.get('accountstatus');
-
-		// return back the form data
-		// to repopulate the form fields
-		// in case of error
-		const formData = { username, email, password, groups, accountstatus };
-
-		// add new user
-		const response = await fetch(`${USER_URL}`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				cookie: cookies.get('token')
-			},
-			body: JSON.stringify({ username, email, password, groups, accountstatus })
-		});
-
-		const data = await response.json();
-
-		if (response.ok) {
-			return { success: data.message };
-		} else {
-			return { error: data.message, formData };
-		}
-	},
 	editUser: async ({ request, cookies }) => {
 		const form = await request.formData();
 

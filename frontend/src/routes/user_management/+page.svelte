@@ -22,8 +22,8 @@
 	let username = '';
 	let email = '';
 	let password = '';
-	let accountstatus = 'Active';
 	let selectedGroups = [];
+	let accountstatus = 'Active';
 	$: options = groupsList || [];
 
 	const createGroup = async (e) => {
@@ -44,7 +44,6 @@
 			if (response.status === 201) {
 				successMessage = response.data.message;
 				errorMessage = '';
-				groupname = '';
 				invalidate('loadUserManagement');
 			}
 		} catch (error) {
@@ -55,25 +54,34 @@
 
 	const createUser = async (e) => {
 		e.preventDefault();
-	};
 
-	// select groups logic for create user
-	let isDropdownOpen = false;
+		try {
+			const response = await axios.post(
+				`${USER_URL}`,
+				{ username, email, password, groups: selectedGroups, accountstatus },
+				{
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					withCredentials: true
+				}
+			);
 
-	function toggleDropdown() {
-		isDropdownOpen = !isDropdownOpen;
-		isEditDropdownOpen = false;
-	}
-
-	function selectGroup(group) {
-		if (!selectedGroups.includes(group)) {
-			selectedGroups = [...selectedGroups, group];
+			if (response.status === 201) {
+				successMessage = response.data.message;
+				errorMessage = '';
+				username = '';
+				email = '';
+				password = '';
+				selectedGroups = [];
+				accountstatus = 'Active';
+				invalidate('loadUserManagement');
+			}
+		} catch (error) {
+			errorMessage = error.response.data.message;
+			successMessage = '';
 		}
-	}
-
-	function removeGroup(groupToRemove) {
-		selectedGroups = selectedGroups.filter((group) => group !== groupToRemove);
-	}
+	};
 
 	// edit user form fields
 	$: currentlyEditing = null;
@@ -107,7 +115,6 @@
 
 	function toggleEditDropdown() {
 		isEditDropdownOpen = !isEditDropdownOpen;
-		isDropdownOpen = false;
 	}
 
 	function selectEditGroup(group) {
@@ -125,7 +132,6 @@
 		const multiSelect = event.target.closest('.multi-select-container');
 		if (!multiSelect) {
 			// close all dropdowns
-			isDropdownOpen = false;
 			isEditDropdownOpen = false;
 		}
 	}
@@ -224,7 +230,7 @@
 								<MultiSelect
 									class="multi-select-input"
 									placeholder="Groups (Optional)"
-									bind:selectedGroups
+									bind:value={selectedGroups}
 									--sms-placeholder-color="#6c757d"
 									highlightMatches={false}
 									{options}

@@ -325,10 +325,12 @@ const editUser = async (req, res) => {
   }
 }
 
-// @desc    Add a new user
+// @desc    Create user
 // @route   POST /user
-const addNewUser = async (req, res) => {
+const createUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
+
+  console.log(groups)
 
   // username, password and status must be filled
   if (!username) {
@@ -446,4 +448,4 @@ const addNewUser = async (req, res) => {
   }
 }
 
-export { getAllUsers, addNewUser, login, logout, editUser, getUser, updateProfile }
+export { getAllUsers, createUser, login, logout, editUser, getUser, updateProfile }
