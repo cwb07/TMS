@@ -101,5 +101,17 @@ const isAdmin = async (req, res, next) => {
   }
 }
 
-export { isAdmin, isLoggedIn }
+// User must be a pl
+const isPl = async (req, res, next) => {
+  if (await checkGroup(req.user.username, "pl")) {
+    next()
+  } else {
+    return res.status(403).json({
+      success: false,
+      message: "You must be an project lead (pl) to access this"
+    })
+  }
+}
+
+export { isAdmin, isLoggedIn, isPl }
 

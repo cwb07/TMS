@@ -1,3 +1,4 @@
+import applicationRoutes from './routes/applicationRoutes.js'
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import dotenv from "dotenv"
@@ -30,5 +31,6 @@ app.use(cookieParser())
 // routes
 app.use("/user", userRoutes)
 app.use("/group", groupRoutes)
+app.use('/application', applicationRoutes)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
