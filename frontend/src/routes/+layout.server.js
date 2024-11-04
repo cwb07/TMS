@@ -7,7 +7,6 @@ export const load = async ({ url }) => {
     if (url.pathname === '/') {
         redirect(302, '/login');
     } else if (!validPaths.includes(url.pathname)) {
-        console.log("22")
         error(404, {
             message: 'Page Not found'
         });

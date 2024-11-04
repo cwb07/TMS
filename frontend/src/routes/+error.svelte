@@ -8,7 +8,7 @@
 	let countdown = 3;
 
 	onMount(() => {
-		if ($page.error.redirect) {
+		if ($page.error.redirectToLogin || $page.error.redirectToTMS) {
 			const interval = setInterval(async () => {
 				if (countdown > 0) {
 					countdown -= 1;
@@ -16,19 +16,22 @@
 					clearInterval(interval);
 					// clear cookies
 					try {
-						const response = await axios.post(
-							`${USER_URL}/logout`,
-							{},
-							{
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								withCredentials: true
+						if ($page.error.redirectToLogin) {
+							const response = await axios.post(
+								`${USER_URL}/logout`,
+								{},
+								{
+									headers: {
+										'Content-Type': 'application/json'
+									},
+									withCredentials: true
+								}
+							);
+							if (response.status === 200) {
+								goto('/login');
 							}
-						);
-
-						if (response.status === 200) {
-							goto('/login');
+						} else {
+							goto('/task_management');
 						}
 					} catch (err) {
 						console.error('Logout failed:', err);
@@ -42,6 +45,6 @@
 
 <h1>{$page.status}: {$page.error.message}</h1>
 
-{#if $page.error.redirect}
+{#if $page.error.redirect || $page.error.redirectToTMS}
 	<p>Redirecting in {countdown}s...</p>
 {/if}

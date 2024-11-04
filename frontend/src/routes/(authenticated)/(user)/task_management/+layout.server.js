@@ -1,6 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 
-export const load = async ({ url }) => {
+export const load = async ({ url, depends }) => {
+    depends('loadTaskManagement');
+
     const user = "admin"
     const currentPath = url.pathname;
 

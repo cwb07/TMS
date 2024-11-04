@@ -20,12 +20,13 @@ export const load = async ({ request, depends }) => {
         // user not admin show forbidden page
         if (err.response.status === 403) {
             error(403, {
-                message: err.response.data.message
+                message: err.response.data.message,
+                redirectToTMS: true
             });
         } else if (err.response.status === 401) {
             error(401, {
                 message: err.response.data.message,
-                redirect: true
+                redirectToLogin: true
             });
         } else {
             error(500, {
