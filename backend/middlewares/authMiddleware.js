@@ -43,7 +43,7 @@ const isLoggedIn = async (req, res, next) => {
   } else {
     return res.status(401).json({
       success: false,
-      message: "Login first to access this resourc222e"
+      message: "Login first to access this resource"
     })
   }
 }
@@ -85,4 +85,5 @@ const isAdmin = async (req, res, next) => {
   }
 }
 
-export { isLoggedIn, isAdmin }
+export { isAdmin, isLoggedIn }
+

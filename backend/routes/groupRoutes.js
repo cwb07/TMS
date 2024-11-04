@@ -1,6 +1,7 @@
-import express from "express"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
-import { isLoggedIn, isAdmin } from "../middlewares/authMiddleware.js"
+import { isAdmin, isLoggedIn } from "../middlewares/authMiddleware.js"
+
+import express from "express"
 
 const router = express.Router()
 

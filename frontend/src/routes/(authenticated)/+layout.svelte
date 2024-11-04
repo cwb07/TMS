@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
 	import { USER_URL } from '$lib/constants';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let data;
 
@@ -29,23 +31,25 @@
 	};
 </script>
 
-<nav class="navbar navbar-expand-lg" style="background-color: #99cdf4; margin-bottom: 10px">
+<nav class="navbar navbar-expand-lg py-3" style="background-color: #99cdf4; margin-bottom: 10px">
 	<div class="container-fluid">
 		<span class="navbar-brand" id="userId" style="flex-grow: 1; text-align: left;">
 			<b>Welcome, {data.username}</b>
 		</span>
 
 		{#if data.isAdmin}
-			<a class="navbar-brand mx-auto" href="/user_management"
-				><u><b>USER MANAGEMENT SYSTEM</b></u></a
+			<a
+				class="navbar-brand mx-auto"
+				href="/user_management"
+				class:underline={$page.url.pathname === '/user_management'}><b>USER MANAGEMENT SYSTEM</b></a
 			>
 			&nbsp;|&nbsp;
-			<a class="navbar-brand mx-auto" href="/task_management"
-				><u><b>TASK MANAGEMENT SYSTEM</b></u></a
-			>
-		{:else}
-			<a class="navbar-brand mx-auto" href="/task_management"><b>TASK MANAGEMENT SYSTEM</b></a>
 		{/if}
+		<a
+			class="navbar-brand mx-auto"
+			href="/task_management"
+			class:underline={$page.url.pathname === '/task_management'}><b>TASK MANAGEMENT SYSTEM</b></a
+		>
 
 		<button
 			class="navbar-toggler"
@@ -76,3 +80,9 @@
 </nav>
 
 <slot />
+
+<style>
+	.underline {
+		text-decoration: underline;
+	}
+</style>

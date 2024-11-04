@@ -1,9 +1,9 @@
-import express from "express"
-import dotenv from "dotenv"
-import userRoutes from "./routes/userRoutes.js"
-import groupRoutes from "./routes/groupRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
+import dotenv from "dotenv"
+import express from "express"
+import groupRoutes from "./routes/groupRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
 
 // load environment variables
 dotenv.config()

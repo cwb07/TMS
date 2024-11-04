@@ -1,6 +1,6 @@
-import pool from "../config/db.js"
-import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import pool from "../config/db.js"
 
 // @desc    Login user & get token
 // @route   POST /user/login
@@ -457,4 +457,5 @@ const createUser = async (req, res) => {
   }
 }
 
-export { getAllUsers, createUser, login, logout, editUser, getUser, updateProfile }
+export { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile }
+

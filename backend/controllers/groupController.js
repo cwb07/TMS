@@ -90,3 +90,4 @@ const getAllGroups = async (req, res) => {
 }
 
 export { createGroup, getAllGroups }
+

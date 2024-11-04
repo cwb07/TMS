@@ -1,6 +1,7 @@
+import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
+import { isAdmin, isLoggedIn } from "../middlewares/authMiddleware.js"
+
 import express from "express"
-import { login, logout, getAllUsers, createUser, editUser, getUser, updateProfile } from "../controllers/userController.js"
-import { isLoggedIn, isAdmin } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 

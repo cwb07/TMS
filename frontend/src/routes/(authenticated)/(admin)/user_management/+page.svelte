@@ -34,6 +34,8 @@
 			if (response.status === 201) {
 				successMessage = response.data.message;
 				errorMessage = '';
+				groupname = '';
+				document.getElementById('groupname').focus();
 				invalidate('loadFetchGroupsUsers');
 			}
 		} catch (err) {
@@ -77,6 +79,7 @@
 				password = '';
 				selectedGroups = [];
 				accountstatus = 'Active';
+				document.getElementById('username').focus();
 				invalidate('loadFetchGroupsUsers');
 			}
 		} catch (err) {
@@ -187,22 +190,26 @@
 
 	<!-- Create Group Table -->
 	<div class="row">
-		<div class="col-6"></div>
-		<div class="col-6">
+		<div class="col-8"></div>
+		<div class="col-4">
 			<form on:submit={createGroup}>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
-							<th
-								><input
+							<th class="col-3">
+								<input
+									id="groupname"
 									type="text"
 									class="form-control"
 									placeholder="Group Name"
 									name="groupname"
+									maxlength="50"
 									bind:value={groupname}
-								/></th
-							>
-							<th><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
+								/>
+							</th>
+							<th class="col-1"
+								><button type="submit" class="btn btn-primary w-100">Create Group</button>
+							</th>
 						</tr>
 					</tbody>
 				</table>
@@ -217,38 +224,42 @@
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
-							<th
-								><input
+							<th class="col-2">
+								<input
+									id="username"
 									type="text"
 									class="form-control"
 									name="username"
 									placeholder="Username*"
+									maxlength="50"
 									bind:value={username}
-								/></th
-							>
-							<th
-								><input
+								/>
+							</th>
+							<th class="col-2">
+								<input
 									type="text"
 									class="form-control"
 									name="email"
 									placeholder="Email (optional)"
 									bind:value={email}
-								/></th
-							>
-							<th
-								><input
+								/>
+							</th>
+							<th class="col-2">
+								<input
 									type="password"
 									class="form-control"
 									name="password"
 									placeholder="Password*"
+									maxlength="10"
 									bind:value={password}
-								/></th
-							>
-							<th style="width: 300px">
+								/>
+							</th>
+							<th class="col-2">
 								<MultiSelect
 									class="multi-select-input"
 									placeholder="Groups (Optional)"
 									--sms-placeholder-color="#6c757d"
+									--sms-options-max-height="40vh"
 									highlightMatches={false}
 									bind:value={selectedGroups}
 									{options}
@@ -256,13 +267,15 @@
 									<span slot="expand-icon"></span>
 								</MultiSelect>
 							</th>
-							<th
-								><select class="form-select" name="accountstatus" bind:value={accountstatus}>
+							<th class="col-1">
+								<select class="form-select" name="accountstatus" bind:value={accountstatus}>
 									<option default value="Active">Active</option>
 									<option value="Disabled">Disabled</option>
 								</select>
 							</th>
-							<th><button type="submit" class="btn btn-primary w-100">Create User</button> </th>
+							<th class="col-1">
+								<button type="submit" class="btn btn-primary w-100">Create User</button>
+							</th>
 						</tr>
 					</tbody>
 				</table>
@@ -274,21 +287,21 @@
 	<div class="row">
 		<div class="col-12">
 			<form on:submit={editUser}>
-				<table class="table table-bordered text-center">
+				<table class="table text-center table-bordered table-sm" class:table-hover={!editUsername}>
 					<thead class="table-light">
 						<tr>
-							<th>Username</th>
-							<th>Email</th>
-							<th>Password</th>
-							<th>Group</th>
-							<th>Active</th>
-							<th>Action</th>
+							<th class="col-2">Username</th>
+							<th class="col-2">Email</th>
+							<th class="col-2">Password</th>
+							<th class="col-2">Group</th>
+							<th class="col-1">Active</th>
+							<th class="col-1">Action</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each usersList as user}
 							{#if editUsername && editUsername == user.username}
-								<tr>
+								<tr class="table-primary">
 									<td>
 										{user.username}
 									</td>
@@ -307,6 +320,7 @@
 											class="form-control"
 											name="password"
 											placeholder="Password"
+											maxlength="10"
 											bind:value={editPassword}
 										/></td
 									>
@@ -315,6 +329,7 @@
 											class="multi-select-input"
 											placeholder="Groups (Optional)"
 											--sms-placeholder-color="#6c757d"
+											--sms-options-max-height="40vh"
 											highlightMatches={false}
 											bind:selected={editPreselectedGroups}
 											bind:value={editSelectedGroups}
@@ -339,8 +354,8 @@
 										{/if}
 									</td>
 									<td
-										><button type="submit" class="btn btn-primary">Save</button>
-										<button type="button" on:click={() => cancelEdit()} class="btn btn-primary"
+										><button type="submit" class="btn btn-success">Save</button>
+										<button type="button" on:click={() => cancelEdit()} class="btn btn-danger"
 											>Cancel</button
 										></td
 									>
@@ -371,6 +386,7 @@
 	:global(div.multiselect) {
 		min-height: 38px;
 		font-weight: normal;
+		background-color: #fff;
 	}
 
 	:global(div.multiselect > *) {
