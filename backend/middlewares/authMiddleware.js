@@ -34,11 +34,26 @@ const isLoggedIn = async (req, res, next) => {
         next()
       }
     } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: "An error occurred while checking if user is logged in",
-        stack: err.stack
-      })
+      if (err instanceof jwt.TokenExpiredError) {
+        // token expired
+        return res.status(401).json({
+          success: false,
+          message: "Session has expired. Please log in again."
+        });
+      } else if (err instanceof jwt.JsonWebTokenError) {
+        // invalid token - signature issues
+        return res.status(401).json({
+          success: false,
+          message: "Unable to verify session. Please log in again."
+        });
+      } else {
+        // handle other types of errors (e.g., database issues)
+        return res.status(500).json({
+          success: false,
+          message: "An error occurred while checking if user is logged in",
+          stack: err.stack
+        });
+      }
     }
   } else {
     return res.status(401).json({

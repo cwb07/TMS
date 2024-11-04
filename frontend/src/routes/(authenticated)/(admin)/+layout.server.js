@@ -22,6 +22,11 @@ export const load = async ({ request, depends }) => {
             error(403, {
                 message: err.response.data.message
             });
+        } else if (err.response.status === 401) {
+            error(401, {
+                message: err.response.data.message,
+                redirect: true
+            });
         } else {
             error(500, {
                 message: 'Internal Server Error'
