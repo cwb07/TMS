@@ -104,7 +104,19 @@
 		editUsername = user.username;
 		editEmail = user.email;
 		editPreselectedGroups = user.user_group ? user.user_group.split(', ') : [];
-		editSelectedGroups = editPreselectedGroups;
+
+		if (user.username === 'admin') {
+			//remove admin from edit selected groups
+			editPreselectedGroups = editPreselectedGroups.filter((group) => group !== 'admin');
+			options = options.filter((group) => group !== 'admin');
+		} else {
+			editSelectedGroups = editPreselectedGroups;
+			// insert admin back to options list
+			// ensure only 1 admin group is available
+			if (!options.includes('admin')) {
+				options = [...options, 'admin'];
+			}
+		}
 		editAccountstatus = user.accountstatus;
 	};
 
@@ -119,6 +131,12 @@
 
 	const editUser = async (e) => {
 		e.preventDefault();
+
+		if (editUsername === 'admin') {
+			if (!editSelectedGroups.includes('admin')) {
+				editSelectedGroups = [...editSelectedGroups, 'admin'];
+			}
+		}
 
 		try {
 			const response = await axios.put(

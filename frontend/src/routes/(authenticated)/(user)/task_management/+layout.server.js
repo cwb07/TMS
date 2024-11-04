@@ -6,7 +6,7 @@ export const load = async ({ url, depends }) => {
     const user = "admin"
     const currentPath = url.pathname;
 
-    if (user === "admin" && !currentPath.startsWith('/task_management/applications')) {
+    if (user !== "admin" && !currentPath.startsWith('/task_management/applications')) {
         redirect(302, '/task_management/applications');
     } else if (user !== "admin" && !currentPath.startsWith('/task_management/kanban')) {
         redirect(302, '/task_management/kanban');
