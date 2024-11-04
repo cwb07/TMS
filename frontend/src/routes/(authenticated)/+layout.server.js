@@ -26,7 +26,7 @@ export const load = async ({ request, depends }) => {
 		if (err.response.status === 401) {
 			error(401, {
 				message: err.response.data.message,
-				redirect: true
+				redirectToLogin: true
 			});
 		} else {
 			error(500, {
