@@ -31,6 +31,7 @@ const isLoggedIn = async (req, res, next) => {
         // store in req.user to access it anywhere
         req.user = results[0]
         req.user.isAdmin = await checkGroup(req.user.username, "admin")
+        req.user.isPl = await checkGroup(req.user.username, "pl")
         next()
       }
     } catch (err) {

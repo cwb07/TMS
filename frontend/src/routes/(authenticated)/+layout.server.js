@@ -18,7 +18,7 @@ export const load = async ({ request, depends }) => {
 		);
 
 		if (response.status === 200) {
-			return { username: response.data.data.username, email: response.data.data.email, isAdmin: response.data.data.isAdmin };
+			return response.data.data;
 		}
 	} catch (err) {
 		// user not logged in
