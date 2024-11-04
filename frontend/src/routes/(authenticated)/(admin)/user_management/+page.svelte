@@ -357,7 +357,7 @@
 										</MultiSelect>
 									</td>
 									<td>
-										{#if user.user_group?.includes('admin')}
+										{#if editUsername === 'admin'}
 											{editAccountstatus}
 										{:else}
 											<select
