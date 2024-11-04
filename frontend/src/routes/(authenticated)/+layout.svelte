@@ -41,14 +41,16 @@
 			<a
 				class="navbar-brand mx-auto"
 				href="/user_management"
-				class:underline={$page.url.pathname === '/user_management'}><b>USER MANAGEMENT SYSTEM</b></a
+				class:underline={$page.url.pathname.includes('/user_management')}
+				><b>USER MANAGEMENT SYSTEM</b></a
 			>
 			&nbsp;|&nbsp;
 		{/if}
 		<a
 			class="navbar-brand mx-auto"
 			href="/task_management"
-			class:underline={$page.url.pathname === '/task_management'}><b>TASK MANAGEMENT SYSTEM</b></a
+			class:underline={$page.url.pathname.includes('/task_management')}
+			><b>TASK MANAGEMENT SYSTEM</b></a
 		>
 
 		<button
