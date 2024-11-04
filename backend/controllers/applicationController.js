@@ -1,5 +1,28 @@
 import pool from "../config/db.js"
 
+// @desc    Get all application
+// @route   GET /application/all
+const getAllApp = async (req, res) => {
+    try {
+        const query = `
+        SELECT * FROM application`
+
+        const [results] = await pool.query(query)
+
+        return res.status(200).json({
+            success: true,
+            message: "Applications retrieved",
+            data: results
+        })
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve all applications",
+            stack: err.stack
+        })
+    }
+}
+
 // @desc    Create application
 // @route   POST /application
 const createApp = async (req, res) => {
@@ -95,4 +118,4 @@ const createApp = async (req, res) => {
     }
 }
 
-export { createApp }
+export { createApp, getAllApp }
