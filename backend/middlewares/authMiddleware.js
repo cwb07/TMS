@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
 
-// User must be logged in and authenticated
+// User must be logged in and authenticated and active
 const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
@@ -21,7 +21,7 @@ const isLoggedIn = async (req, res, next) => {
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
       const [results] = await pool.query(query, [decoded.username])
 
-      if (results.length === 0) {
+      if (results.length === 0 || results[0].accountstatus !== "Active") {
         // no username found
         return res.status(401).json({
           success: false,

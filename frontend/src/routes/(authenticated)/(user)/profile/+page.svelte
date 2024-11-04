@@ -1,7 +1,7 @@
 <script>
 	import axios from 'axios';
 	import { USER_URL } from '$lib/constants';
-	import { invalidate } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
 
 	export let data;
 	let errorMessage = '';
@@ -38,7 +38,7 @@
 		} catch (err) {
 			if (err.response.status === 401) {
 				// show error page, redirect user to login page
-				invalidate('loadUserCheck');
+				invalidateAll();
 			} else {
 				errorMessage = err.response.data.message;
 				successMessage = '';

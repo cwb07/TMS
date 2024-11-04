@@ -45,6 +45,6 @@
 
 <h1>{$page.status}: {$page.error.message}</h1>
 
-{#if $page.error.redirect || $page.error.redirectToTMS}
+{#if $page.error.redirectToLogin || $page.error.redirectToTMS}
 	<p>Redirecting in {countdown}s...</p>
 {/if}

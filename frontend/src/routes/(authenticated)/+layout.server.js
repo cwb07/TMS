@@ -2,7 +2,7 @@ import { USER_URL } from '$lib/constants';
 import axios from 'axios';
 import { error } from '@sveltejs/kit';
 
-// ensure user is logged in, return user info to data
+// ensure user is logged in and not disabled, return user info to data
 export const load = async ({ request, depends }) => {
 	depends("loadUserCheck");
 
