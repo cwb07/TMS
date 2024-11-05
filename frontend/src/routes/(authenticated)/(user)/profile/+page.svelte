@@ -1,50 +1,19 @@
 <script>
-	import axios from 'axios';
-	import { USER_URL } from '$lib/constants';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
 
 	export let data;
-	let errorMessage = '';
-	let successMessage = '';
+	export let form;
 
-	$: username = data.username;
-	$: currentEmail = data.email;
+	$: errorMessage = '' || form?.errorMessage;
+	$: successMessage = '' || form?.successMessage;
+
 	let email = '';
 	let password = '';
 
-	const updateProfile = async (e) => {
-		e.preventDefault();
-
-		try {
-			const response = await axios.put(
-				`${USER_URL}`,
-				{ username, email, password },
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					withCredentials: true
-				}
-			);
-
-			if (response.status === 200) {
-				successMessage = response.data.message;
-				errorMessage = '';
-				password = '';
-				email = '';
-				// update user info
-				invalidate('loadUserCheck');
-			}
-		} catch (err) {
-			if (err.response.status === 401) {
-				// show error page, redirect user to login page
-				invalidateAll();
-			} else {
-				errorMessage = err.response.data.message;
-				successMessage = '';
-			}
-		}
-	};
+	$: if (form?.resetUpdateProfileForm) {
+		email = '';
+		password = '';
+	}
 </script>
 
 <div class="container">
@@ -73,13 +42,21 @@
 					{/if}
 					<div class="mb-3">
 						<label for="email" class="form-label">Current Email Address</label>
-						{#if currentEmail}
-							<p id="email"><b>{currentEmail}</b></p>
+						{#if data.email}
+							<p id="email"><b>{data.email}</b></p>
 						{:else}
 							<p id="email"><b>No email</b></p>
 						{/if}
 					</div>
-					<form on:submit={updateProfile}>
+					<form
+						method="POST"
+						use:enhance={() => {
+							return async ({ update }) => {
+								update({ reset: false });
+							};
+						}}
+					>
+						<input type="hidden" name="username" value={data.username} />
 						<div class="mb-3">
 							<label for="email" class="form-label">New Email</label>
 							<input id="email" name="email" class="form-control" bind:value={email} />

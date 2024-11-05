@@ -1,6 +1,6 @@
 import { USER_URL } from '$lib/constants';
 import axios from 'axios';
-import { error } from '@sveltejs/kit';
+import { handleApiError } from '$lib/errorHandler.js';
 
 // check if admin
 export const load = async ({ request, depends }) => {
@@ -17,21 +17,6 @@ export const load = async ({ request, depends }) => {
             }
         );
     } catch (err) {
-        // user not admin show forbidden page
-        if (err.response.status === 403) {
-            error(403, {
-                message: err.response.data.message,
-                redirectToTMS: true
-            });
-        } else if (err.response.status === 401) {
-            error(401, {
-                message: err.response.data.message,
-                redirectToLogin: true
-            });
-        } else {
-            error(500, {
-                message: 'Internal Server Error'
-            });
-        }
+        return handleApiError(err, false)
     }
 };

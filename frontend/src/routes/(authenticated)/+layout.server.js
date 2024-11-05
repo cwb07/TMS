@@ -1,6 +1,6 @@
 import { USER_URL } from '$lib/constants';
 import axios from 'axios';
-import { error } from '@sveltejs/kit';
+import { handleApiError } from '$lib/errorHandler.js';
 
 // ensure user is logged in and not disabled, return user info to data
 export const load = async ({ request, depends }) => {
@@ -21,17 +21,6 @@ export const load = async ({ request, depends }) => {
 			return { username: response.data.data.username, email: response.data.data.email, isAdmin: response.data.data.isAdmin };
 		}
 	} catch (err) {
-		// user not logged in
-		// redirect to login page
-		if (err.response.status === 401) {
-			error(401, {
-				message: err.response.data.message,
-				redirectToLogin: true
-			});
-		} else {
-			error(500, {
-				message: 'Internal Server Error'
-			});
-		}
+		return handleApiError(err, false)
 	}
 };

@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
 	import { USER_URL } from '$lib/constants';
-	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
 
 	export let data;
@@ -26,7 +25,8 @@
 				goto('/login');
 			}
 		} catch (err) {
-			invalidate('loadUserCheck');
+			console.error('Logout failed:', err);
+			goto('/login');
 		}
 	};
 </script>

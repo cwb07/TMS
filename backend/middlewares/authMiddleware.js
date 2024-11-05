@@ -25,7 +25,7 @@ const isLoggedIn = async (req, res, next) => {
         // no username found
         return res.status(401).json({
           success: false,
-          message: "No user found"
+          message: "Unathorized access"
         })
       } else {
         // store in req.user to access it anywhere

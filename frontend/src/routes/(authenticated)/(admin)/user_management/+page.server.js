@@ -1,7 +1,7 @@
 import { GROUP_URL, USER_URL } from '$lib/constants';
 
 import axios from 'axios';
-import { error } from '@sveltejs/kit';
+import { handleApiError } from '$lib/errorHandler.js';
 
 export const load = async ({ request, depends }) => {
 	depends("loadFetchGroupsUsers");
@@ -36,21 +36,7 @@ export const load = async ({ request, depends }) => {
 			};
 		}
 	} catch (err) {
-		if (err.response.status === 401) {
-			error(401, {
-				message: err.response.data.message,
-				redirectToLogin: true
-			});
-		} else if (err.response.status === 403) {
-			error(403, {
-				message: err.response.data.message,
-				redirectToTMS: true
-			});
-		} else {
-			error(500, {
-				message: 'Internal Server Error'
-			});
-		}
+		return handleApiError(err, false)
 	}
 };
 
@@ -79,22 +65,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			if (err.response.status === 401) {
-				error(401, {
-					message: err.response.data.message,
-					redirectToLogin: true
-				});
-			} else if (err.response.status === 403) {
-				error(403, {
-					message: err.response.data.message,
-					redirectToTMS: true
-				});
-			} else {
-				return {
-					successMessage: '',
-					errorMessage: err.response.data.message
-				};
-			}
+			return handleApiError(err)
 		}
 	},
 	createUser: async ({ request }) => {
@@ -132,22 +103,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			if (err.response.status === 401) {
-				error(401, {
-					message: err.response.data.message,
-					redirectToLogin: true
-				});
-			} else if (err.response.status === 403) {
-				error(403, {
-					message: err.response.data.message,
-					redirectToTMS: true
-				});
-			} else {
-				return {
-					successMessage: '',
-					errorMessage: err.response.data.message
-				};
-			}
+			return handleApiError(err)
 		}
 	},
 	editUser: async ({ request }) => {
@@ -191,22 +147,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			if (err.response.status === 401) {
-				error(401, {
-					message: err.response.data.message,
-					redirectToLogin: true
-				});
-			} else if (err.response.status === 403) {
-				error(403, {
-					message: err.response.data.message,
-					redirectToTMS: true
-				});
-			} else {
-				return {
-					successMessage: '',
-					errorMessage: err.response.data.message
-				};
-			}
+			return handleApiError(err)
 		}
 	}
 };

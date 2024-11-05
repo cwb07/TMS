@@ -11,7 +11,6 @@
 
 	// load existing groups and users
 	$: options = data.groupsList || [];
-	$: usersList = data.usersList;
 
 	// group form fields
 	let groupname = '';
@@ -247,7 +246,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each usersList as user}
+						{#each data.usersList as user}
 							{#if editUsername && editUsername == user.username}
 								<tr class="table-primary">
 									<td>
@@ -290,6 +289,7 @@
 									</td>
 									<td>
 										{#if editUsername === 'admin'}
+											<input type="hidden" name="accountstatus" value={editAccountstatus} />
 											{editAccountstatus}
 										{:else}
 											<select
