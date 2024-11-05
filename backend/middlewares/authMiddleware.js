@@ -10,7 +10,7 @@ const isLoggedIn = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
       // //check if the IP and User-Agent match the current request
-      if (decoded.ip !== req.ip) {
+      if (decoded.ip !== req.ip || decoded.browser != req.headers["user-agent"]) {
         return res.status(401).json({
           success: false,
           message: "Your session is not valid with this IP address"

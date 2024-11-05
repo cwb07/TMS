@@ -51,7 +51,8 @@ const login = async (req, res) => {
     const token = jwt.sign(
       {
         username,
-        ip: req.ip
+        ip: req.ip,
+        browser: req.headers["user-agent"],
       },
       process.env.JWT_SECRET,
       {

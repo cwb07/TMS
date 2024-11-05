@@ -11,6 +11,7 @@ export const load = async ({ request }) => {
 			{
 				headers: {
 					'Content-Type': 'application/json',
+					'User-Agent': request.headers.get('User-Agent'),
 					cookie: request.headers.get('cookie')
 				}
 			}
@@ -22,6 +23,7 @@ export const load = async ({ request }) => {
 			{
 				headers: {
 					'Content-Type': 'application/json',
+					'User-Agent': request.headers.get('User-Agent'),
 					cookie: request.headers.get('cookie')
 				}
 			}
@@ -50,6 +52,7 @@ export const actions = {
 				{
 					headers: {
 						'Content-Type': 'application/json',
+						'User-Agent': request.headers.get('User-Agent'),
 						cookie: request.headers.get('cookie')
 					}
 				}
@@ -88,6 +91,7 @@ export const actions = {
 				{
 					headers: {
 						'Content-Type': 'application/json',
+						'User-Agent': request.headers.get('User-Agent'),
 						cookie: request.headers.get('cookie')
 					}
 				}
@@ -132,6 +136,7 @@ export const actions = {
 				{
 					headers: {
 						'Content-Type': 'application/json',
+						'User-Agent': request.headers.get('User-Agent'),
 						cookie: request.headers.get('cookie')
 					}
 				}
