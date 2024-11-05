@@ -20,6 +20,9 @@ export function handleApiError(err, showMessages = true) {
                     successMessage: '',
                     errorMessage: message
                 };
+            } else {
+                error(500, { message: "Internal Server Error" });
+                break;
             }
     }
 }

@@ -1,5 +1,8 @@
 import pool from "../config/db.js"
 
+// max 50 characters, alphanumeric with possible underscore
+const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
+
 // @desc    Create group
 // @route   POST /group
 const createGroup = async (req, res) => {
@@ -11,9 +14,6 @@ const createGroup = async (req, res) => {
       message: "Group name is mandatory"
     })
   }
-
-  // max 50 characters, alphanumeric with possible underscore
-  const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
 
   if (!groupnameRegex.test(groupname)) {
     // group name format wrong

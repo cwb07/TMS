@@ -6,6 +6,7 @@ import express from "express"
 const router = express.Router()
 
 router.route("/").get(isLoggedIn, getUser).post(isLoggedIn, isAdmin, createUser).put(isLoggedIn, updateProfile)
+
 router.route("/admin").get(isLoggedIn, isAdmin, getUser)
 
 router.route("/edit").put(isLoggedIn, isAdmin, editUser)

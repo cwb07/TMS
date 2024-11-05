@@ -2,6 +2,15 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
 
+// max 50 characters, alphanumeric with no spaces
+const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
+
+// email regex match pattern: user@domain.com
+const emailRegex = /^[^\s]+@[^\s]+\.com$/
+
+// min 8 char & max 10 char consisting of alphabets, numbers and special characters
+const passwordRegex = /^[^\s]{8,10}$/
+
 // @desc    Login user & get token
 // @route   POST /user/login
 const login = async (req, res) => {
@@ -52,7 +61,7 @@ const login = async (req, res) => {
 
     // set JWT as an HTTP-Only cookie
     res.cookie("jwt", token, {
-      httpOnly: true, // jwt is transmitted w every HTTP req, prevents xss - disallow javascript from accessing cookies
+      httpOnly: true, // disallow javascript from accessing cookies
       maxAge: 60 * 60 * 1000 // 60 minutes in milliseconds
     })
 
@@ -138,19 +147,12 @@ const updateProfile = async (req, res) => {
     })
   }
 
-  // email regex if user did enter email (optional)
-  const emailRegex = /^[^\s]+@[^\s]+\.com$/
-
   if (email && !emailRegex.test(email)) {
     return res.status(409).json({
       success: false,
       message: "Email format entered must match the pattern username@domain.com"
     })
   }
-
-  // password regex
-  // min 8 char & max 10 char consisting of alphabets, numbers and special characters
-  const passwordRegex = /^[^\s]{8,10}$/
 
   if (password && !passwordRegex.test(password)) {
     return res.status(409).json({
@@ -214,10 +216,6 @@ const editUser = async (req, res) => {
     })
   }
 
-  // username regex
-  // max 50 characters, alphanumeric with no spaces
-  const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
-
   if (!usernameRegex.test(username)) {
     return res.status(409).json({
       success: false,
@@ -231,9 +229,6 @@ const editUser = async (req, res) => {
       message: "Active is mandatory"
     })
   }
-
-  // email regex if user did enter email (optional)
-  const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
   if (email && !emailRegex.test(email)) {
     return res.status(409).json({
@@ -267,10 +262,6 @@ const editUser = async (req, res) => {
         const updateQuery = `UPDATE accounts SET email = ?, accountstatus = ? WHERE username = ?`
         await pool.query(updateQuery, [email, accountstatus, username])
       } else {
-        // password regex
-        // min 8 char & max 10 char consisting of alphabets, numbers and special characters
-        const passwordRegex = /^[^\s]{8,10}$/
-
         if (!passwordRegex.test(password)) {
           return res.status(409).json({
             success: false,
@@ -359,10 +350,6 @@ const createUser = async (req, res) => {
     if (results.length === 0) {
       //username is unique
 
-      // username regex
-      // max 50 characters, alphanumeric with no spaces
-      const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
-
       if (!usernameRegex.test(username)) {
         return res.status(409).json({
           success: false,
@@ -377,10 +364,6 @@ const createUser = async (req, res) => {
         })
       }
 
-      // password regex
-      // min 8 char & max 10 char consisting of alphabets, numbers and special characters
-      const passwordRegex = /^[^\s]{8,10}$/
-
       if (!passwordRegex.test(password)) {
         return res.status(409).json({
           success: false,
@@ -394,9 +377,6 @@ const createUser = async (req, res) => {
           message: "Active is mandatory"
         })
       }
-
-      // email regex if user did enter email (optional)
-      const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
       if (email && !emailRegex.test(email)) {
         return res.status(409).json({
