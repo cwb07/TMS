@@ -36,21 +36,177 @@ export const load = async ({ request, depends }) => {
 			};
 		}
 	} catch (err) {
-		// user not admin show forbidden page
-		if (err.response.status === 403) {
-			error(403, {
-				message: err.response.data.message,
-				redirectToTMS: true
-			});
-		} else if (err.response.status === 401) {
+		if (err.response.status === 401) {
 			error(401, {
 				message: err.response.data.message,
 				redirectToLogin: true
+			});
+		} else if (err.response.status === 403) {
+			error(403, {
+				message: err.response.data.message,
+				redirectToTMS: true
 			});
 		} else {
 			error(500, {
 				message: 'Internal Server Error'
 			});
+		}
+	}
+};
+
+export const actions = {
+	createGroup: async ({ request }) => {
+		const form = await request.formData();
+		const groupname = form.get('groupname');
+
+		try {
+			const response = await axios.post(
+				`${GROUP_URL}`,
+				{ groupname },
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						cookie: request.headers.get('cookie')
+					}
+				}
+			);
+
+			if (response.status === 201) {
+				return {
+					successMessage: response.data.message,
+					errorMessage: '',
+					resetCreateGroupForm: true
+				};
+			}
+		} catch (err) {
+			if (err.response.status === 401) {
+				error(401, {
+					message: err.response.data.message,
+					redirectToLogin: true
+				});
+			} else if (err.response.status === 403) {
+				error(403, {
+					message: err.response.data.message,
+					redirectToTMS: true
+				});
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
+		}
+	},
+	createUser: async ({ request }) => {
+		const form = await request.formData();
+
+		const username = form.get('username');
+		const password = form.get('password');
+		const accountstatus = form.get('accountstatus');
+		const email = form.get('email');
+		let groups = JSON.parse(form.get('groups'))
+
+		try {
+			const response = await axios.post(
+				`${USER_URL}`,
+				{
+					username,
+					email,
+					password,
+					groups,
+					accountstatus
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						cookie: request.headers.get('cookie')
+					}
+				}
+			);
+
+			if (response.status === 201) {
+				return {
+					successMessage: response.data.message,
+					errorMessage: '',
+					resetCreateUserForm: true
+				};
+			}
+		} catch (err) {
+			if (err.response.status === 401) {
+				error(401, {
+					message: err.response.data.message,
+					redirectToLogin: true
+				});
+			} else if (err.response.status === 403) {
+				error(403, {
+					message: err.response.data.message,
+					redirectToTMS: true
+				});
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
+		}
+	},
+	editUser: async ({ request }) => {
+		const form = await request.formData();
+
+		const username = form.get('username');
+		const password = form.get('password');
+		const accountstatus = form.get('accountstatus');
+		const email = form.get('email');
+		let groups = JSON.parse(form.get('groups'))
+
+		if (username == "admin") {
+			if (!groups.includes('admin')) {
+				groups = [...groups, 'admin'];
+			}
+		}
+
+		try {
+			const response = await axios.put(
+				`${USER_URL}/edit`,
+				{
+					username,
+					email,
+					password,
+					groups,
+					accountstatus
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						cookie: request.headers.get('cookie')
+					}
+				}
+			);
+
+			if (response.status === 200) {
+				return {
+					successMessage: response.data.message,
+					errorMessage: '',
+					resetEditUserForm: true
+				};
+			}
+		} catch (err) {
+			if (err.response.status === 401) {
+				error(401, {
+					message: err.response.data.message,
+					redirectToLogin: true
+				});
+			} else if (err.response.status === 403) {
+				error(403, {
+					message: err.response.data.message,
+					redirectToTMS: true
+				});
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
 		}
 	}
 };

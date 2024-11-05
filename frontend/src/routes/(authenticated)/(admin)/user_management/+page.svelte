@@ -1,52 +1,29 @@
 <script>
-	import { USER_URL, GROUP_URL } from '$lib/constants';
-	import { invalidate } from '$app/navigation';
-	import axios from 'axios';
 	import MultiSelect from 'svelte-multiselect';
+	import { enhance } from '$app/forms';
 
 	// data from form actions and load
+	export let form;
 	export let data;
-	let errorMessage = '';
-	let successMessage = '';
+
+	$: errorMessage = '' || form?.errorMessage;
+	$: successMessage = '' || form?.successMessage;
 
 	// load existing groups and users
-	$: groupsList = data.groupsList;
+	$: options = data.groupsList || [];
 	$: usersList = data.usersList;
 
 	// group form fields
 	let groupname = '';
 
-	const createGroup = async (e) => {
-		e.preventDefault();
+	$: if (form?.resetCreateGroupForm) {
+		groupname = '';
 
-		try {
-			const response = await axios.post(
-				`${GROUP_URL}`,
-				{ groupname },
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					withCredentials: true
-				}
-			);
-
-			if (response.status === 201) {
-				successMessage = response.data.message;
-				errorMessage = '';
-				groupname = '';
-				document.getElementById('groupname').focus();
-				invalidate('loadFetchGroupsUsers');
-			}
-		} catch (err) {
-			if (err.response.status === 403) {
-				invalidate('loadAdminCheck');
-			} else {
-				errorMessage = err.response.data.message;
-				successMessage = '';
-			}
-		}
-	};
+		// 0.1s delay to wait for groupname updates
+		setTimeout(() => {
+			document.getElementById('groupname').focus();
+		}, 100);
+	}
 
 	// user form fields
 	let username = '';
@@ -54,43 +31,15 @@
 	let password = '';
 	let selectedGroups = [];
 	let accountstatus = 'Active';
-	$: options = groupsList || [];
 
-	const createUser = async (e) => {
-		e.preventDefault();
-
-		try {
-			const response = await axios.post(
-				`${USER_URL}`,
-				{ username, email, password, groups: selectedGroups, accountstatus },
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					withCredentials: true
-				}
-			);
-
-			if (response.status === 201) {
-				successMessage = response.data.message;
-				errorMessage = '';
-				username = '';
-				email = '';
-				password = '';
-				selectedGroups = [];
-				accountstatus = 'Active';
-				document.getElementById('username').focus();
-				invalidate('loadFetchGroupsUsers');
-			}
-		} catch (err) {
-			if (err.response.status === 403) {
-				invalidate('loadAdminCheck');
-			} else {
-				errorMessage = err.response.data.message;
-				successMessage = '';
-			}
-		}
-	};
+	$: if (form?.resetCreateUserForm) {
+		username = '';
+		email = '';
+		password = '';
+		selectedGroups = [];
+		accountstatus = 'Active';
+		document.getElementById('username').focus();
+	}
 
 	// edit user form fields
 	let editUsername = '';
@@ -101,6 +50,7 @@
 	let editAccountstatus = 'Active';
 
 	const editRow = (user) => {
+		// load user data to edit form
 		editUsername = user.username;
 		editEmail = user.email;
 		editPreselectedGroups = user.user_group ? user.user_group.split(', ') : [];
@@ -120,6 +70,10 @@
 		editAccountstatus = user.accountstatus;
 	};
 
+	$: if (form?.resetEditUserForm) {
+		cancelEdit();
+	}
+
 	const cancelEdit = () => {
 		editUsername = '';
 		editEmail = '';
@@ -127,55 +81,6 @@
 		editPreselectedGroups = [];
 		editSelectedGroups = [];
 		editAccountstatus = 'Active';
-	};
-
-	const editUser = async (e) => {
-		e.preventDefault();
-
-		if (editUsername === 'admin') {
-			if (!editSelectedGroups.includes('admin')) {
-				editSelectedGroups = [...editSelectedGroups, 'admin'];
-			}
-		}
-
-		try {
-			const response = await axios.put(
-				`${USER_URL}/edit`,
-				{
-					username: editUsername,
-					email: editEmail,
-					password: editPassword,
-					groups: editSelectedGroups,
-					accountstatus: editAccountstatus
-				},
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					withCredentials: true
-				}
-			);
-
-			if (response.status === 200) {
-				successMessage = response.data.message;
-				errorMessage = '';
-				editUsername = '';
-				editEmail = '';
-				editPassword = '';
-				editPreselectedGroups = [];
-				editSelectedGroups = [];
-				editAccountstatus = 'Active';
-				invalidate('loadFetchGroupsUsers');
-				invalidate('loadUserCheck');
-			}
-		} catch (err) {
-			if (err.response.status === 403) {
-				invalidate('loadAdminCheck');
-			} else {
-				errorMessage = err.response.data.message;
-				successMessage = '';
-			}
-		}
 	};
 </script>
 
@@ -210,7 +115,15 @@
 	<div class="row">
 		<div class="col-8"></div>
 		<div class="col-4">
-			<form on:submit={createGroup}>
+			<form
+				method="POST"
+				action="?/createGroup"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ reset: false });
+					};
+				}}
+			>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
@@ -238,7 +151,15 @@
 	<!-- Create User Table -->
 	<div class="row">
 		<div class="col-12">
-			<form on:submit={createUser}>
+			<form
+				method="POST"
+				action="?/createUser"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ reset: false });
+					};
+				}}
+			>
 				<table class="table table-bordered text-center">
 					<tbody>
 						<tr>
@@ -279,6 +200,7 @@
 									--sms-placeholder-color="#6c757d"
 									--sms-options-max-height="40vh"
 									highlightMatches={false}
+									name="groups"
 									bind:value={selectedGroups}
 									{options}
 								>
@@ -301,10 +223,18 @@
 		</div>
 	</div>
 
-	<!-- User Table -->
+	<!-- Edit User Table -->
 	<div class="row">
 		<div class="col-12">
-			<form on:submit={editUser}>
+			<form
+				method="POST"
+				action="?/editUser"
+				use:enhance={() => {
+					return async ({ update }) => {
+						update({ reset: false });
+					};
+				}}
+			>
 				<table class="table text-center table-bordered table-sm" class:table-hover={!editUsername}>
 					<thead class="table-light">
 						<tr>
@@ -321,6 +251,7 @@
 							{#if editUsername && editUsername == user.username}
 								<tr class="table-primary">
 									<td>
+										<input type="hidden" name="username" value={user.username} />
 										{user.username}
 									</td>
 									<td
@@ -349,6 +280,7 @@
 											--sms-placeholder-color="#6c757d"
 											--sms-options-max-height="40vh"
 											highlightMatches={false}
+											name="groups"
 											bind:selected={editPreselectedGroups}
 											bind:value={editSelectedGroups}
 											{options}
@@ -363,7 +295,6 @@
 											<select
 												class="form-select"
 												name="accountstatus"
-												readOnly="true"
 												bind:value={editAccountstatus}
 											>
 												<option default value="Active">Active</option>
@@ -373,10 +304,10 @@
 									</td>
 									<td
 										><button type="submit" class="btn btn-success">Save</button>
-										<button type="button" on:click={() => cancelEdit()} class="btn btn-danger"
-											>Cancel</button
-										></td
-									>
+										<button type="button" on:click={() => cancelEdit()} class="btn btn-danger">
+											Cancel
+										</button>
+									</td>
 								</tr>
 							{:else}
 								<tr>
