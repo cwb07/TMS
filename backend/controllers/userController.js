@@ -224,13 +224,6 @@ const editUser = async (req, res) => {
     })
   }
 
-  if (!accountstatus) {
-    return res.status(409).json({
-      success: false,
-      message: "Active is mandatory"
-    })
-  }
-
   if (email && !emailRegex.test(email)) {
     return res.status(409).json({
       success: false,
@@ -276,6 +269,13 @@ const editUser = async (req, res) => {
 
         const updateQuery = `UPDATE accounts SET email = ?, password = ?, accountstatus = ? WHERE username = ?`
         await pool.query(updateQuery, [email, hashedPassword, accountstatus, username])
+      }
+
+      if (!accountstatus) {
+        return res.status(409).json({
+          success: false,
+          message: "Active is mandatory"
+        })
       }
 
       // update user groups
@@ -358,6 +358,13 @@ const createUser = async (req, res) => {
         })
       }
 
+      if (email && !emailRegex.test(email)) {
+        return res.status(409).json({
+          success: false,
+          message: "Email format entered must match the pattern username@domain.com"
+        })
+      }
+
       if (!password) {
         return res.status(409).json({
           success: false,
@@ -376,13 +383,6 @@ const createUser = async (req, res) => {
         return res.status(409).json({
           success: false,
           message: "Active is mandatory"
-        })
-      }
-
-      if (email && !emailRegex.test(email)) {
-        return res.status(409).json({
-          success: false,
-          message: "Email format entered must match the pattern username@domain.com"
         })
       }
 
