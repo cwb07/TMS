@@ -3,9 +3,7 @@ import { GROUP_URL, USER_URL } from '$lib/constants';
 import axios from 'axios';
 import { handleApiError } from '$lib/errorHandler.js';
 
-export const load = async ({ request, depends }) => {
-	depends("loadFetchGroupsUsers");
-
+export const load = async ({ request }) => {
 	try {
 		// get groups first
 		const groupResponse = await axios.get(
