@@ -25,7 +25,6 @@
 				goto('/login');
 			}
 		} catch (err) {
-			console.error('Logout failed:', err);
 			goto('/login');
 		}
 	};

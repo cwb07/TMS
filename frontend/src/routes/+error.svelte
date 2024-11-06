@@ -34,7 +34,6 @@
 							goto('/task_management');
 						}
 					} catch (err) {
-						console.error('Logout failed:', err);
 						goto('/login');
 					}
 				}
