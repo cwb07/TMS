@@ -52,7 +52,7 @@ const login = async (req, res) => {
       {
         username,
         ip: req.ip,
-        browser: req.headers["user-agent"],
+        browser: req.headers["user-agent"]
       },
       process.env.JWT_SECRET,
       {
@@ -299,7 +299,7 @@ const editUser = async (req, res) => {
         }
       }
 
-      await connection.commit();
+      await connection.commit()
 
       return res.status(200).json({
         success: true,
@@ -409,7 +409,7 @@ const createUser = async (req, res) => {
           }
         }
 
-        await connection.commit();
+        await connection.commit()
 
         // inserted user into user group
         return res.status(201).json({
@@ -439,4 +439,3 @@ const createUser = async (req, res) => {
 }
 
 export { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile }
-
