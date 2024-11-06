@@ -1,37 +1,13 @@
 <script>
-	import { USER_URL } from '$lib/constants';
-	import { goto } from '$app/navigation';
-	import axios from 'axios';
+	import { enhance } from '$app/forms';
+
+	export let form;
+
+	$: errorMessage = '' || form?.errorMessage;
 
 	let username = '';
 	let password = '';
 	let errorMessage = '';
-
-	const submitHandler = async (e) => {
-		e.preventDefault();
-
-		try {
-			const response = await axios.post(
-				`${USER_URL}/login`,
-				{
-					username,
-					password
-				},
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					withCredentials: true
-				}
-			);
-
-			if (response.status === 200) {
-				goto('/task_management');
-			}
-		} catch (err) {
-			errorMessage = err.response.data.message;
-		}
-	};
 </script>
 
 <div class="login-background">
@@ -44,7 +20,14 @@
 						{#if errorMessage}
 							<div class="alert alert-danger" role="alert">Error: {errorMessage}</div>
 						{/if}
-						<form on:submit={submitHandler}>
+						<form
+							method="POST"
+							use:enhance={() => {
+								return async ({ update }) => {
+									update({ reset: false });
+								};
+							}}
+						>
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
 								<input id="username" name="username" class="form-control" bind:value={username} />

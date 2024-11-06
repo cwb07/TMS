@@ -6,28 +6,22 @@ import { handleApiError } from '$lib/errorHandler.js';
 export const load = async ({ request }) => {
 	try {
 		// get groups first
-		const groupResponse = await axios.get(
-			`${GROUP_URL}`,
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': request.headers.get('User-Agent'),
-					cookie: request.headers.get('cookie')
-				}
+		const groupResponse = await axios.get(`${GROUP_URL}`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'User-Agent': request.headers.get('User-Agent'),
+				cookie: request.headers.get('cookie')
 			}
-		);
+		});
 
 		// get users after fetching groups
-		const userResponse = await axios.get(
-			`${USER_URL}/all`,
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': request.headers.get('User-Agent'),
-					cookie: request.headers.get('cookie')
-				}
+		const userResponse = await axios.get(`${USER_URL}/all`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'User-Agent': request.headers.get('User-Agent'),
+				cookie: request.headers.get('cookie')
 			}
-		);
+		});
 
 		if (groupResponse.status === 200 && userResponse.status === 200) {
 			return {
@@ -36,7 +30,7 @@ export const load = async ({ request }) => {
 			};
 		}
 	} catch (err) {
-		return handleApiError(err, false)
+		return handleApiError(err, false);
 	}
 };
 
@@ -66,7 +60,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err)
+			return handleApiError(err);
 		}
 	},
 	createUser: async ({ request }) => {
@@ -76,7 +70,7 @@ export const actions = {
 		const password = form.get('password');
 		const accountstatus = form.get('accountstatus');
 		const email = form.get('email');
-		let groups = JSON.parse(form.get('groups'))
+		let groups = JSON.parse(form.get('groups'));
 
 		try {
 			const response = await axios.post(
@@ -105,7 +99,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err)
+			return handleApiError(err);
 		}
 	},
 	editUser: async ({ request }) => {
@@ -115,9 +109,9 @@ export const actions = {
 		const password = form.get('password');
 		const accountstatus = form.get('accountstatus');
 		const email = form.get('email');
-		let groups = JSON.parse(form.get('groups'))
+		let groups = JSON.parse(form.get('groups'));
 
-		if (username == "admin") {
+		if (username == 'admin') {
 			if (!groups.includes('admin')) {
 				groups = [...groups, 'admin'];
 			}
@@ -150,7 +144,7 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err)
+			return handleApiError(err);
 		}
 	}
 };

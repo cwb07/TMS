@@ -10,7 +10,7 @@
 	onMount(() => {
 		if ($page.error.redirectToLogin || $page.error.redirectToTMS) {
 			const interval = setInterval(async () => {
-				if (countdown > 0) {
+				if (countdown > 1) {
 					countdown -= 1;
 				} else {
 					clearInterval(interval);
