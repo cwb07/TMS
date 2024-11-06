@@ -1,13 +1,17 @@
 <script>
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 
 	export let form;
 
 	$: errorMessage = '' || form?.errorMessage;
 
+	$: if (form?.loginSuccess) {
+		goto('/task_management');
+	}
+
 	let username = '';
 	let password = '';
-	let errorMessage = '';
 </script>
 
 <div class="login-background">

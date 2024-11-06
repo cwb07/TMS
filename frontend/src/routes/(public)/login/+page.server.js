@@ -1,7 +1,5 @@
 import { USER_URL } from '$lib/constants';
-
 import axios from 'axios';
-import { redirect } from '@sveltejs/kit';
 
 export const actions = {
 	default: async ({ request, cookies }) => {
@@ -10,32 +8,36 @@ export const actions = {
 		const username = form.get('username');
 		const password = form.get('password');
 
-		const response = await axios.post(
-			`${USER_URL}/login`,
-			{
-				username,
-				password
-			},
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': request.headers.get('User-Agent'),
-					cookie: request.headers.get('cookie')
+		try {
+			const response = await axios.post(
+				`${USER_URL}/login`,
+				{
+					username,
+					password
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'User-Agent': request.headers.get('User-Agent'),
+						cookie: request.headers.get('cookie')
+					}
 				}
+			);
+
+			let token = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+			cookies.set('jwt', token, {
+				path: '/'
+			});
+
+			if (response.status === 200) {
+				return {
+					loginSuccess: true
+				};
 			}
-		);
-
-		let token = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
-
-		cookies.set('jwt', token, {
-			path: '/'
-		});
-
-		if (response.status === 200) {
-			redirect(302, '/task_management');
-		} else {
+		} catch (err) {
 			return {
-				errorMessage: 'Invalid credentials'
+				errorMessage: err.response.data.message
 			};
 		}
 	}

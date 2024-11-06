@@ -8,8 +8,8 @@ const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
 // email regex match pattern: user@domain.com
 const emailRegex = /^[^\s]+@[^\s]+\.com$/
 
-// min 8 char & max 10 char consisting of alphabets, numbers and special characters
-const passwordRegex = /^[^\s]{8,10}$/
+// min 8 char & max 10 char consisting of alphabets, numbers and special characters at least 1 each
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/])[A-Za-z\d@~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/]{8,10}$/
 
 // @desc    Login user & get token
 // @route   POST /user/login
