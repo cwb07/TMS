@@ -24,6 +24,7 @@ const createGroup = async (req, res) => {
   }
 
   const connection = await pool.getConnection()
+
   try {
     // start transaction
     await connection.beginTransaction()
@@ -68,9 +69,11 @@ const createGroup = async (req, res) => {
 // @desc    Get all groups
 // @route   GET /group
 const getAllGroups = async (req, res) => {
+  const connection = await pool.getConnection()
+
   try {
     const query = `SELECT DISTINCT user_group FROM usergroup`
-    const [results] = await pool.query(query)
+    const [results] = await connection.query(query)
 
     // Extract the user_group names into a new array
     const groupNames = results.map(row => row.user_group)
@@ -86,6 +89,9 @@ const getAllGroups = async (req, res) => {
       message: "Unable to fetch groups",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 

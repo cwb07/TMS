@@ -23,10 +23,12 @@ const login = async (req, res) => {
     })
   }
 
+  const connection = await pool.getConnection()
+
   try {
     // check if username exists
     const query = `SELECT * FROM accounts WHERE username = ?`
-    const [results] = await pool.query(query, [username])
+    const [results] = await connection.query(query, [username])
 
     if (results.length === 0) {
       // username not found
@@ -76,6 +78,9 @@ const login = async (req, res) => {
       message: "Unable to login user",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 
@@ -107,6 +112,8 @@ const getUser = async (req, res) => {
 // @desc    Get all users w groups
 // @route   GET /user/all
 const getAllUsers = async (req, res) => {
+  const connection = await pool.getConnection()
+
   try {
     const query = `
     SELECT A.*, GROUP_CONCAT(UG.user_group SEPARATOR ', ') AS user_group
@@ -114,7 +121,7 @@ const getAllUsers = async (req, res) => {
     LEFT JOIN usergroup UG ON A.username = UG.username
     GROUP BY A.username`
 
-    const [results] = await pool.query(query)
+    const [results] = await connection.query(query)
 
     return res.status(200).json({
       success: true,
@@ -127,6 +134,9 @@ const getAllUsers = async (req, res) => {
       message: "Unable to retrieve all accounts",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 
@@ -188,20 +198,30 @@ const updateProfile = async (req, res) => {
   updateQuery += " WHERE username = ?"
   values.push(username)
 
+  const connection = await pool.getConnection()
+
   try {
+    // start transaction
+    await connection.beginTransaction()
+
     // execute query
-    await pool.query(updateQuery, values)
+    await connection.query(updateQuery, values)
 
     return res.status(200).json({
       success: true,
       message: "Your profile has been updated"
     })
   } catch (err) {
+    await connection.commit()
+
     return res.status(500).json({
       success: false,
       message: "Unable to update user profile",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 
@@ -233,9 +253,11 @@ const editUser = async (req, res) => {
   }
 
   const connection = await pool.getConnection()
+
   try {
     // start transaction
     await connection.beginTransaction()
+
     // check if username exists
     const query = `
     SELECT A.*, GROUP_CONCAT(UG.user_group SEPARATOR ', ') AS user_group
@@ -341,6 +363,7 @@ const createUser = async (req, res) => {
   }
 
   const connection = await pool.getConnection()
+
   try {
     // start transaction
     await connection.beginTransaction()

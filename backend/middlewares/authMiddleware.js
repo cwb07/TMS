@@ -5,6 +5,8 @@ import pool from "../config/db.js"
 const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
+  const connection = await pool.getConnection()
+
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
@@ -19,7 +21,7 @@ const isLoggedIn = async (req, res, next) => {
 
       //get username from jwt cookies, store in req.user to access it
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
-      const [results] = await pool.query(query, [decoded.username])
+      const [results] = await connection.query(query, [decoded.username])
 
       if (results.length === 0 || results[0].accountstatus !== "Active") {
         // no username found
@@ -34,6 +36,11 @@ const isLoggedIn = async (req, res, next) => {
         next()
       }
     } catch (err) {
+      res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0) // set expiration to a past date
+      })
+
       if (err instanceof jwt.TokenExpiredError) {
         // token expired
         return res.status(401).json({
@@ -54,6 +61,9 @@ const isLoggedIn = async (req, res, next) => {
           stack: err.stack
         })
       }
+    } finally {
+      // release the connection back to the pool
+      connection.release()
     }
   } else {
     return res.status(401).json({
@@ -65,13 +75,15 @@ const isLoggedIn = async (req, res, next) => {
 
 // checkgroup function
 const checkGroup = async (username, groupname) => {
+  const connection = await pool.getConnection()
+
   try {
     const query = `
     SELECT user_group 
     FROM usergroup 
     WHERE username = ? AND user_group = ?;`
 
-    const [results] = await pool.query(query, [username, groupname])
+    const [results] = await connection.query(query, [username, groupname])
 
     if (results.length === 0) {
       // user not in group
@@ -85,6 +97,9 @@ const checkGroup = async (username, groupname) => {
       message: "An error occurred while checking if user is in group",
       stack: err.stack
     })
+  } finally {
+    // release the connection back to the pool
+    connection.release()
   }
 }
 
