@@ -244,7 +244,7 @@ const editUser = async (req, res) => {
     WHERE A.username = ?
     GROUP BY A.username
      `
-    const [results] = await pool.query(query, [username])
+    const [results] = await connection.query(query, [username])
 
     const user = results[0]
 
@@ -255,7 +255,7 @@ const editUser = async (req, res) => {
       if (!password) {
         // password is the same, no need to rehash
         const updateQuery = `UPDATE accounts SET email = ?, accountstatus = ? WHERE username = ?`
-        await pool.query(updateQuery, [email, accountstatus, username])
+        await connection.query(updateQuery, [email, accountstatus, username])
       } else {
         if (!passwordRegex.test(password)) {
           return res.status(409).json({
@@ -269,7 +269,7 @@ const editUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
 
         const updateQuery = `UPDATE accounts SET email = ?, password = ?, accountstatus = ? WHERE username = ?`
-        await pool.query(updateQuery, [email, hashedPassword, accountstatus, username])
+        await connection.query(updateQuery, [email, hashedPassword, accountstatus, username])
       }
 
       if (!accountstatus) {
@@ -286,7 +286,7 @@ const editUser = async (req, res) => {
 
       if (sortedGroups !== userGroups) {
         const deleteQuery = `DELETE FROM usergroup WHERE username = ?`
-        await pool.query(deleteQuery, [username])
+        await connection.query(deleteQuery, [username])
 
         if (groups) {
           for (let group of groups) {
@@ -295,7 +295,7 @@ const editUser = async (req, res) => {
             VALUES (?, ?)
           `
 
-            await pool.query(query, [username, group])
+            await connection.query(query, [username, group])
           }
         }
       }
@@ -347,7 +347,7 @@ const createUser = async (req, res) => {
 
     //check if username exists
     const query = `SELECT * FROM accounts WHERE username = ?`
-    const [results] = await pool.query(query, [username])
+    const [results] = await connection.query(query, [username])
 
     if (results.length === 0) {
       //username is unique
@@ -394,7 +394,7 @@ const createUser = async (req, res) => {
         INSERT INTO accounts(username, email, password, accountstatus)
         VALUES (?, ?, ?, ?)
       `
-      const [results] = await pool.query(query, [username, email, hashedPassword, accountstatus])
+      const [results] = await connection.query(query, [username, email, hashedPassword, accountstatus])
 
       // inserted new account
       if (results.affectedRows > 0) {
@@ -406,7 +406,7 @@ const createUser = async (req, res) => {
               VALUES (?, ?)
             `
 
-            await pool.query(query, [username, group])
+            await connection.query(query, [username, group])
           }
         }
 

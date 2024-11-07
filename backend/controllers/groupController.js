@@ -30,7 +30,7 @@ const createGroup = async (req, res) => {
 
     // check if groupname exists
     const query = `SELECT * FROM usergroup WHERE user_group = ?`
-    const [results] = await pool.query(query, [groupname])
+    const [results] = await connection.query(query, [groupname])
 
     if (results.length > 0) {
       // groupname already exists
@@ -42,9 +42,9 @@ const createGroup = async (req, res) => {
 
     // insert new group
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
-    await pool.query(insertQuery, [groupname])
+    await connection.query(insertQuery, [groupname])
 
-    await connection.commit();
+    await connection.commit()
 
     return res.status(201).json({
       success: true,
@@ -90,4 +90,3 @@ const getAllGroups = async (req, res) => {
 }
 
 export { createGroup, getAllGroups }
-
