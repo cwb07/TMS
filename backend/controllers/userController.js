@@ -326,6 +326,8 @@ const editUser = async (req, res) => {
         message: "Account updated"
       })
     } else {
+      await connection.rollback()
+
       return res.status(404).json({
         success: false,
         message: "User not found"

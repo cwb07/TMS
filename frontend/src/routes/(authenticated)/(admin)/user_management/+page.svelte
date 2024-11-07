@@ -1,6 +1,7 @@
 <script>
 	import MultiSelect from 'svelte-multiselect';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
 	// data from form actions and load
 	export let form;
@@ -37,6 +38,7 @@
 		password = '';
 		selectedGroups = [];
 		accountstatus = 'Active';
+		invalidateAll();
 		document.getElementById('username').focus();
 	}
 

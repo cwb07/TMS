@@ -3,7 +3,7 @@ import axios from 'axios';
 import { handleApiError } from '$lib/errorHandler.js';
 
 // ensure user is logged in and not disabled, return user info to data
-export const load = async ({ request }) => {
+export const load = async ({ request }) => {	
 	try {
 		const response = await axios.get(`${API_URL}/getUser`, {
 			headers: {

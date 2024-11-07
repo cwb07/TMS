@@ -70,7 +70,8 @@ export const actions = {
 		const password = form.get('password');
 		const accountstatus = form.get('accountstatus');
 		const email = form.get('email');
-		let groups = JSON.parse(form.get('groups'));
+		let formGroups = form.get('groups');
+		const groups = JSON.parse(formGroups);
 
 		try {
 			const response = await axios.post(
@@ -84,6 +85,9 @@ export const actions = {
 				},
 				{
 					headers: {
+						'Cache-Control': 'no-cache, no-store, must-revalidate',
+						Pragma: 'no-cache',
+						Expires: '0',
 						'Content-Type': 'application/json',
 						'User-Agent': request.headers.get('User-Agent'),
 						cookie: request.headers.get('cookie')
