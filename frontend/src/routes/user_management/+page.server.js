@@ -1,10 +1,20 @@
 import { API_URL } from '$lib/constants';
-
 import axios from 'axios';
 import { handleApiError } from '$lib/errorHandler.js';
 
 export const load = async ({ request }) => {
+	console.log("USER MANAGEMENT PAGE LOADING")
+
 	try {
+		// check if admin
+		const response = await axios.get(`${API_URL}/getAdmin`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'User-Agent': request.headers.get('User-Agent'),
+				cookie: request.headers.get('cookie')
+			}
+		});
+
 		// get groups first
 		const groupResponse = await axios.get(`${API_URL}/getAllGroups`, {
 			headers: {
@@ -25,6 +35,9 @@ export const load = async ({ request }) => {
 
 		if (groupResponse.status === 200 && userResponse.status === 200) {
 			return {
+				username: response.data.data.username,
+				email: response.data.data.email,
+				isAdmin: response.data.data.isAdmin,
 				groupsList: groupResponse.data.data,
 				usersList: userResponse.data.data
 			};

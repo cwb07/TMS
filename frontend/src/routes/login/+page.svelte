@@ -7,7 +7,7 @@
 	$: errorMessage = '' || form?.errorMessage;
 
 	$: if (form?.loginSuccess) {
-		goto('/task_management');
+		goto('/user_management');
 	}
 
 	let username = '';

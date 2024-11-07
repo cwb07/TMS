@@ -2,16 +2,16 @@
 	import MultiSelect from 'svelte-multiselect';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	// data from form actions and load
 	export let form;
-	export let data;
 
 	$: errorMessage = '' || form?.errorMessage;
 	$: successMessage = '' || form?.successMessage;
 
 	// load existing groups and users
-	$: options = data.groupsList || [];
+	$: options = $page.data.groupsList || [];
 
 	// group form fields
 	let groupname = '';
@@ -248,7 +248,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data.usersList as user}
+						{#each $page.data.usersList as user}
 							{#if editUsername && editUsername == user.username}
 								<tr class="table-primary">
 									<td>

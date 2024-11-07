@@ -1,7 +1,7 @@
 <script>
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 
-	export let data;
 	export let form;
 
 	$: errorMessage = '' || form?.errorMessage;
@@ -42,8 +42,8 @@
 					{/if}
 					<div class="mb-3">
 						<label for="email" class="form-label">Current Email Address</label>
-						{#if data.email}
-							<p id="email"><b>{data.email}</b></p>
+						{#if $page.data.email}
+							<p id="email"><b>{$page.data.email}</b></p>
 						{:else}
 							<p id="email"><b>No email</b></p>
 						{/if}
@@ -56,7 +56,7 @@
 							};
 						}}
 					>
-						<input type="hidden" name="username" value={data.username} />
+						<input type="hidden" name="username" value={$page.data.username} />
 						<div class="mb-3">
 							<label for="email" class="form-label">New Email</label>
 							<input id="email" name="email" class="form-control" bind:value={email} />

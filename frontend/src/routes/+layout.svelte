@@ -4,8 +4,6 @@
 	import { API_URL } from '$lib/constants';
 	import { page } from '$app/stores';
 
-	export let data;
-
 	const logout = async (e) => {
 		e.preventDefault();
 
@@ -33,10 +31,10 @@
 <nav class="navbar navbar-expand-lg py-3" style="background-color: #99cdf4; margin-bottom: 10px">
 	<div class="container-fluid">
 		<span class="navbar-brand" id="userId" style="flex-grow: 1; text-align: left;">
-			<b>Welcome, {data.username}</b>
+			<b>Welcome, {$page.data.username}</b>
 		</span>
 
-		{#if data.isAdmin}
+		{#if $page.data.isAdmin}
 			<a
 				class="navbar-brand mx-auto"
 				href="/user_management"
