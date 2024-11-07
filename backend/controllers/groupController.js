@@ -4,7 +4,7 @@ import pool from "../config/db.js"
 const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
 
 // @desc    Create group
-// @route   POST /group
+// @route   POST /createGroup
 const createGroup = async (req, res) => {
   const { groupname } = req.body
 
@@ -26,7 +26,6 @@ const createGroup = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
-    // start transaction
     await connection.beginTransaction()
 
     // check if groupname exists
@@ -52,7 +51,6 @@ const createGroup = async (req, res) => {
       message: "Group created"
     })
   } catch (err) {
-    // rollback in case of error
     await connection.rollback()
 
     return res.status(500).json({
@@ -61,13 +59,12 @@ const createGroup = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
 // @desc    Get all groups
-// @route   GET /group
+// @route   GET /getAllGroups
 const getAllGroups = async (req, res) => {
   const connection = await pool.getConnection()
 
@@ -75,7 +72,7 @@ const getAllGroups = async (req, res) => {
     const query = `SELECT DISTINCT user_group FROM usergroup`
     const [results] = await connection.query(query)
 
-    // Extract the user_group names into a new array
+    // extract user_group names into a new array
     const groupNames = results.map(row => row.user_group)
 
     return res.status(200).json({
@@ -90,7 +87,6 @@ const getAllGroups = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }

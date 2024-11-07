@@ -1,4 +1,4 @@
-import { USER_URL } from '$lib/constants';
+import { API_URL } from '$lib/constants';
 import axios from 'axios';
 
 export const actions = {
@@ -10,7 +10,7 @@ export const actions = {
 
 		try {
 			const response = await axios.post(
-				`${USER_URL}/login`,
+				`${API_URL}/login`,
 				{
 					username,
 					password

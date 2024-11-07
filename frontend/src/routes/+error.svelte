@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import axios from 'axios';
-	import { USER_URL } from '$lib/constants';
+	import { API_URL } from '$lib/constants';
 	import { goto } from '$app/navigation';
 
 	let countdown = 3;
@@ -18,7 +18,7 @@
 					try {
 						if ($page.error.redirectToLogin) {
 							const response = await axios.post(
-								`${USER_URL}/logout`,
+								`${API_URL}/logout`,
 								{},
 								{
 									headers: {

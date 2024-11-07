@@ -12,7 +12,7 @@ const emailRegex = /^[^\s]+@[^\s]+\.com$/
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/])[A-Za-z\d@~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/]{8,10}$/
 
 // @desc    Login user & get token
-// @route   POST /user/login
+// @route   POST /login
 const login = async (req, res) => {
   const { username, password } = req.body
 
@@ -49,7 +49,6 @@ const login = async (req, res) => {
     }
 
     // generate token
-    // include ip and user-agent browser
     const token = jwt.sign(
       {
         username,
@@ -58,14 +57,14 @@ const login = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "60m" // expiration 60 minutes
+        expiresIn: "60m"
       }
     )
 
     // set JWT as an HTTP-Only cookie
     res.cookie("jwt", token, {
-      httpOnly: true, // disallow javascript from accessing cookies
-      maxAge: 60 * 60 * 1000 // 60 minutes in milliseconds
+      httpOnly: true,
+      maxAge: 60 * 60 * 1000
     })
 
     return res.status(200).json({
@@ -79,17 +78,16 @@ const login = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
 // @desc    Logout user / clear cookie
-// @route   POST /user/logout
+// @route   POST /logout
 const logout = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
-    expires: new Date(0) // set expiration to a past date
+    expires: new Date(0)
   })
 
   return res.status(200).json({
@@ -99,8 +97,8 @@ const logout = (req, res) => {
 }
 
 // @desc    Get user info
-// @route   GET /user
-// @route   GET /user/admin
+// @route   GET /getUser
+// @route   GET /getAdmin
 const getUser = async (req, res) => {
   return res.status(200).json({
     success: true,
@@ -110,7 +108,7 @@ const getUser = async (req, res) => {
 }
 
 // @desc    Get all users w groups
-// @route   GET /user/all
+// @route   GET /getAllUsers
 const getAllUsers = async (req, res) => {
   const connection = await pool.getConnection()
 
@@ -135,13 +133,12 @@ const getAllUsers = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
 // @desc Update profile
-// @route PUT /user
+// @route PUT /updateProfile
 const updateProfile = async (req, res) => {
   const { username, email, password } = req.body
 
@@ -191,7 +188,7 @@ const updateProfile = async (req, res) => {
     values.push(hashedPassword)
   }
 
-  // Remove trailing comma
+  // remove trailing comma
   updateQuery = updateQuery.slice(0, -1)
 
   // add where clause
@@ -207,12 +204,14 @@ const updateProfile = async (req, res) => {
     // execute query
     await connection.query(updateQuery, values)
 
+    await connection.commit()
+
     return res.status(200).json({
       success: true,
       message: "Your profile has been updated"
     })
   } catch (err) {
-    await connection.commit()
+    await connection.rollback()
 
     return res.status(500).json({
       success: false,
@@ -220,13 +219,12 @@ const updateProfile = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
 // @desc Edit a user
-// @route PUT /user/edit
+// @route PUT /editUser
 const editUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
@@ -255,7 +253,6 @@ const editUser = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
-    // start transaction
     await connection.beginTransaction()
 
     // check if username exists
@@ -335,7 +332,6 @@ const editUser = async (req, res) => {
       })
     }
   } catch (err) {
-    // rollback in case of error
     await connection.rollback()
 
     return res.status(500).json({
@@ -344,13 +340,12 @@ const editUser = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
 // @desc    Create user
-// @route   POST /user
+// @route   POST /createUser
 const createUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
@@ -365,7 +360,6 @@ const createUser = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
-    // start transaction
     await connection.beginTransaction()
 
     //check if username exists
@@ -374,7 +368,6 @@ const createUser = async (req, res) => {
 
     if (results.length === 0) {
       //username is unique
-
       if (!usernameRegex.test(username)) {
         return res.status(409).json({
           success: false,
@@ -448,7 +441,6 @@ const createUser = async (req, res) => {
       })
     }
   } catch (err) {
-    // rollback in case of error
     await connection.rollback()
 
     return res.status(500).json({
@@ -457,7 +449,6 @@ const createUser = async (req, res) => {
       stack: err.stack
     })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }

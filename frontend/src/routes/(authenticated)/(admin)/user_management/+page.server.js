@@ -1,4 +1,4 @@
-import { GROUP_URL, USER_URL } from '$lib/constants';
+import { API_URL } from '$lib/constants';
 
 import axios from 'axios';
 import { handleApiError } from '$lib/errorHandler.js';
@@ -6,7 +6,7 @@ import { handleApiError } from '$lib/errorHandler.js';
 export const load = async ({ request }) => {
 	try {
 		// get groups first
-		const groupResponse = await axios.get(`${GROUP_URL}`, {
+		const groupResponse = await axios.get(`${API_URL}/getAllGroups`, {
 			headers: {
 				'Content-Type': 'application/json',
 				'User-Agent': request.headers.get('User-Agent'),
@@ -15,7 +15,7 @@ export const load = async ({ request }) => {
 		});
 
 		// get users after fetching groups
-		const userResponse = await axios.get(`${USER_URL}/all`, {
+		const userResponse = await axios.get(`${API_URL}/getAllUsers`, {
 			headers: {
 				'Content-Type': 'application/json',
 				'User-Agent': request.headers.get('User-Agent'),
@@ -41,7 +41,7 @@ export const actions = {
 
 		try {
 			const response = await axios.post(
-				`${GROUP_URL}`,
+				`${API_URL}/createGroup`,
 				{ groupname },
 				{
 					headers: {
@@ -74,7 +74,7 @@ export const actions = {
 
 		try {
 			const response = await axios.post(
-				`${USER_URL}`,
+				`${API_URL}/createUser`,
 				{
 					username,
 					email,
@@ -119,7 +119,7 @@ export const actions = {
 
 		try {
 			const response = await axios.put(
-				`${USER_URL}/edit`,
+				`${API_URL}/editUser`,
 				{
 					username,
 					email,

@@ -1,7 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
-	import { USER_URL } from '$lib/constants';
+	import { API_URL } from '$lib/constants';
 	import { page } from '$app/stores';
 
 	export let data;
@@ -11,7 +11,7 @@
 
 		try {
 			const response = await axios.post(
-				`${USER_URL}/logout`,
+				`${API_URL}/logout`,
 				{},
 				{
 					headers: {

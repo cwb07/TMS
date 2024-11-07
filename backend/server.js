@@ -2,8 +2,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import dotenv from "dotenv"
 import express from "express"
-import groupRoutes from "./routes/groupRoutes.js"
-import userRoutes from "./routes/userRoutes.js"
+import routes from "./routes/routes.js"
 
 // load environment variables
 dotenv.config()
@@ -28,7 +27,6 @@ app.use(express.json())
 app.use(cookieParser())
 
 // routes
-app.use("/user", userRoutes)
-app.use("/group", groupRoutes)
+app.use(routes)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
