@@ -16,7 +16,6 @@ const createGroup = async (req, res) => {
   }
 
   if (!groupnameRegex.test(groupname)) {
-    // group name format wrong
     return res.status(400).json({
       success: false,
       message: "Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters"
@@ -33,14 +32,12 @@ const createGroup = async (req, res) => {
     const [results] = await connection.query(query, [groupname])
 
     if (results.length > 0) {
-      // groupname already exists
       return res.status(409).json({
         success: false,
         message: "Group name already exists"
       })
     }
 
-    // insert new group
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
     await connection.query(insertQuery, [groupname])
 

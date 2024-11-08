@@ -30,7 +30,7 @@ export const actions = {
 				path: '/'
 			});
 
-			if (response.status === 200) {
+			if (response.data.success) {
 				return {
 					loginSuccess: true
 				};

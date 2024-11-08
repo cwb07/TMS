@@ -4,8 +4,6 @@ import { handleApiError } from '$lib/errorHandler.js';
 
 // ensure user is logged in and not disabled, return user info to data
 export const load = async ({ request }) => {
-	console.log("getprofile")
-
 	try {
 		const response = await axios.get(`${API_URL}/getUser`, {
 			headers: {
@@ -15,11 +13,11 @@ export const load = async ({ request }) => {
 			}
 		});
 
-		if (response.status === 200) {
+		if (response.data.success) {
 			return {
 				username: response.data.data.username,
-				email: response.data.data.email,
-				isAdmin: response.data.data.isAdmin
+				isAdmin: response.data.data.isAdmin,
+				email: response.data.data.email
 			};
 		}
 	} catch (err) {
@@ -48,7 +46,7 @@ export const actions = {
 				}
 			);
 
-			if (response.status === 200) {
+			if (response.data.success) {
 				return {
 					successMessage: response.data.message,
 					errorMessage: '',

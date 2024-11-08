@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
+import { checkGroup } from "../middlewares/authMiddleware.js"
 
 // max 50 characters, alphanumeric with no spaces
 const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
@@ -48,7 +49,6 @@ const login = async (req, res) => {
       })
     }
 
-    // generate token
     const token = jwt.sign(
       {
         username,
@@ -61,7 +61,6 @@ const login = async (req, res) => {
       }
     )
 
-    // set JWT as an HTTP-Only cookie
     res.cookie("jwt", token, {
       httpOnly: true,
       maxAge: 60 * 60 * 1000
@@ -98,8 +97,9 @@ const logout = (req, res) => {
 
 // @desc    Get user info
 // @route   GET /getUser
-// @route   GET /getAdmin
 const getUser = async (req, res) => {
+  req.user.isAdmin = await checkGroup(req.user.username, "admin")
+
   return res.status(200).json({
     success: true,
     message: "User retrieved",
@@ -198,10 +198,8 @@ const updateProfile = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
-    // start transaction
     await connection.beginTransaction()
 
-    // execute query
     await connection.query(updateQuery, values)
 
     await connection.commit()
@@ -228,7 +226,6 @@ const updateProfile = async (req, res) => {
 const editUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
-  // username, password and status must be filled
   if (!username) {
     return res.status(409).json({
       success: false,
@@ -263,6 +260,7 @@ const editUser = async (req, res) => {
     WHERE A.username = ?
     GROUP BY A.username
      `
+
     const [results] = await connection.query(query, [username])
 
     const user = results[0]
@@ -298,7 +296,6 @@ const editUser = async (req, res) => {
         })
       }
 
-      // update user groups
       // if user groups is same as before, no need to update
       const userGroups = (user.user_group || "").split(", ").sort().toString()
       const sortedGroups = groups.sort().toString()
@@ -312,7 +309,7 @@ const editUser = async (req, res) => {
             const query = `
             INSERT INTO usergroup(username, user_group)
             VALUES (?, ?)
-          `
+            `
 
             await connection.query(query, [username, group])
           }
@@ -326,8 +323,6 @@ const editUser = async (req, res) => {
         message: "Account updated"
       })
     } else {
-      await connection.rollback()
-
       return res.status(404).json({
         success: false,
         message: "User not found"
@@ -416,7 +411,6 @@ const createUser = async (req, res) => {
 
       // inserted new account
       if (results.affectedRows > 0) {
-        // insert user into user groups
         if (groups) {
           for (let group of groups) {
             const query = `
@@ -430,7 +424,6 @@ const createUser = async (req, res) => {
 
         await connection.commit()
 
-        // inserted user into user group
         return res.status(201).json({
           success: true,
           message: "User successfully created"

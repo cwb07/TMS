@@ -4,14 +4,9 @@
 
 	export let form;
 
-	$: errorMessage = '' || form?.errorMessage;
-
 	$: if (form?.loginSuccess) {
 		goto('/user_management');
 	}
-
-	let username = '';
-	let password = '';
 </script>
 
 <div class="login-background">
@@ -21,8 +16,8 @@
 				<div class="card">
 					<div class="card-body">
 						<h3 class="card-title text-center mb-4">Login</h3>
-						{#if errorMessage}
-							<div class="alert alert-danger" role="alert">Error: {errorMessage}</div>
+						{#if form?.errorMessage}
+							<div class="alert alert-danger" role="alert">Error: {form?.errorMessage}</div>
 						{/if}
 						<form
 							method="POST"
@@ -34,17 +29,11 @@
 						>
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
-								<input id="username" name="username" class="form-control" bind:value={username} />
+								<input id="username" name="username" class="form-control" />
 							</div>
 							<div class="mb-3">
 								<label for="password" class="form-label">Password</label>
-								<input
-									id="password"
-									type="password"
-									name="password"
-									class="form-control"
-									bind:value={password}
-								/>
+								<input id="password" type="password" name="password" class="form-control" />
 							</div>
 							<button type="submit" class="btn btn-primary w-100">Log In</button>
 						</form>

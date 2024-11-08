@@ -27,7 +27,7 @@
 									withCredentials: true
 								}
 							);
-							if (response.status === 200) {
+							if (response.data.success) {
 								goto('/login');
 							}
 						} else {

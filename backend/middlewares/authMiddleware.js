@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
 
-// User must be logged in and authenticated and active
+// user must be logged in and authenticated and active
 const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
@@ -11,7 +11,6 @@ const isLoggedIn = async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-      // //check if the IP and User-Agent match the current request
       if (decoded.ip !== req.ip || decoded.browser != req.headers["user-agent"]) {
         return res.status(401).json({
           success: false,
@@ -19,26 +18,23 @@ const isLoggedIn = async (req, res, next) => {
         })
       }
 
-      //get username from jwt cookies, store in req.user to access it
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
       const [results] = await connection.query(query, [decoded.username])
 
       if (results.length === 0 || results[0].accountstatus !== "Active") {
-        // no username found
+        // no user found or user not active
         return res.status(401).json({
           success: false,
           message: "Unathorized access"
         })
       } else {
-        // store in req.user to access it anywhere
         req.user = results[0]
-        req.user.isAdmin = await checkGroup(req.user.username, "admin")
         next()
       }
     } catch (err) {
       res.cookie("jwt", "", {
         httpOnly: true,
-        expires: new Date(0) // set expiration to a past date
+        expires: new Date(0)
       })
 
       if (err instanceof jwt.TokenExpiredError) {
@@ -54,7 +50,6 @@ const isLoggedIn = async (req, res, next) => {
           message: "Unable to verify session. Please log in again."
         })
       } else {
-        // handle other types of errors (e.g., database issues)
         return res.status(500).json({
           success: false,
           message: "An error occurred while checking if user is logged in",
@@ -62,7 +57,6 @@ const isLoggedIn = async (req, res, next) => {
         })
       }
     } finally {
-      // release the connection back to the pool
       connection.release()
     }
   } else {
@@ -73,7 +67,6 @@ const isLoggedIn = async (req, res, next) => {
   }
 }
 
-// checkgroup function
 const checkGroup = async (username, groupname) => {
   const connection = await pool.getConnection()
 
@@ -103,16 +96,24 @@ const checkGroup = async (username, groupname) => {
   }
 }
 
-// User must be an admin
-const isAdmin = async (req, res, next) => {
-  if (await checkGroup(req.user.username, "admin")) {
+const checkUserAccess = groups => async (req, res, next) => {
+  let isAuthorized = true
+
+  for (let group of groups) {
+    if (!(await checkGroup(req.user.username, group))) {
+      isAuthorized = false
+      break
+    }
+  }
+
+  if (isAuthorized) {
     next()
   } else {
     return res.status(403).json({
       success: false,
-      message: "You must be an admin to access this"
+      message: "Unauthorized access"
     })
   }
 }
 
-export { isAdmin, isLoggedIn }
+export { checkUserAccess, isLoggedIn, checkGroup }

@@ -1,16 +1,16 @@
 <script>
 	import MultiSelect from 'svelte-multiselect';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
-	// data from form actions and load
 	export let form;
 
 	$: errorMessage = '' || form?.errorMessage;
 	$: successMessage = '' || form?.successMessage;
 
-	// load existing groups and users
+	// load existing groups
 	$: options = $page.data.groupsList || [];
 
 	// group form fields
@@ -38,7 +38,6 @@
 		password = '';
 		selectedGroups = [];
 		accountstatus = 'Active';
-		invalidateAll();
 		document.getElementById('username').focus();
 	}
 
@@ -46,7 +45,6 @@
 	let editUsername = '';
 	let editEmail = '';
 	let editPassword = '';
-	let editPreselectedGroups = [];
 	let editSelectedGroups = [];
 	let editAccountstatus = 'Active';
 
@@ -54,14 +52,13 @@
 		// load user data to edit form
 		editUsername = user.username;
 		editEmail = user.email;
-		editPreselectedGroups = user.user_group ? user.user_group.split(', ') : [];
+		editSelectedGroups = user.user_group ? user.user_group.split(', ') : [];
 
 		if (user.username === 'admin') {
 			//remove admin from edit selected groups
-			editPreselectedGroups = editPreselectedGroups.filter((group) => group !== 'admin');
+			editSelectedGroups = editSelectedGroups.filter((group) => group !== 'admin');
 			options = options.filter((group) => group !== 'admin');
 		} else {
-			editSelectedGroups = editPreselectedGroups;
 			// insert admin back to options list
 			// ensure only 1 admin group is available
 			if (!options.includes('admin')) {
@@ -79,10 +76,15 @@
 		editUsername = '';
 		editEmail = '';
 		editPassword = '';
-		editPreselectedGroups = [];
 		editSelectedGroups = [];
 		editAccountstatus = 'Active';
 	};
+
+	onMount(() => {
+		if (!$page.data.isAdmin) {
+			goto('/task_management');
+		}
+	});
 </script>
 
 <div style="padding: 20px">
@@ -282,8 +284,7 @@
 											--sms-options-max-height="40vh"
 											highlightMatches={false}
 											name="groups"
-											bind:selected={editPreselectedGroups}
-											bind:value={editSelectedGroups}
+											bind:selected={editSelectedGroups}
 											{options}
 										>
 											<span slot="expand-icon"></span>

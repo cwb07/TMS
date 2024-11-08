@@ -3,11 +3,8 @@ import axios from 'axios';
 import { handleApiError } from '$lib/errorHandler.js';
 
 export const load = async ({ request }) => {
-	console.log("USER MANAGEMENT PAGE LOADING")
-
 	try {
-		// check if admin
-		const response = await axios.get(`${API_URL}/getAdmin`, {
+		const response = await axios.get(`${API_URL}/getUser`, {
 			headers: {
 				'Content-Type': 'application/json',
 				'User-Agent': request.headers.get('User-Agent'),
@@ -15,7 +12,6 @@ export const load = async ({ request }) => {
 			}
 		});
 
-		// get groups first
 		const groupResponse = await axios.get(`${API_URL}/getAllGroups`, {
 			headers: {
 				'Content-Type': 'application/json',
@@ -24,7 +20,6 @@ export const load = async ({ request }) => {
 			}
 		});
 
-		// get users after fetching groups
 		const userResponse = await axios.get(`${API_URL}/getAllUsers`, {
 			headers: {
 				'Content-Type': 'application/json',
@@ -33,10 +28,9 @@ export const load = async ({ request }) => {
 			}
 		});
 
-		if (groupResponse.status === 200 && userResponse.status === 200) {
+		if (groupResponse.data.success && userResponse.data.success && response.data.success) {
 			return {
 				username: response.data.data.username,
-				email: response.data.data.email,
 				isAdmin: response.data.data.isAdmin,
 				groupsList: groupResponse.data.data,
 				usersList: userResponse.data.data
@@ -65,7 +59,7 @@ export const actions = {
 				}
 			);
 
-			if (response.status === 201) {
+			if (response.data.success) {
 				return {
 					successMessage: response.data.message,
 					errorMessage: '',
@@ -83,8 +77,7 @@ export const actions = {
 		const password = form.get('password');
 		const accountstatus = form.get('accountstatus');
 		const email = form.get('email');
-		let formGroups = form.get('groups');
-		const groups = JSON.parse(formGroups);
+		const groups = JSON.parse(form.get('groups'));
 
 		try {
 			const response = await axios.post(
@@ -98,9 +91,6 @@ export const actions = {
 				},
 				{
 					headers: {
-						'Cache-Control': 'no-cache, no-store, must-revalidate',
-						Pragma: 'no-cache',
-						Expires: '0',
 						'Content-Type': 'application/json',
 						'User-Agent': request.headers.get('User-Agent'),
 						cookie: request.headers.get('cookie')
@@ -108,7 +98,7 @@ export const actions = {
 				}
 			);
 
-			if (response.status === 201) {
+			if (response.data.success) {
 				return {
 					successMessage: response.data.message,
 					errorMessage: '',
@@ -153,7 +143,7 @@ export const actions = {
 				}
 			);
 
-			if (response.status === 200) {
+			if (response.data.success) {
 				return {
 					successMessage: response.data.message,
 					errorMessage: '',
