@@ -22,10 +22,15 @@ const isLoggedIn = async (req, res, next) => {
       const [results] = await connection.query(query, [decoded.username])
 
       if (results.length === 0 || results[0].accountstatus !== "Active") {
+        res.cookie("jwt", "", {
+          httpOnly: true,
+          expires: new Date(0)
+        })
+
         // no user found or user not active
         return res.status(401).json({
           success: false,
-          message: "Unathorized access"
+          message: "Unauthorized access"
         })
       } else {
         req.user = results[0]
@@ -109,6 +114,11 @@ const checkUserAccess = groups => async (req, res, next) => {
   if (isAuthorized) {
     next()
   } else {
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      expires: new Date(0)
+    })
+
     return res.status(403).json({
       success: false,
       message: "Unauthorized access"

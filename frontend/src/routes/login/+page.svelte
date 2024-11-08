@@ -5,7 +5,7 @@
 	export let form;
 
 	$: if (form?.loginSuccess) {
-		goto('/user_management');
+		goto('/task_management');
 	}
 </script>
 
