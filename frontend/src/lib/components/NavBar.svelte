@@ -3,6 +3,7 @@
   import axios from "axios";
   import { API_URL } from "$lib/constants";
   import { page } from "$app/stores";
+  import { onMount } from "svelte";
 
   const logout = async (e) => {
     e.preventDefault();
@@ -84,8 +85,6 @@
     </div>
   </div>
 </nav>
-
-<slot />
 
 <style>
   .underline {

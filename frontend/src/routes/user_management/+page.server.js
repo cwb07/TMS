@@ -1,6 +1,6 @@
 import { API_URL } from '$lib/constants';
 import axios from 'axios';
-import { handleApiError } from '$lib/errorHandler.js';
+import { error } from '@sveltejs/kit';
 
 export const load = async ({ request }) => {
 	try {
@@ -37,7 +37,13 @@ export const load = async ({ request }) => {
 			};
 		}
 	} catch (err) {
-		return handleApiError(err, false);
+		if (err.response.status === 401) {
+			error(401, { message: err.response.data.message, redirectToLogin: true })
+		} else if (err.response.status === 403) {
+			error(403, { message: err.response.data.message, redirectToTMS: true })
+		} else {
+			error(500, { message: "Internal server error" })
+		}
 	}
 };
 
@@ -67,7 +73,16 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err);
+			if (err.response.status === 401) {
+				error(401, { message: err.response.data.message, redirectToLogin: true })
+			} else if (err.response.status === 403) {
+				error(403, { message: err.response.data.message, redirectToTMS: true })
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
 		}
 	},
 	createUser: async ({ request }) => {
@@ -106,7 +121,16 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err);
+			if (err.response.status === 401) {
+				error(401, { message: err.response.data.message, redirectToLogin: true })
+			} else if (err.response.status === 403) {
+				error(403, { message: err.response.data.message, redirectToTMS: true })
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
 		}
 	},
 	editUser: async ({ request }) => {
@@ -151,7 +175,16 @@ export const actions = {
 				};
 			}
 		} catch (err) {
-			return handleApiError(err);
+			if (err.response.status === 401) {
+				error(401, { message: err.response.data.message, redirectToLogin: true })
+			} else if (err.response.status === 403) {
+				error(403, { message: err.response.data.message, redirectToTMS: true })
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: err.response.data.message
+				};
+			}
 		}
 	}
 };

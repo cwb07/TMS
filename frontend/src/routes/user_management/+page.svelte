@@ -4,6 +4,7 @@
   import { page } from "$app/stores";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import NavBar from "$lib/components/NavBar.svelte";
 
   export let form;
 
@@ -88,6 +89,8 @@
     }
   });
 </script>
+
+<NavBar />
 
 <div style="padding: 20px">
   <!-- Page Title and Welcome Message -->
