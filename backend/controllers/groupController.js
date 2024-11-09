@@ -9,52 +9,29 @@ const createGroup = async (req, res) => {
   const { groupname } = req.body
 
   if (!groupname) {
-    return res.status(400).json({
-      success: false,
-      message: "Group name is mandatory"
-    })
+    return res.status(400).json({ success: false, message: "Group name is mandatory" })
   }
 
   if (!groupnameRegex.test(groupname)) {
-    return res.status(400).json({
-      success: false,
-      message: "Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters"
-    })
+    return res.status(400).json({ success: false, message: "Group name must be alphanumeric (allow underscore) and have a maximum of 50 characters" })
   }
 
   const connection = await pool.getConnection()
 
   try {
-    await connection.beginTransaction()
-
     // check if groupname exists
     const query = `SELECT * FROM usergroup WHERE user_group = ?`
     const [results] = await connection.query(query, [groupname])
 
     if (results.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: "Group name already exists"
-      })
+      return res.status(409).json({ success: false, message: "Group name already exists" })
     }
 
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
     await connection.query(insertQuery, [groupname])
-
-    await connection.commit()
-
-    return res.status(201).json({
-      success: true,
-      message: "Group created"
-    })
+    return res.status(201).json({ success: true, message: "Group created" })
   } catch (err) {
-    await connection.rollback()
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to create group",
-      stack: err.stack
-    })
+    return res.status(500).json({ success: false, message: "Unable to create group", stack: err.stack })
   } finally {
     connection.release()
   }
@@ -72,17 +49,9 @@ const getAllGroups = async (req, res) => {
     // extract user_group names into a new array
     const groupNames = results.map(row => row.user_group)
 
-    return res.status(200).json({
-      success: true,
-      message: "Groups successfully retrieved",
-      data: groupNames
-    })
+    return res.status(200).json({ success: true, message: "Groups successfully retrieved", data: groupNames })
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Unable to fetch groups",
-      stack: err.stack
-    })
+    return res.status(500).json({ success: false, message: "Unable to fetch groups", stack: err.stack })
   } finally {
     connection.release()
   }

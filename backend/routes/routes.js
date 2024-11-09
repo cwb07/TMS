@@ -6,19 +6,17 @@ import express from "express"
 
 const router = express.Router()
 
-// GET
-router.route("/getUser").get(isLoggedIn, getUser)
-router.route("/getAllUsers").get(isLoggedIn, checkUserAccess(["admin"]), getAllUsers)
-router.route("/getAllGroups").get(isLoggedIn, checkUserAccess(["admin"]), getAllGroups)
+// admin
+router.route("/getAllUsers").get(isLoggedIn, checkUserAccess("admin"), getAllUsers)
+router.route("/getAllGroups").get(isLoggedIn, checkUserAccess("admin"), getAllGroups)
+router.route("/createUser").post(isLoggedIn, checkUserAccess("admin"), createUser)
+router.route("/createGroup").post(isLoggedIn, checkUserAccess("admin"), createGroup)
+router.route("/editUser").put(isLoggedIn, checkUserAccess("admin"), editUser)
 
-// POST
-router.route("/createUser").post(isLoggedIn, checkUserAccess(["admin"]), createUser)
+// user
 router.route("/login").post(login)
 router.route("/logout").post(isLoggedIn, logout)
-router.route("/createGroup").post(isLoggedIn, checkUserAccess(["admin"]), createGroup)
-
-// PUT
-router.route("/editUser").put(isLoggedIn, checkUserAccess(["admin"]), editUser)
+router.route("/getUser").get(isLoggedIn, getUser)
 router.route("/updateProfile").put(isLoggedIn, updateProfile)
 
 export default router

@@ -12,10 +12,7 @@ const isLoggedIn = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
       if (decoded.ip !== req.ip || decoded.browser != req.headers["user-agent"]) {
-        return res.status(401).json({
-          success: false,
-          message: "Your session is not valid with this IP address"
-        })
+        return res.status(401).json({ success: false, message: "Your session is not valid with this IP address" })
       }
 
       const query = `SELECT username, email, accountstatus FROM accounts WHERE username = ?`
@@ -28,10 +25,7 @@ const isLoggedIn = async (req, res, next) => {
         })
 
         // no user found or user not active
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized access"
-        })
+        return res.status(401).json({ success: false, message: "Unauthorized access" })
       } else {
         req.user = results[0]
         next()
@@ -44,31 +38,18 @@ const isLoggedIn = async (req, res, next) => {
 
       if (err instanceof jwt.TokenExpiredError) {
         // token expired
-        return res.status(401).json({
-          success: false,
-          message: "Session has expired. Please log in again."
-        })
+        return res.status(401).json({ success: false, message: "Session has expired. Please log in again." })
       } else if (err instanceof jwt.JsonWebTokenError) {
         // invalid token - signature issues
-        return res.status(401).json({
-          success: false,
-          message: "Unable to verify session. Please log in again."
-        })
+        return res.status(401).json({ success: false, message: "Unable to verify session. Please log in again." })
       } else {
-        return res.status(500).json({
-          success: false,
-          message: "An error occurred while checking if user is logged in",
-          stack: err.stack
-        })
+        return res.status(500).json({ success: false, message: "An error occurred while checking if user is logged in", stack: err.stack })
       }
     } finally {
       connection.release()
     }
   } else {
-    return res.status(401).json({
-      success: false,
-      message: "Login first to access this resource"
-    })
+    return res.status(401).json({ success: false, message: "Login first to access this resource" })
   }
 }
 
@@ -76,11 +57,7 @@ const checkGroup = async (username, groupname) => {
   const connection = await pool.getConnection()
 
   try {
-    const query = `
-    SELECT user_group 
-    FROM usergroup 
-    WHERE username = ? AND user_group = ?;`
-
+    const query = `SELECT user_group FROM usergroup WHERE username = ? AND user_group = ?;`
     const [results] = await connection.query(query, [username, groupname])
 
     if (results.length === 0) {
@@ -90,18 +67,13 @@ const checkGroup = async (username, groupname) => {
       return true
     }
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while checking if user is in group",
-      stack: err.stack
-    })
+    return res.status(500).json({ success: false, message: "An error occurred while checking if user is in group", stack: err.stack })
   } finally {
-    // release the connection back to the pool
     connection.release()
   }
 }
 
-const checkUserAccess = groups => async (req, res, next) => {
+const checkUserAccess = (...groups) => async (req, res, next) => {
   let isAuthorized = true
 
   for (let group of groups) {
@@ -119,10 +91,7 @@ const checkUserAccess = groups => async (req, res, next) => {
       expires: new Date(0)
     })
 
-    return res.status(403).json({
-      success: false,
-      message: "Unauthorized access"
-    })
+    return res.status(403).json({ success: false, message: "Unauthorized access" })
   }
 }
 
