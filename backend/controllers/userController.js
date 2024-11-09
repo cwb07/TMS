@@ -1,13 +1,13 @@
 import bcrypt from "bcrypt"
+import { checkGroup } from "../middlewares/authMiddleware.js"
 import jwt from "jsonwebtoken"
 import pool from "../config/db.js"
-import { checkGroup } from "../middlewares/authMiddleware.js"
 
 // max 50 characters, alphanumeric with no spaces
 const usernameRegex = /^[a-zA-Z0-9]{1,50}$/
 
-// email regex match pattern: user@domain.com
-const emailRegex = /^[^\s]+@[^\s]+\.com$/
+// email regex match pattern: (user)@(domain)
+const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/
 
 // min 8 char & max 10 char consisting of alphabets, numbers and special characters at least 1 each
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/])[A-Za-z\d@~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/]{8,10}$/
@@ -198,19 +198,13 @@ const updateProfile = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
-    await connection.beginTransaction()
-
     await connection.query(updateQuery, values)
-
-    await connection.commit()
 
     return res.status(200).json({
       success: true,
       message: "Your profile has been updated"
     })
   } catch (err) {
-    await connection.rollback()
-
     return res.status(500).json({
       success: false,
       message: "Unable to update user profile",

@@ -5,9 +5,9 @@ import pool from "../config/db.js"
 const isLoggedIn = async (req, res, next) => {
   let token = req.cookies.jwt
 
-  const connection = await pool.getConnection()
-
   if (token) {
+    const connection = await pool.getConnection()
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 

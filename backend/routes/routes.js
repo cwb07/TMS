@@ -1,6 +1,6 @@
-import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
-import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { checkUserAccess, isLoggedIn } from "../middlewares/authMiddleware.js"
+import { createGroup, getAllGroups } from "../controllers/groupController.js"
+import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
 
 import express from "express"
 

@@ -31,11 +31,9 @@
 								goto('/login');
 							}
 						} else {
-							console.log('1');
 							goto('/task_management');
 						}
 					} catch (err) {
-						console.log('2');
 						goto('/login');
 					}
 				}

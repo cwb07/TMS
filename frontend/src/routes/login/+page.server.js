@@ -27,7 +27,9 @@ export const actions = {
 			let token = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
 
 			cookies.set('jwt', token, {
-				path: '/'
+				path: '/',
+				httpOnly: true,
+				maxAge: 60 * 60
 			});
 
 			if (response.data.success) {
