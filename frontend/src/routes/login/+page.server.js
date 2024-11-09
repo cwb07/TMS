@@ -11,10 +11,7 @@ export const actions = {
 		try {
 			const response = await axios.post(
 				`${API_URL}/login`,
-				{
-					username,
-					password
-				},
+				{ username, password },
 				{
 					headers: {
 						'Content-Type': 'application/json',
