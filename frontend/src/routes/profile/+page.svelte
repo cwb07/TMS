@@ -4,9 +4,6 @@
 
   export let form;
 
-  $: errorMessage = "" || form?.errorMessage;
-  $: successMessage = "" || form?.successMessage;
-
   let email = "";
   let password = "";
 
@@ -26,19 +23,19 @@
         <div class="card-body">
           <h3 class="card-title text-center mb-4">Update Info</h3>
           <!-- Message Display -->
-          {#if errorMessage}
+          {#if form?.errorMessage}
             <div class="row mb-2">
               <div class="col-12">
                 <div class="alert alert-danger" role="alert">
-                  Error: {errorMessage}
+                  Error: {form?.errorMessage}
                 </div>
               </div>
             </div>
-          {:else if successMessage}
+          {:else if form?.successMessage}
             <div class="row mb-2">
               <div class="col-12">
                 <div class="alert alert-success" role="alert">
-                  Success: {successMessage}
+                  Success: {form?.successMessage}
                 </div>
               </div>
             </div>

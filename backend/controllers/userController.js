@@ -140,7 +140,9 @@ const updateProfile = async (req, res) => {
 }
 
 const editUser = async (req, res) => {
-  const { username, password, email, groups, accountstatus } = req.body
+  let { username, password, email, groups, accountstatus } = req.body
+
+  email = email.trim()
 
   if (email && !emailRegex.test(email)) {
     return res.json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
@@ -184,6 +186,8 @@ const editUser = async (req, res) => {
         if (!groups.includes('admin')) {
           newGroups = [...groups, 'admin'];
         }
+      } else {
+        newGroups = groups;
       }
 
       if (newGroups) {
@@ -207,7 +211,10 @@ const editUser = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  const { username, password, email, groups, accountstatus } = req.body
+  let { username, password, email, groups, accountstatus } = req.body
+
+  username = username.trim()
+  email = email.trim()
 
   // username, password and status must be filled
   if (!username) {

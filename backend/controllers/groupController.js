@@ -4,7 +4,9 @@ import pool from "../config/db.js"
 const groupnameRegex = /^[a-zA-Z0-9_]{1,50}$/
 
 const createGroup = async (req, res) => {
-  const { groupname } = req.body
+  let { groupname } = req.body
+
+  groupname = groupname.trim()
 
   if (!groupname) {
     return res.json({ success: false, message: "Group name is mandatory" })

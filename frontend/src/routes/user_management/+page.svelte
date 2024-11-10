@@ -7,9 +7,6 @@
 
   export let form;
 
-  $: errorMessage = "" || form?.errorMessage;
-  $: successMessage = "" || form?.successMessage;
-
   // load existing groups
   $: options = $page.data.groupsList || [];
 
@@ -18,11 +15,6 @@
 
   $: if (form?.resetCreateGroupForm) {
     groupname = "";
-
-    // 0.1s delay to wait for groupname updates
-    setTimeout(() => {
-      document.getElementById("groupname").focus();
-    }, 100);
   }
 
   // user form fields
@@ -98,19 +90,19 @@
   </div>
 
   <!-- Message Display -->
-  {#if errorMessage}
+  {#if form?.errorMessage}
     <div class="row mb-2">
       <div class="col-12">
         <div class="alert alert-danger" role="alert">
-          Error: {errorMessage}
+          Error: {form?.errorMessage}
         </div>
       </div>
     </div>
-  {:else if successMessage}
+  {:else if form?.successMessage}
     <div class="row mb-2">
       <div class="col-12">
         <div class="alert alert-success" role="alert">
-          Success: {successMessage}
+          Success: {form?.successMessage}
         </div>
       </div>
     </div>

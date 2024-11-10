@@ -9,16 +9,14 @@
   onMount(async () => {
     if ($page.error.redirectToLogin) {
       try {
-        if ($page.error.redirectToLogin) {
-          const response = await axios.post(
-            `http://localhost:3000/logout`,
-            {},
-            {
-              headers: { "Content-Type": "application/json" },
-              withCredentials: true,
-            }
-          );
-        }
+        await axios.post(
+          `http://localhost:3000/logout`,
+          {},
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          }
+        );
       } catch (err) {
         console.log("Logout failed:", err);
       }
