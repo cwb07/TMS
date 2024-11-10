@@ -13,10 +13,7 @@ export const load = async ({ request }) => {
 		});
 
 		if (response.data.success) {
-			return {
-				username: response.data.data.username,
-				isAdmin: response.data.data.isAdmin
-			};
+			return { username: response.data.data.username, isAdmin: response.data.data.isAdmin };
 		}
 	} catch (err) {
 		if (err.response.status === 401) {

@@ -58,10 +58,7 @@ export const actions = {
 					resetUpdateProfileForm: true
 				};
 			} else {
-				return {
-					successMessage: '',
-					errorMessage: response.data.message
-				};
+				return { successMessage: '', errorMessage: response.data.message };
 			}
 		} catch (err) {
 			if (err.response.status === 401) {

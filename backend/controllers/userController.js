@@ -178,8 +178,16 @@ const editUser = async (req, res) => {
       const deleteQuery = `DELETE FROM usergroup WHERE username = ?`
       await connection.query(deleteQuery, [username])
 
-      if (groups) {
-        for (let group of groups) {
+      let newGroups = []
+
+      if (username == 'admin') {
+        if (!groups.includes('admin')) {
+          newGroups = [...groups, 'admin'];
+        }
+      }
+
+      if (newGroups) {
+        for (let group of newGroups) {
           const query = `INSERT INTO usergroup(username, user_group) VALUES (?, ?)`
           await connection.query(query, [username, group])
         }

@@ -71,10 +71,7 @@ export const actions = {
 					resetCreateGroupForm: true
 				};
 			} else {
-				return {
-					successMessage: '',
-					errorMessage: response.data.message
-				};
+				return { successMessage: '', errorMessage: response.data.message };
 			}
 		} catch (err) {
 			if (err.response.status === 401) {
@@ -121,10 +118,7 @@ export const actions = {
 					resetCreateUserForm: true
 				};
 			} else {
-				return {
-					successMessage: '',
-					errorMessage: response.data.message
-				};
+				return { successMessage: '', errorMessage: response.data.message };
 			}
 		} catch (err) {
 			if (err.response.status === 401) {
@@ -144,12 +138,6 @@ export const actions = {
 		const accountstatus = form.get('accountstatus');
 		const email = form.get('email');
 		let groups = JSON.parse(form.get('groups'));
-
-		if (username == 'admin') {
-			if (!groups.includes('admin')) {
-				groups = [...groups, 'admin'];
-			}
-		}
 
 		try {
 			const response = await axios.put(
@@ -177,10 +165,7 @@ export const actions = {
 					resetEditUserForm: true
 				};
 			} else {
-				return {
-					successMessage: '',
-					errorMessage: response.data.message
-				};
+				return { successMessage: '', errorMessage: response.data.message };
 			}
 		} catch (err) {
 			if (err.response.status === 401) {
