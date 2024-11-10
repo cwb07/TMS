@@ -1,7 +1,6 @@
 <script>
   import { enhance } from "$app/forms";
   import { page } from "$app/stores";
-  import NavBar from "$lib/components/NavBar.svelte";
 
   export let form;
 
@@ -16,8 +15,6 @@
     password = "";
   }
 </script>
-
-<NavBar />
 
 <div class="container">
   <div
