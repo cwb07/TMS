@@ -1,11 +1,10 @@
-import { API_URL } from '$lib/constants';
 import axios from 'axios';
 import { error } from '@sveltejs/kit';
 
 // ensure user is logged in and not disabled, return user info to data
 export const load = async ({ request }) => {
 	try {
-		const response = await axios.get(`${API_URL}/getUser`, {
+		const response = await axios.get(`http://localhost:3000/getUser`, {
 			headers: {
 				'Content-Type': 'application/json',
 				'User-Agent': request.headers.get('User-Agent'),
@@ -41,7 +40,7 @@ export const actions = {
 
 		try {
 			const response = await axios.put(
-				`${API_URL}/updateProfile`,
+				`http://localhost:3000/updateProfile`,
 				{ username, email, password },
 				{
 					headers: {
@@ -58,6 +57,11 @@ export const actions = {
 					errorMessage: '',
 					resetUpdateProfileForm: true
 				};
+			} else {
+				return {
+					successMessage: '',
+					errorMessage: response.data.message
+				};
 			}
 		} catch (err) {
 			if (err.response.status === 401) {
@@ -65,10 +69,7 @@ export const actions = {
 			} else if (err.response.status === 403) {
 				error(403, { message: err.response.data.message, redirectToTMS: true })
 			} else {
-				return {
-					successMessage: '',
-					errorMessage: err.response.data.message
-				};
+				error(500, { message: "Internal server error" })
 			}
 		}
 	}

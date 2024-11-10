@@ -1,4 +1,3 @@
-import { API_URL } from '$lib/constants';
 import axios from 'axios';
 
 export const actions = {
@@ -10,7 +9,7 @@ export const actions = {
 
 		try {
 			const response = await axios.post(
-				`${API_URL}/login`,
+				'http://localhost:3000/login',
 				{ username, password },
 				{
 					headers: {
@@ -21,23 +20,21 @@ export const actions = {
 				}
 			);
 
-			let token = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
-
-			cookies.set('jwt', token, {
-				path: '/',
-				httpOnly: true,
-				maxAge: 60 * 60
-			});
-
 			if (response.data.success) {
-				return {
-					loginSuccess: true
-				};
+				let token = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+				cookies.set('jwt', token, {
+					path: '/',
+					httpOnly: true,
+					maxAge: 60 * 60
+				});
+
+				return { loginSuccess: true };
+			} else {
+				return { errorMessage: response.data.message };
 			}
 		} catch (err) {
-			return {
-				errorMessage: err.response.data.message
-			};
+			return { errorMessage: "Invalid credentials" };
 		}
 	}
 };

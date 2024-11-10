@@ -1,7 +1,6 @@
 <script>
   import { goto } from "$app/navigation";
   import axios from "axios";
-  import { API_URL } from "$lib/constants";
   import { page } from "$app/stores";
   import { onMount } from "svelte";
 
@@ -10,7 +9,7 @@
 
     try {
       const response = await axios.post(
-        `${API_URL}/logout`,
+        `http://localhost:3000/logout`,
         {},
         {
           headers: { "Content-Type": "application/json" },

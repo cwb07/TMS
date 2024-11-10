@@ -2,45 +2,44 @@
   import { page } from "$app/stores";
   import { onMount } from "svelte";
   import axios from "axios";
-  import { API_URL } from "$lib/constants";
   import { goto } from "$app/navigation";
 
   let countdown = 3;
 
-  onMount(() => {
-    if ($page.error.redirectToLogin || $page.error.redirectToTMS) {
-      const interval = setInterval(async () => {
-        if (countdown > 1) {
-          countdown -= 1;
-        } else {
-          clearInterval(interval);
-          // clear cookies
-          try {
-            if ($page.error.redirectToLogin) {
-              const response = await axios.post(
-                `${API_URL}/logout`,
-                {},
-                {
-                  headers: { "Content-Type": "application/json" },
-                  withCredentials: true,
-                }
-              );
-              if (response.data.success) {
-                goto("/login");
-              }
-            } else {
-              goto("/task_management");
+  onMount(async () => {
+    if ($page.error.redirectToLogin) {
+      try {
+        if ($page.error.redirectToLogin) {
+          const response = await axios.post(
+            `http://localhost:3000/logout`,
+            {},
+            {
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
             }
-          } catch (err) {
-            goto("/login");
-          }
+          );
         }
-      }, 1000);
+      } catch (err) {
+        console.log("Logout failed:", err);
+      }
     }
+
+    const interval = setInterval(async () => {
+      if (countdown > 1) {
+        countdown -= 1;
+      } else {
+        clearInterval(interval);
+        if ($page.error.redirectToLogin) {
+          goto("/login");
+        } else if ($page.error.redirectToTMS) {
+          goto("/task_management");
+        }
+      }
+    }, 1000);
   });
 </script>
 
-<h1>{$page.status}: {$page.error.message}</h1>
+<h1>{$page.error.message}</h1>
 
 {#if $page.error.redirectToLogin || $page.error.redirectToTMS}
   <p>Redirecting in {countdown}s...</p>

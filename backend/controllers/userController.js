@@ -12,13 +12,12 @@ const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/
 // min 8 char & max 10 char consisting of alphabets, numbers and special characters at least 1 each
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/])[A-Za-z\d@~`!@#$%^&*()\-_=+{[}\]|\\:;"'<,>.?\/]{8,10}$/
 
-// @desc    Login user & get token
-// @route   POST /login
+// Login user & get token
 const login = async (req, res) => {
   const { username, password } = req.body
 
   if (!username || !password) {
-    return res.status(400).json({ success: false, message: "Invalid credentials" })
+    return res.json({ success: false, message: "Invalid credentials" })
   }
 
   const connection = await pool.getConnection()
@@ -30,14 +29,14 @@ const login = async (req, res) => {
 
     if (results.length === 0) {
       // username not found
-      return res.status(401).json({ success: false, message: "Invalid credentials" })
+      return res.json({ success: false, message: "Invalid credentials" })
     }
 
     const user = results[0]
 
     if (!(await bcrypt.compare(password, user.password)) || user.accountstatus !== "Active") {
       // account is not active or password not matching
-      return res.status(401).json({ success: false, message: "Invalid credentials" })
+      return res.json({ success: false, message: "Invalid credentials" })
     }
 
     const token = jwt.sign(
@@ -50,7 +49,7 @@ const login = async (req, res) => {
       maxAge: 60 * 60 * 1000
     })
 
-    return res.status(200).json({ success: true, message: "Login successful" })
+    return res.json({ success: true, message: "Login successful" })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to login user", stack: err.stack })
   } finally {
@@ -58,26 +57,21 @@ const login = async (req, res) => {
   }
 }
 
-// @desc    Logout user / clear cookie
-// @route   POST /logout
+// Logout user & clear cookie
 const logout = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
     expires: new Date(0)
   })
 
-  return res.status(200).json({ success: true, message: "Logged out successfully" })
+  return res.json({ success: true, message: "Logged out successfully" })
 }
 
-// @desc    Get user info
-// @route   GET /getUser
 const getUser = async (req, res) => {
   req.user.isAdmin = await checkGroup(req.user.username, "admin")
-  return res.status(200).json({ success: true, message: "User retrieved", data: req.user })
+  return res.json({ success: true, message: "User retrieved", data: req.user })
 }
 
-// @desc    Get all users w groups
-// @route   GET /getAllUsers
 const getAllUsers = async (req, res) => {
   const connection = await pool.getConnection()
 
@@ -90,7 +84,7 @@ const getAllUsers = async (req, res) => {
 
     const [results] = await connection.query(query)
 
-    return res.status(200).json({ success: true, message: "Accounts retrieved", data: results })
+    return res.json({ success: true, message: "Accounts retrieved", data: results })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to retrieve all accounts", stack: err.stack })
   } finally {
@@ -98,25 +92,23 @@ const getAllUsers = async (req, res) => {
   }
 }
 
-// @desc Update profile
-// @route PUT /updateProfile
 const updateProfile = async (req, res) => {
   const { username, email, password } = req.body
 
   if (!username) {
-    return res.status(409).json({ success: false, message: "Username is mandatory" })
+    return res.json({ success: false, message: "Username is mandatory" })
   }
 
   if (!email && !password) {
-    return res.status(409).json({ success: false, message: "Please enter either a email or password" })
+    return res.json({ success: false, message: "Please enter either a email or password" })
   }
 
   if (email && !emailRegex.test(email)) {
-    return res.status(409).json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
+    return res.json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
   }
 
   if (password && !passwordRegex.test(password)) {
-    return res.status(409).json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
+    return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
   }
 
   // create update query string
@@ -148,7 +140,7 @@ const updateProfile = async (req, res) => {
 
   try {
     await connection.query(updateQuery, values)
-    return res.status(200).json({ success: true, message: "Your profile has been updated" })
+    return res.json({ success: true, message: "Your profile has been updated" })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to update user profile", stack: err.stack })
   } finally {
@@ -156,21 +148,19 @@ const updateProfile = async (req, res) => {
   }
 }
 
-// @desc Edit a user
-// @route PUT /editUser
 const editUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
   if (!username) {
-    return res.status(409).json({ success: false, message: "Username is mandatory" })
+    return res.json({ success: false, message: "Username is mandatory" })
   }
 
   if (!usernameRegex.test(username)) {
-    return res.status(409).json({ success: false, message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters" })
+    return res.json({ success: false, message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters" })
   }
 
   if (email && !emailRegex.test(email)) {
-    return res.status(409).json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
+    return res.json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
   }
 
   const connection = await pool.getConnection()
@@ -183,8 +173,6 @@ const editUser = async (req, res) => {
 
     const [results] = await connection.query(query, [username])
 
-    const user = results[0]
-
     // user must exist to update
     if (results.length !== 0) {
       // can update user
@@ -195,7 +183,7 @@ const editUser = async (req, res) => {
         await connection.query(updateQuery, [email, accountstatus, username])
       } else {
         if (!passwordRegex.test(password)) {
-          return res.status(409).json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
+          return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
         }
 
         // password is different, rehash
@@ -207,7 +195,7 @@ const editUser = async (req, res) => {
       }
 
       if (!accountstatus) {
-        return res.status(409).json({ success: false, message: "Active is mandatory" })
+        return res.json({ success: false, message: "Active is mandatory" })
       }
 
       const deleteQuery = `DELETE FROM usergroup WHERE username = ?`
@@ -221,9 +209,9 @@ const editUser = async (req, res) => {
       }
 
       await connection.commit()
-      return res.status(200).json({ success: true, message: "Account updated" })
+      return res.json({ success: true, message: "Account updated" })
     } else {
-      return res.status(404).json({ success: false, message: "User not found" })
+      return res.json({ success: false, message: "User not found" })
     }
   } catch (err) {
     await connection.rollback()
@@ -233,14 +221,12 @@ const editUser = async (req, res) => {
   }
 }
 
-// @desc    Create user
-// @route   POST /createUser
 const createUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
   // username, password and status must be filled
   if (!username) {
-    return res.status(409).json({ success: false, message: "Username is mandatory" })
+    return res.json({ success: false, message: "Username is mandatory" })
   }
 
   const connection = await pool.getConnection()
@@ -255,23 +241,23 @@ const createUser = async (req, res) => {
     if (results.length === 0) {
       //username is unique
       if (!usernameRegex.test(username)) {
-        return res.status(409).json({ success: false, message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters" })
+        return res.json({ success: false, message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters" })
       }
 
       if (email && !emailRegex.test(email)) {
-        return res.status(409).json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
+        return res.json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
       }
 
       if (!password) {
-        return res.status(409).json({ success: false, message: "Password is mandatory" })
+        return res.json({ success: false, message: "Password is mandatory" })
       }
 
       if (!passwordRegex.test(password)) {
-        return res.status(409).json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
+        return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
       }
 
       if (!accountstatus) {
-        return res.status(409).json({ success: false, message: "Active is mandatory" })
+        return res.json({ success: false, message: "Active is mandatory" })
       }
 
       const salt = await bcrypt.genSalt(10)
@@ -290,10 +276,10 @@ const createUser = async (req, res) => {
         }
 
         await connection.commit()
-        return res.status(201).json({ success: true, message: "User successfully created" })
+        return res.json({ success: true, message: "User successfully created" })
       }
     } else {
-      return res.status(409).json({ success: false, message: "Username needs to be unique" })
+      return res.json({ success: false, message: "Username needs to be unique" })
     }
   } catch (err) {
     await connection.rollback()
