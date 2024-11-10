@@ -95,10 +95,6 @@ const getAllUsers = async (req, res) => {
 const updateProfile = async (req, res) => {
   const { username, email, password } = req.body
 
-  if (!username) {
-    return res.json({ success: false, message: "Username is mandatory" })
-  }
-
   if (!email && !password) {
     return res.json({ success: false, message: "Please enter either a email or password" })
   }
@@ -111,13 +107,12 @@ const updateProfile = async (req, res) => {
     return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
   }
 
-  // create update query string
-  let updateQuery = "UPDATE accounts SET"
-  const values = []
+  let updateFields = [];
+  let values = []
 
   // add email if given
   if (email) {
-    updateQuery += " email = ?,"
+    updateFields.push("email = ?");
     values.push(email)
   }
 
@@ -125,17 +120,13 @@ const updateProfile = async (req, res) => {
   if (password) {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    updateQuery += " password = ?,"
+    updateFields.push("password = ?");
     values.push(hashedPassword)
   }
 
-  // remove trailing comma
-  updateQuery = updateQuery.slice(0, -1)
-
-  // add where clause
-  updateQuery += " WHERE username = ?"
   values.push(username)
 
+  const updateQuery = "UPDATE accounts SET " + updateFields.join(", ") + " WHERE username = ?"
   const connection = await pool.getConnection()
 
   try {
@@ -151,14 +142,6 @@ const updateProfile = async (req, res) => {
 const editUser = async (req, res) => {
   const { username, password, email, groups, accountstatus } = req.body
 
-  if (!username) {
-    return res.json({ success: false, message: "Username is mandatory" })
-  }
-
-  if (!usernameRegex.test(username)) {
-    return res.json({ success: false, message: "Username must be alphanumeric with no spaces and have a maximum of 50 characters" })
-  }
-
   if (email && !emailRegex.test(email)) {
     return res.json({ success: false, message: "Email format entered must match the pattern username@domain.com" })
   }
@@ -170,7 +153,6 @@ const editUser = async (req, res) => {
 
     // check if username exists
     const query = `SELECT * FROM accounts WHERE username = ?`
-
     const [results] = await connection.query(query, [username])
 
     // user must exist to update
@@ -189,13 +171,8 @@ const editUser = async (req, res) => {
         // password is different, rehash
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
-
         const updateQuery = `UPDATE accounts SET email = ?, password = ?, accountstatus = ? WHERE username = ?`
         await connection.query(updateQuery, [email, hashedPassword, accountstatus, username])
-      }
-
-      if (!accountstatus) {
-        return res.json({ success: false, message: "Active is mandatory" })
       }
 
       const deleteQuery = `DELETE FROM usergroup WHERE username = ?`
@@ -256,13 +233,8 @@ const createUser = async (req, res) => {
         return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
       }
 
-      if (!accountstatus) {
-        return res.json({ success: false, message: "Active is mandatory" })
-      }
-
       const salt = await bcrypt.genSalt(10)
       const hashedPassword = await bcrypt.hash(password, salt)
-
       const query = `INSERT INTO accounts(username, email, password, accountstatus) VALUES (?, ?, ?, ?)`
       const [results] = await connection.query(query, [username, email, hashedPassword, accountstatus])
 
@@ -283,7 +255,6 @@ const createUser = async (req, res) => {
     }
   } catch (err) {
     await connection.rollback()
-
     return res.status(500).json({ success: false, message: "Unable to create user", stack: err.stack })
   } finally {
     connection.release()
