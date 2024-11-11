@@ -53,8 +53,7 @@
       );
       options = options.filter((group) => group !== "admin");
     } else {
-      // insert admin back to options list
-      // ensure only 1 admin group is available
+      // insert admin back ensure only 1 admin group is available
       if (!options.includes("admin")) {
         options = [...options, "admin"];
       }

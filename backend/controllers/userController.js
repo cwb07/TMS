@@ -39,15 +39,8 @@ const login = async (req, res) => {
       return res.json({ success: false, message: "Invalid credentials" })
     }
 
-    const token = jwt.sign(
-      { username, ip: req.ip, browser: req.headers["user-agent"] }, process.env.JWT_SECRET,
-      { expiresIn: "60m" }
-    )
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 1000
-    })
+    const token = jwt.sign({ username, ip: req.ip, browser: req.headers["user-agent"] }, process.env.JWT_SECRET, { expiresIn: "60m" })
+    res.cookie("jwt", token, { httpOnly: true, maxAge: 60 * 60 * 1000 })
 
     return res.json({ success: true, message: "Login successful" })
   } catch (err) {
@@ -59,11 +52,7 @@ const login = async (req, res) => {
 
 // Logout user & clear cookie
 const logout = (req, res) => {
-  res.cookie("jwt", "", {
-    httpOnly: true,
-    expires: new Date(0)
-  })
-
+  res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
   return res.json({ success: true, message: "Logged out successfully" })
 }
 
@@ -107,12 +96,12 @@ const updateProfile = async (req, res) => {
     return res.json({ success: false, message: "Password can only consist of alphabets, numbers and special characters, minimum 8-10 characters" })
   }
 
-  let updateFields = [];
+  let updateFields = []
   let values = []
 
   // add email if given
   if (email) {
-    updateFields.push("email = ?");
+    updateFields.push("email = ?")
     values.push(email)
   }
 
@@ -120,7 +109,7 @@ const updateProfile = async (req, res) => {
   if (password) {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    updateFields.push("password = ?");
+    updateFields.push("password = ?")
     values.push(hashedPassword)
   }
 
@@ -182,12 +171,12 @@ const editUser = async (req, res) => {
 
       let newGroups = []
 
-      if (username == 'admin') {
-        if (!groups.includes('admin')) {
-          newGroups = [...groups, 'admin'];
+      if (username == "admin") {
+        if (!groups.includes("admin")) {
+          newGroups = [...groups, "admin"]
         }
       } else {
-        newGroups = groups;
+        newGroups = groups
       }
 
       if (newGroups) {

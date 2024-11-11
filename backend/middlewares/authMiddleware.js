@@ -19,10 +19,7 @@ const isLoggedIn = async (req, res, next) => {
       const [results] = await connection.query(query, [decoded.username])
 
       if (results.length === 0 || results[0].accountstatus !== "Active") {
-        res.cookie("jwt", "", {
-          httpOnly: true,
-          expires: new Date(0)
-        })
+        res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
 
         // no user found or user not active
         return res.status(401).json({ success: false, message: "Unauthorized access" })
@@ -31,10 +28,7 @@ const isLoggedIn = async (req, res, next) => {
         next()
       }
     } catch (err) {
-      res.cookie("jwt", "", {
-        httpOnly: true,
-        expires: new Date(0)
-      })
+      res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
 
       if (err instanceof jwt.TokenExpiredError) {
         // token expired
@@ -74,25 +68,21 @@ const checkGroup = async (username, groupname) => {
 }
 
 const checkUserAccess = (...groups) => async (req, res, next) => {
-  let isAuthorized = true
+    let isAuthorized = true
 
-  for (let group of groups) {
-    if (!(await checkGroup(req.user.username, group))) {
-      isAuthorized = false
-      break
+    for (let group of groups) {
+      if (!(await checkGroup(req.user.username, group))) {
+        isAuthorized = false
+        break
+      }
+    }
+
+    if (isAuthorized) {
+      next()
+    } else {
+      res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+      return res.status(403).json({ success: false, message: "Unauthorized access" })
     }
   }
-
-  if (isAuthorized) {
-    next()
-  } else {
-    res.cookie("jwt", "", {
-      httpOnly: true,
-      expires: new Date(0)
-    })
-
-    return res.status(403).json({ success: false, message: "Unauthorized access" })
-  }
-}
 
 export { checkUserAccess, isLoggedIn, checkGroup }

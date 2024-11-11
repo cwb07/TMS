@@ -29,6 +29,7 @@ const createGroup = async (req, res) => {
 
     const insertQuery = `INSERT INTO usergroup (user_group) VALUES (?)`
     await connection.query(insertQuery, [groupname])
+
     return res.json({ success: true, message: "Group created" })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to create group", stack: err.stack })
