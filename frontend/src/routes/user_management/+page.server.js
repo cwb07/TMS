@@ -32,9 +32,7 @@ export const actions = {
     const groupname = form.get("groupname")
 
     try {
-      const response = await axios.post(`http://localhost:3000/createGroup`, 
-		{ groupname }, 
-		{ headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/createGroup`, { groupname }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
         return { successMessage: response.data.message, resetCreateGroupForm: true }
@@ -61,12 +59,10 @@ export const actions = {
     const groups = JSON.parse(form.get("groups"))
 
     try {
-      const response = await axios.post(`http://localhost:3000/createUser`, 
-		{ username, email, password, groups, accountstatus }, 
-		{ headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/createUser`, { username, email, password, groups, accountstatus }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
-        return { successMessage: response.data.message,errorMessage: "", resetCreateUserForm: true }
+        return { successMessage: response.data.message, errorMessage: "", resetCreateUserForm: true }
       } else {
         return { successMessage: "", errorMessage: response.data.message }
       }
@@ -90,9 +86,7 @@ export const actions = {
     let groups = JSON.parse(form.get("groups"))
 
     try {
-      const response = await axios.put( `http://localhost:3000/editUser`,
-        { username, email, password, groups, accountstatus },
-        { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie")}})
+      const response = await axios.put(`http://localhost:3000/editUser`, { username, email, password, groups, accountstatus }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
         return { successMessage: response.data.message, errorMessage: "", resetEditUserForm: true }

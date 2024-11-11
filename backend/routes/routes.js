@@ -1,7 +1,7 @@
 import { checkUserAccess, isLoggedIn } from "../middlewares/authMiddleware.js"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
-import { createApplication, getAllApplications } from "../controllers/applicationController.js"
+import { createApplication, getAllApplications, editApplication } from "../controllers/applicationController.js"
 
 import express from "express"
 
@@ -19,9 +19,10 @@ router.route("/logout").post(isLoggedIn, logout)
 router.route("/getUser").get(isLoggedIn, getUser)
 router.route("/getAllGroups").get(isLoggedIn, getAllGroups)
 router.route("/updateProfile").put(isLoggedIn, updateProfile)
+router.route("/getAllApplications").get(isLoggedIn, getAllApplications)
 
 // pl
 router.route("/createApplication").post(isLoggedIn, checkUserAccess("pl"), createApplication)
-router.route("/getAllApplications").get(isLoggedIn, getAllApplications)
+router.route("/editApplication").post(isLoggedIn, checkUserAccess("pl"), editApplication)
 
 export default router

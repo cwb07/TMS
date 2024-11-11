@@ -60,6 +60,54 @@ const createApplication = async (req, res) => {
   }
 }
 
+const editApplication = async (req, res) => {
+  const { prev_app_acronym, app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+
+  if (!app_acronym) {
+    return res.json({ success: false, message: "App name is mandatory" })
+  }
+
+  const connection = await pool.getConnection()
+
+  try {
+    // if app acronym changed
+    if (prev_app_acronym !== app_acronym) {
+      //check if application already exists in current db
+      const query = `SELECT * FROM application WHERE app_acronym = ?`
+      const [results] = await connection.query(query, [app_acronym])
+
+      if (results.length !== 0) {
+        return res.json({ success: false, message: "Application already exists" })
+      }
+    }
+
+    if (!appAcronymRegex.test(app_acronym)) {
+      return res.json({ success: false, message: "App name must be alphanumeric have a maximum of 50 characters" })
+    }
+
+    if (!app_startdate) {
+      return res.json({ success: false, message: "App start date is mandatory" })
+    }
+
+    if (!app_enddate) {
+      return res.json({ success: false, message: "App end date is mandatory" })
+    }
+
+    // app start date must be before app end date
+    if (app_startdate >= app_enddate) {
+      return res.json({ success: false, message: "App start date must be before app end date" })
+    }
+
+    const updateQuery = `UPDATE application SET app_acronym = ?, app_description = ?, app_rnumber = ?, app_startdate = ?, app_enddate = ?, app_permit_open = ?, app_permit_todolist = ?, app_permit_doing = ?, app_permit_done = ?, app_permit_create = ? WHERE app_acronym = ?`
+    await connection.query(updateQuery, [app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create, prev_app_acronym])
+    return res.json({ success: true, message: "Application updated" })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to update application", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
 const getAllApplications = async (req, res) => {
   const connection = await pool.getConnection()
 
@@ -75,4 +123,4 @@ const getAllApplications = async (req, res) => {
   }
 }
 
-export { createApplication, getAllApplications }
+export { createApplication, getAllApplications, editApplication }

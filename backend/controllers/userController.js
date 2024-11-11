@@ -58,6 +58,7 @@ const logout = (req, res) => {
 
 const getUser = async (req, res) => {
   req.user.isAdmin = await checkGroup(req.user.username, "admin")
+  req.user.isPL = await checkGroup(req.user.username, "pl")
   return res.json({ success: true, message: "User retrieved", data: req.user })
 }
 

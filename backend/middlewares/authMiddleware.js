@@ -12,6 +12,7 @@ const isLoggedIn = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
       if (decoded.ip !== req.ip || decoded.browser != req.headers["user-agent"]) {
+        res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
         return res.status(401).json({ success: false, message: "Your session is not valid with this IP address" })
       }
 
@@ -67,7 +68,9 @@ const checkGroup = async (username, groupname) => {
   }
 }
 
-const checkUserAccess = (...groups) => async (req, res, next) => {
+const checkUserAccess =
+  (...groups) =>
+  async (req, res, next) => {
     let isAuthorized = true
 
     for (let group of groups) {
