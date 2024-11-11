@@ -1,13 +1,19 @@
 import axios from "axios"
 import { error } from "@sveltejs/kit"
 
-// ensure user is logged in and not disabled, return user info to data
 export const load = async ({ request }) => {
   try {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+    const applicationResponse = await axios.get(`http://localhost:3000/getAllApplications`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+    const groupResponse = await axios.get(`http://localhost:3000/getAllGroups`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
-    if (response.data.success) {
-      return { username: response.data.data.username, isAdmin: response.data.data.isAdmin }
+    if (response.data.success && applicationResponse.data.success) {
+      return {
+        username: response.data.data.username,
+        isAdmin: response.data.data.isAdmin,
+        applicationsList: applicationResponse.data.data,
+        groupsList: groupResponse.data.data
+      }
     }
   } catch (err) {
     if (err.response.status === 401) {
