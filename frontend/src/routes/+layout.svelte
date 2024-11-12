@@ -23,6 +23,16 @@
       goto("/login")
     }
   })
+
+  $: if ($page.error) {
+    // list modal class elements
+    let modals = document.getElementsByClassName("modal-backdrop")
+
+    for (let modal of modals) {
+      // remove modal class elements
+      modal.remove()
+    }
+  }
 </script>
 
 {#if $page.url.pathname !== "/login" && !$page.error}

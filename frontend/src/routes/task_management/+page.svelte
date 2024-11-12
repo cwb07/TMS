@@ -2,6 +2,7 @@
   import { page } from "$app/stores"
   import { enhance } from "$app/forms"
   import { onMount } from "svelte"
+  import { goto } from "$app/navigation"
 
   export let form
 
@@ -95,7 +96,7 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
   <div style="flex: 1; text-align: center;">
-    <h2 style="margin-left: 100px">APPLICATIONS</h2>
+    <h2>APPLICATIONS</h2>
   </div>
   {#if $page.data.isPL}
     <button type="submit" class="btn btn-primary" style="margin-right: 20px;" data-bs-toggle="modal" data-bs-target="#createAppModal">Create App</button>
@@ -151,7 +152,7 @@
             </div>
           </div>
           <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm w-100">View</button>
+            <button type="submit" class="btn btn-primary btn-sm w-100" on:click={() => goto("/login")}>View</button>
           </div>
         </div>
       </div>
