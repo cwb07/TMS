@@ -1,83 +1,81 @@
 <script>
-  import MultiSelect from "svelte-multiselect";
-  import { enhance } from "$app/forms";
-  import { page } from "$app/stores";
-  import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
+  import MultiSelect from "svelte-multiselect"
+  import { enhance } from "$app/forms"
+  import { page } from "$app/stores"
+  import { onMount } from "svelte"
+  import { goto } from "$app/navigation"
 
-  export let form;
+  export let form
 
   // load existing groups
-  $: options = $page.data.groupsList || [];
+  $: options = $page.data.groupsList || []
 
   // group form fields
-  let groupname = "";
+  let groupName = ""
 
   $: if (form?.resetCreateGroupForm) {
-    groupname = "";
+    groupName = ""
   }
 
   // user form fields
-  let username = "";
-  let email = "";
-  let password = "";
-  let selectedGroups = [];
-  let accountstatus = "Active";
+  let username = ""
+  let email = ""
+  let password = ""
+  let selectedGroups = []
+  let accountStatus = "Active"
 
   $: if (form?.resetCreateUserForm) {
-    username = "";
-    email = "";
-    password = "";
-    selectedGroups = [];
-    accountstatus = "Active";
-    document.getElementById("username").focus();
+    username = ""
+    email = ""
+    password = ""
+    selectedGroups = []
+    accountStatus = "Active"
+    document.getElementById("username").focus()
   }
 
   // edit user form fields
-  let editUsername = "";
-  let editEmail = "";
-  let editPassword = "";
-  let editSelectedGroups = [];
-  let editAccountstatus = "Active";
+  let editUsername = ""
+  let editEmail = ""
+  let editPassword = ""
+  let editSelectedGroups = []
+  let editAccountstatus = "Active"
 
-  const editRow = (user) => {
+  const editRow = user => {
     // load user data to edit form
-    editUsername = user.username;
-    editEmail = user.email;
-    editSelectedGroups = user.user_group ? user.user_group.split(", ") : [];
+    editUsername = user.username
+    editEmail = user.email
+    editSelectedGroups = user.user_group ? user.user_group.split(", ") : []
 
     if (user.username === "admin") {
       //remove admin from edit selected groups
-      editSelectedGroups = editSelectedGroups.filter(
-        (group) => group !== "admin"
-      );
-      options = options.filter((group) => group !== "admin");
+      editSelectedGroups = editSelectedGroups.filter(group => group !== "admin")
+      options = options.filter(group => group !== "admin")
     } else {
       // insert admin back ensure only 1 admin group is available
       if (!options.includes("admin")) {
-        options = [...options, "admin"];
+        options = [...options, "admin"]
       }
     }
-    editAccountstatus = user.accountstatus;
-  };
+    editAccountstatus = user.accountstatus
+  }
 
   $: if (form?.resetEditUserForm) {
-    cancelEdit();
+    cancelEdit()
   }
 
   const cancelEdit = () => {
-    editUsername = "";
-    editEmail = "";
-    editPassword = "";
-    editSelectedGroups = [];
-    editAccountstatus = "Active";
-  };
+    editUsername = ""
+    editEmail = ""
+    editPassword = ""
+    editSelectedGroups = []
+    editAccountstatus = "Active"
+  }
 
   onMount(() => {
     if (!$page.data.isAdmin) {
-      goto("/task_management");
+      goto("/task_management")
     }
-  });
+  })
 </script>
 
 <div style="padding: 20px">
@@ -116,29 +114,17 @@
         action="?/createGroup"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false });
-          };
+            update({ reset: false })
+          }
         }}
       >
         <table class="table table-bordered text-center">
           <tbody>
             <tr>
               <th class="col-3">
-                <input
-                  id="groupname"
-                  type="text"
-                  class="form-control"
-                  placeholder="Group Name"
-                  name="groupname"
-                  maxlength="50"
-                  bind:value={groupname}
-                />
+                <input id="groupname" type="text" class="form-control" placeholder="Group Name" name="groupname" maxlength="50" bind:value={groupName} />
               </th>
-              <th class="col-1"
-                ><button type="submit" class="btn btn-primary w-100"
-                  >Create Group</button
-                >
-              </th>
+              <th class="col-1"><button type="submit" class="btn btn-primary w-100">Create Group</button> </th>
             </tr>
           </tbody>
         </table>
@@ -154,71 +140,35 @@
         action="?/createUser"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false });
-          };
+            update({ reset: false })
+          }
         }}
       >
         <table class="table table-bordered text-center">
           <tbody>
             <tr>
               <th class="col-2">
-                <input
-                  id="username"
-                  type="text"
-                  class="form-control"
-                  name="username"
-                  placeholder="Username*"
-                  maxlength="50"
-                  bind:value={username}
-                />
+                <input id="username" type="text" class="form-control" name="username" placeholder="Username*" maxlength="50" bind:value={username} />
               </th>
               <th class="col-2">
-                <input
-                  type="text"
-                  class="form-control"
-                  name="email"
-                  placeholder="Email (optional)"
-                  bind:value={email}
-                />
+                <input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={email} />
               </th>
               <th class="col-2">
-                <input
-                  type="password"
-                  class="form-control"
-                  name="password"
-                  placeholder="Password*"
-                  maxlength="10"
-                  bind:value={password}
-                />
+                <input type="password" class="form-control" name="password" placeholder="Password*" maxlength="10" bind:value={password} />
               </th>
               <th class="col-2">
-                <MultiSelect
-                  class="multi-select-input"
-                  placeholder="Groups (Optional)"
-                  --sms-placeholder-color="#6c757d"
-                  --sms-options-max-height="40vh"
-                  highlightMatches={false}
-                  name="groups"
-                  bind:value={selectedGroups}
-                  {options}
-                >
+                <MultiSelect class="multi-select-input" placeholder="Groups (Optional)" --sms-placeholder-color="#6c757d" --sms-options-max-height="40vh" highlightMatches={false} name="groups" bind:value={selectedGroups} {options}>
                   <span slot="expand-icon"></span>
                 </MultiSelect>
               </th>
               <th class="col-1">
-                <select
-                  class="form-select"
-                  name="accountstatus"
-                  bind:value={accountstatus}
-                >
+                <select class="form-select" name="accountstatus" bind:value={accountStatus}>
                   <option default value="Active">Active</option>
                   <option value="Disabled">Disabled</option>
                 </select>
               </th>
               <th class="col-1">
-                <button type="submit" class="btn btn-primary w-100"
-                  >Create User</button
-                >
+                <button type="submit" class="btn btn-primary w-100">Create User</button>
               </th>
             </tr>
           </tbody>
@@ -235,14 +185,11 @@
         action="?/editUser"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false });
-          };
+            update({ reset: false })
+          }
         }}
       >
-        <table
-          class="table text-center table-bordered table-sm"
-          class:table-hover={!editUsername}
-        >
+        <table class="table text-center table-bordered table-sm" class:table-hover={!editUsername}>
           <thead class="table-light">
             <tr>
               <th class="col-2">Username</th>
@@ -258,60 +205,22 @@
               {#if editUsername && editUsername == user.username}
                 <tr class="table-primary">
                   <td>
-                    <input
-                      type="hidden"
-                      name="username"
-                      value={user.username}
-                    />
+                    <input type="hidden" name="username" value={user.username} />
                     {user.username}
                   </td>
-                  <td
-                    ><input
-                      type="text"
-                      class="form-control"
-                      name="email"
-                      placeholder="Email (optional)"
-                      bind:value={editEmail}
-                    /></td
-                  >
-                  <td
-                    ><input
-                      type="password"
-                      class="form-control"
-                      name="password"
-                      placeholder="Password"
-                      maxlength="10"
-                      bind:value={editPassword}
-                    /></td
-                  >
+                  <td><input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={editEmail} /></td>
+                  <td><input type="password" class="form-control" name="password" placeholder="Password" maxlength="10" bind:value={editPassword} /></td>
                   <td style="width: 300px">
-                    <MultiSelect
-                      class="multi-select-input"
-                      placeholder="Groups (Optional)"
-                      --sms-placeholder-color="#6c757d"
-                      --sms-options-max-height="40vh"
-                      highlightMatches={false}
-                      name="groups"
-                      bind:selected={editSelectedGroups}
-                      {options}
-                    >
+                    <MultiSelect class="multi-select-input" placeholder="Groups (Optional)" --sms-placeholder-color="#6c757d" --sms-options-max-height="40vh" highlightMatches={false} name="groups" bind:selected={editSelectedGroups} {options}>
                       <span slot="expand-icon"></span>
                     </MultiSelect>
                   </td>
                   <td>
                     {#if editUsername === "admin"}
-                      <input
-                        type="hidden"
-                        name="accountstatus"
-                        value={editAccountstatus}
-                      />
+                      <input type="hidden" name="accountstatus" value={editAccountstatus} />
                       {editAccountstatus}
                     {:else}
-                      <select
-                        class="form-select"
-                        name="accountstatus"
-                        bind:value={editAccountstatus}
-                      >
+                      <select class="form-select" name="accountstatus" bind:value={editAccountstatus}>
                         <option default value="Active">Active</option>
                         <option value="Disabled">Disabled</option>
                       </select>
@@ -319,13 +228,7 @@
                   </td>
                   <td
                     ><button type="submit" class="btn btn-success">Save</button>
-                    <button
-                      type="button"
-                      on:click={() => cancelEdit()}
-                      class="btn btn-danger"
-                    >
-                      Cancel
-                    </button>
+                    <button type="button" on:click={() => cancelEdit()} class="btn btn-danger"> Cancel </button>
                   </td>
                 </tr>
               {:else}
@@ -336,13 +239,7 @@
                   <td>{user.user_group}</td>
                   <td>{user.accountstatus}</td>
                   <td>
-                    <button
-                      type="button"
-                      on:click={() => editRow(user)}
-                      class="btn btn-primary"
-                    >
-                      Edit
-                    </button>
+                    <button type="button" on:click={() => editRow(user)} class="btn btn-primary"> Edit </button>
                   </td>
                 </tr>
               {/if}

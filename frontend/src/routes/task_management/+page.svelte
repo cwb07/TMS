@@ -13,28 +13,28 @@
 
   // create app form
   let name = ""
-  let rnumber = ""
+  let rNumber = ""
   let description = ""
-  let startdate = ""
-  let enddate = ""
-  let permitopen = ""
-  let permittodo = ""
-  let permitdoing = ""
-  let permitdone = ""
-  let permitcreate = ""
+  let startDate = ""
+  let endDate = ""
+  let permitOpen = ""
+  let permitTodo = ""
+  let permitDoing = ""
+  let permitDone = ""
+  let permitCreate = ""
 
   onMount(async () => {
     document.getElementById("createAppModal").addEventListener("hide.bs.modal", function (event) {
       name = ""
-      rnumber = ""
+      rNumber = ""
       description = ""
-      startdate = ""
-      enddate = ""
-      permitopen = ""
-      permittodo = ""
-      permitdoing = ""
-      permitdone = ""
-      permitcreate = ""
+      startDate = ""
+      endDate = ""
+      permitOpen = ""
+      permitTodo = ""
+      permitDoing = ""
+      permitDone = ""
+      permitCreate = ""
 
       if (form?.errorMessage) {
         form.errorMessage = ""
@@ -45,13 +45,13 @@
       editName = ""
       editRnumber = ""
       editDescription = ""
-      editStartdate = ""
-      editEnddate = ""
-      editPermitopen = ""
-      editPermittodo = ""
-      editPermitdoing = ""
-      editPermitdone = ""
-      editPermitcreate = ""
+      editStartDate = ""
+      editEndDate = ""
+      editPermitOpen = ""
+      editPermitTodo = ""
+      editPermitDoing = ""
+      editPermitDone = ""
+      editPermitCreate = ""
 
       if (form?.errorMessage) {
         form.errorMessage = ""
@@ -68,13 +68,13 @@
   let editName = ""
   let editRnumber = ""
   let editDescription = ""
-  let editStartdate = ""
-  let editEnddate = ""
-  let editPermitopen = ""
-  let editPermittodo = ""
-  let editPermitdoing = ""
-  let editPermitdone = ""
-  let editPermitcreate = ""
+  let editStartDate = ""
+  let editEndDate = ""
+  let editPermitOpen = ""
+  let editPermitTodo = ""
+  let editPermitDoing = ""
+  let editPermitDone = ""
+  let editPermitCreate = ""
 
   const editApp = application => {
     // load application details to edit form
@@ -84,14 +84,14 @@
     editDescription = application.app_description
 
     // convert app_startdate date to yyyy-MM-dd format
-    editStartdate = new Date(application.app_startdate).toLocaleDateString("en-ca")
-    editEnddate = new Date(application.app_enddate).toLocaleDateString("en-ca")
+    editStartDate = new Date(application.app_startdate).toLocaleDateString("en-ca")
+    editEndDate = new Date(application.app_enddate).toLocaleDateString("en-ca")
 
-    editPermitopen = application.app_permit_open
-    editPermittodo = application.app_permit_todolist
-    editPermitdoing = application.app_permit_doing
-    editPermitdone = application.app_permit_done
-    editPermitcreate = application.app_permit_create
+    editPermitOpen = application.app_permit_open
+    editPermitTodo = application.app_permit_todolist
+    editPermitDoing = application.app_permit_doing
+    editPermitDone = application.app_permit_done
+    editPermitCreate = application.app_permit_create
   }
 
   $: if (form?.resetEditAppForm) {
@@ -215,19 +215,19 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={editStartdate} />
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={editStartDate} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={editEnddate} />
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={editEndDate} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Open</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitopen" bind:value={editPermitopen}>
+              <select class="form-select" name="permitopen" bind:value={editPermitOpen}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option value={group}>{group}</option>
@@ -238,7 +238,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Todo</div>
             <div class="col-md-9">
-              <select class="form-select" name="permittodo" bind:value={editPermittodo}>
+              <select class="form-select" name="permittodo" bind:value={editPermitTodo}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -249,7 +249,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Doing</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitdoing" bind:value={editPermitdoing}>
+              <select class="form-select" name="permitdoing" bind:value={editPermitDoing}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -260,7 +260,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Done</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitdone" bind:value={editPermitdone}>
+              <select class="form-select" name="permitdone" bind:value={editPermitDone}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -271,7 +271,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Create</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitcreate" bind:value={editPermitcreate}>
+              <select class="form-select" name="permitcreate" bind:value={editPermitCreate}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -324,7 +324,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">RNumber*</div>
             <div class="col-md-9">
-              <input id="rnumber" name="rnumber" class="form-control" type="number" bind:value={rnumber} />
+              <input id="rnumber" name="rnumber" class="form-control" type="number" bind:value={rNumber} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -336,19 +336,19 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startdate} />
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startDate} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={enddate} />
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={endDate} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Open</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitopen" bind:value={permitopen}>
+              <select class="form-select" name="permitopen" bind:value={permitOpen}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -359,7 +359,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Todo</div>
             <div class="col-md-9">
-              <select class="form-select" name="permittodo" bind:value={permittodo}>
+              <select class="form-select" name="permittodo" bind:value={permitTodo}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -370,7 +370,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Doing</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitdoing" bind:value={permitdoing}>
+              <select class="form-select" name="permitdoing" bind:value={permitDoing}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -381,7 +381,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Done</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitdone" bind:value={permitdone}>
+              <select class="form-select" name="permitdone" bind:value={permitDone}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -392,7 +392,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Create</div>
             <div class="col-md-9">
-              <select class="form-select" name="permitcreate" bind:value={permitcreate}>
+              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>

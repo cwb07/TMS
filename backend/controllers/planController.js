@@ -55,4 +55,20 @@ const createPlan = async (req, res) => {
   }
 }
 
-export { createPlan }
+const getAllPlansInApp = async (req, res) => {
+  const { plan_app_acronym } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    const query = `SELECT * FROM plan WHERE plan_app_acronym = ?`
+    const [results] = await connection.query(query, [plan_app_acronym])
+    return res.json({ success: true, message: "Plans retrieved", data: results })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to retrieve all plans", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+export { createPlan, getAllPlansInApp }

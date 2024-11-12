@@ -3,21 +3,47 @@
   import { goto } from "$app/navigation"
   import { enhance } from "$app/forms"
   import { page } from "$app/stores"
+  import axios from "axios"
 
   export let form
 
   // create plan form
-  let planname = ""
-  let startdate = ""
-  let enddate = ""
-  let color = ""
+  let planName = ""
+  let planStartDate = ""
+  let planEndDate = ""
+  let planColor = "#FFFFFF"
+
+  // create task form
+  let taskCreator = ""
+  let taskCreationDate = ""
+  let taskState = ""
+  let taskName = ""
+  let taskOwner = ""
+  let taskDescription = ""
+  let taskPlan = ""
+  let taskPlanStartDate = ""
+  let taskPlanEndDate = ""
 
   onMount(async () => {
     document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
-      planname = ""
-      startdate = ""
-      enddate = ""
-      color = ""
+      planName = ""
+      planStartDate = ""
+      planEndDate = ""
+      planColor = "#FFFFFF"
+
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
+
+    document.getElementById("createTaskModal").addEventListener("hide.bs.modal", function (event) {
+      taskCreator = ""
+      taskCreationDate = ""
+      taskState = ""
+      taskName = ""
+      taskOwner = ""
+      taskDescription = ""
+      taskPlan = ""
 
       if (form?.errorMessage) {
         form.errorMessage = ""
@@ -54,8 +80,50 @@
     }
   })
 
-  function getTasksByStatus(taskStateHeader) {
+  const getTasksByStatus = taskStateHeader => {
     return tasks.filter(task => task.taskState === taskStateHeader)
+  }
+
+  let listOfPlans = []
+
+  // when user selects a plan, display the start and end date of the plan
+  $: if (taskPlan) {
+    const selectedPlan = listOfPlans.find(plan => plan.plan_mvp_name === taskPlan)
+    const formattedStartDate = new Date(selectedPlan.plan_startdate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    })
+    taskPlanStartDate = formattedStartDate
+
+    const formattedEndDate = new Date(selectedPlan.plan_enddate).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    })
+    taskPlanEndDate = formattedEndDate
+  } else {
+    taskPlanStartDate = ""
+    taskPlanEndDate = ""
+  }
+
+  const handleCreateTask = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/getAllPlansInApp`,
+        { plan_app_acronym: appName },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true
+        }
+      )
+
+      if (response.data.success) {
+        listOfPlans = response.data.data
+      }
+    } catch (err) {
+      location.reload()
+    }
   }
 </script>
 
@@ -63,7 +131,9 @@
   {#if $page.data.isPM}
     <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createPlanModal">Create Plan</button>
   {/if}
-  <button type="submit" class="btn btn-primary" style="margin-left: 20px">Create Task</button>
+  {#if $page.data.isPL}
+    <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createTaskModal" on:click={handleCreateTask}>Create Task</button>
+  {/if}
   <div style="flex: 1; text-align: center; margin-right: 300px">
     <h2>{appName}</h2>
   </div>
@@ -98,7 +168,7 @@
                 <div class="card-footer">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <span class="badge" style="background-color: {task.taskPlanColor}">
+                      <span class="badge">
                         {task.planName}
                       </span>
                     </div>
@@ -153,25 +223,25 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Plan Name*</div>
             <div class="col-md-9">
-              <input id="planname" name="planname" class="form-control" bind:value={planname} />
+              <input id="planname" name="planname" class="form-control" bind:value={planName} />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startdate} />
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={planStartDate} />
             </div>
           </div>
           <div class="row align-items-center mb-3">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={enddate} />
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={planEndDate} />
             </div>
           </div>
           <div class="row align-items-center">
             <div class="col-md-3" style="text-align: right">Color*</div>
             <div class="col-md-2">
-              <input id="color" name="color" class="form-control" type="color" style="height: 40px;" bind:value={color} />
+              <input id="color" name="color" class="form-control" type="color" style="height: 40px;" bind:value={planColor} />
             </div>
           </div>
         </div>
@@ -179,6 +249,97 @@
           <button type="submit" class="btn btn-primary col">Create</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Create Task Modal -->
+<div class="modal" id="createTaskModal">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Create Task</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Creator</div>
+                <div class="col-md-9">
+                  <input type="hidden" name="creator" bind:value={taskCreator} />
+                  {$page.data.username}
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Creation Date</div>
+                <div class="col-md-9">
+                  <input type="hidden" name="creationdate" bind:value={taskCreationDate} />
+                  {new Date().toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                  })}
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Status</div>
+                <div class="col-md-9">
+                  <input type="hidden" name="state" bind:value={taskState} />
+                  Open
+                </div>
+              </div>
+              <div class="row align-items-center mb-3">
+                <div class="col-md-3" style="text-align: right">Task Name*</div>
+                <div class="col-md-9">
+                  <input id="taskname" name="taskname" class="form-control" bind:value={taskName} />
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Task Owner</div>
+                <div class="col-md-9">
+                  <input type="hidden" name="owner" bind:value={taskOwner} />
+                  {$page.data.username}
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Description</div>
+                <div class="col-md-9">
+                  <textarea rows="4" id="description" name="description" class="form-control" bind:value={taskDescription}></textarea>
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Plan Name</div>
+                <div class="col-md-9">
+                  <select class="form-select" name="taskplan" bind:value={taskPlan}>
+                    <option></option>
+                    {#each listOfPlans as plan}
+                      <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
+                    {/each}
+                  </select>
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Plan Start Date</div>
+                <div class="col-md-9">
+                  {taskPlanStartDate}
+                </div>
+              </div>
+              <div class="row align-items-center mb-2">
+                <div class="col-md-3" style="text-align: right">Plan End Date</div>
+                <div class="col-md-9">
+                  {taskPlanEndDate}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6"><textarea disabled id="description" name="description" class="form-control" style="height: 100%"></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Create</button>
+      </div>
     </div>
   </div>
 </div>
