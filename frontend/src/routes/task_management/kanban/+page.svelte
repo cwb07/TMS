@@ -44,7 +44,7 @@
     {#each taskStateHeaders as taskStateHeader}
       <div class="col" style="min-width: 300px;">
         <div class="card">
-          <div class="card-header bg-light text-capitalize">
+          <div class="card-header text-capitalize">
             <h5 class="mb-0">{taskStateHeader}</h5>
           </div>
           <div class="card-body" style="min-height: 500px;">
@@ -59,12 +59,12 @@
                 <div class="card-footer">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <span class="badge me-1" style="background-color: {task.taskPlanColor}">
+                      <span class="badge" style="background-color: {task.taskPlanColor}">
                         {task.planName}
                       </span>
                     </div>
                     <div>
-                      <span class="badge bg-secondary me-1">{task.taskOwner}</span>
+                      <span class="badge bg-secondary">{task.taskOwner}</span>
                     </div>
                   </div>
                 </div>
