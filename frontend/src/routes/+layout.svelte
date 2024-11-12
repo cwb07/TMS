@@ -25,12 +25,14 @@
   })
 
   $: if ($page.error) {
-    // list modal class elements
-    let modals = document.getElementsByClassName("modal-backdrop")
+    if (typeof window !== "undefined") {
+      // list modal class elements
+      let modals = document?.getElementsByClassName("modal-backdrop")
 
-    for (let modal of modals) {
-      // remove modal class elements
-      modal.remove()
+      for (let modal of modals) {
+        // remove modal class elements
+        modal.remove()
+      }
     }
   }
 </script>

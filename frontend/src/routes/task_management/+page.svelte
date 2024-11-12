@@ -4,6 +4,11 @@
   import { onMount } from "svelte"
   import { goto } from "$app/navigation"
 
+  const handleRedirectToView = application => {
+    sessionStorage.setItem("app", application.app_acronym)
+    goto(`/task_management/kanban`)
+  }
+
   export let form
 
   // create app form
@@ -152,7 +157,7 @@
             </div>
           </div>
           <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm w-100" on:click={() => goto("/login")}>View</button>
+            <button type="submit" class="btn btn-primary btn-sm w-100" on:click={() => handleRedirectToView(application)}>View</button>
           </div>
         </div>
       </div>
