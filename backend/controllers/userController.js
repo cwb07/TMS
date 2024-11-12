@@ -59,6 +59,7 @@ const logout = (req, res) => {
 const getUser = async (req, res) => {
   req.user.isAdmin = await checkGroup(req.user.username, "admin")
   req.user.isPL = await checkGroup(req.user.username, "pl")
+  req.user.isPM = await checkGroup(req.user.username, "pm")
   return res.json({ success: true, message: "User retrieved", data: req.user })
 }
 
@@ -130,7 +131,8 @@ const updateProfile = async (req, res) => {
 }
 
 const editUser = async (req, res) => {
-  let { username, password, email, groups, accountstatus } = req.body
+  const { username, password, groups, accountstatus } = req.body
+  let { email } = req.body
 
   email = email.trim()
 
@@ -201,7 +203,8 @@ const editUser = async (req, res) => {
 }
 
 const createUser = async (req, res) => {
-  let { username, password, email, groups, accountstatus } = req.body
+  const { password, groups, accountstatus } = req.body
+  let { username, email } = req.body
 
   username = username.trim()
   email = email.trim()

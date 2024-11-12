@@ -7,7 +7,10 @@ const appRnumberRegex = /^[0-9]+$/
 const appAcronymRegex = /^[a-zA-Z0-9]{1,50}$/
 
 const createApplication = async (req, res) => {
-  const { app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+  const { app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+  let { app_acronym } = req.body
+
+  app_acronym = app_acronym.trim()
 
   if (!app_acronym) {
     return res.json({ success: false, message: "App name is mandatory" })
@@ -61,7 +64,10 @@ const createApplication = async (req, res) => {
 }
 
 const editApplication = async (req, res) => {
-  const { prev_app_acronym, app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+  const { prev_app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+  let { app_acronym } = req.body
+
+  app_acronym = app_acronym.trim()
 
   if (!app_acronym) {
     return res.json({ success: false, message: "App name is mandatory" })

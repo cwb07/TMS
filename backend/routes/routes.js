@@ -2,6 +2,7 @@ import { checkUserAccess, isLoggedIn } from "../middlewares/authMiddleware.js"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
 import { createApplication, getAllApplications, editApplication } from "../controllers/applicationController.js"
+import { createPlan } from "../controllers/planController.js"
 
 import express from "express"
 
@@ -24,5 +25,8 @@ router.route("/getAllApplications").get(isLoggedIn, getAllApplications)
 // pl
 router.route("/createApplication").post(isLoggedIn, checkUserAccess("pl"), createApplication)
 router.route("/editApplication").post(isLoggedIn, checkUserAccess("pl"), editApplication)
+
+// pm
+router.route("/createPlan").post(isLoggedIn, checkUserAccess("pm"), createPlan)
 
 export default router

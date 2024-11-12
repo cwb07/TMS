@@ -1,0 +1,50 @@
+import pool from "../config/db.js"
+
+// plan mvp name length must be 1-255 characters
+const planMvpRegex = /^[a-zA-Z0-9]{1,255}$/
+
+const createPlan = async (req, res) => {
+  const { plan_app_acronym, plan_startdate, plan_enddate, plan_color } = req.body
+  let { plan_mvp_name } = req.body
+
+  plan_mvp_name = plan_mvp_name.trim()
+
+  if (!plan_mvp_name) {
+    return res.json({ success: false, message: "Plan name is mandatory" })
+  }
+
+  if (!planMvpRegex.test(plan_mvp_name)) {
+    return res.json({ success: false, message: "Plan name must be alphanumeric have a maximum of 255 characters" })
+  }
+
+  if (!plan_startdate) {
+    return res.json({ success: false, message: "Plan start date is mandatory" })
+  }
+
+  if (!plan_enddate) {
+    return res.json({ success: false, message: "Plan end date is mandatory" })
+  }
+
+  // plan start date must be before app end date
+  if (plan_startdate >= plan_enddate) {
+    return res.json({ success: false, message: "App start date must be before app end date" })
+  }
+
+  if (!plan_color) {
+    return res.json({ success: false, message: "Plan color is mandatory" })
+  }
+
+  const connection = await pool.getConnection()
+
+  try {
+    const query = `INSERT INTO plan(plan_mvp_name, plan_app_acronym, plan_startdate, plan_enddate, plan_color) VALUES (?, ?, ?, ?, ?)`
+    await connection.query(query, [plan_mvp_name, plan_app_acronym, plan_startdate, plan_enddate, plan_color])
+    return res.json({ success: true, message: "Plan created" })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to create plan", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+export { createPlan }
