@@ -80,5 +80,31 @@ export const actions = {
         error(500, { message: "Internal server error" })
       }
     }
+  },
+  updateTask: async ({ request }) => {
+    const form = await request.formData()
+
+    const task_id = form.get("taskid")
+    const prev_task_plan = form.get("prevtaskplan")
+    const task_plan = form.get("taskplan")
+    const task_notes = form.get("notes")
+    const username = form.get("username")
+    const task_state = form.get("taskstate")
+
+    try {
+      const response = await axios.post(`http://localhost:3000/updateTask`, { task_id, prev_task_plan, task_plan, task_notes, username, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+
+      if (response.data.success) {
+        return { taskSuccessMessage: response.data.message, resetUpdateTaskForm: true, notes: response.data.notes }
+      }
+    } catch (err) {
+      if (err.response.status === 401) {
+        error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403) {
+        error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else {
+        error(500, { message: "Internal server error" })
+      }
+    }
   }
 }
