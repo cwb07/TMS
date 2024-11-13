@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms"
   import { onMount } from "svelte"
   import { goto } from "$app/navigation"
+  import { formatDateToDisplay } from "$lib/utils.js"
 
   const handleRedirectToView = application => {
     sessionStorage.setItem("app", application.app_acronym)
@@ -138,21 +139,13 @@
             <div class="row">
               <div class="col-md-4" style="text-align: right"><b>START DATE</b></div>
               <div class="col-md-7">
-                {new Date(application.app_startdate).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric"
-                })}
+                {formatDateToDisplay(application.app_startdate)}
               </div>
             </div>
             <div class="row">
               <div class="col-md-4" style="text-align: right"><b>END DATE</b></div>
               <div class="col-md-7">
-                {new Date(application.app_enddate).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric"
-                })}
+                {formatDateToDisplay(application.app_enddate)}
               </div>
             </div>
           </div>
@@ -200,7 +193,7 @@
             </div>
           </div>
           <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">RNumber*</div>
+            <div class="col-md-3" style="text-align: right">RNumber</div>
             <div class="col-md-9">
               <input type="hidden" name="rnumber" value={editRnumber} />
               {editRnumber}

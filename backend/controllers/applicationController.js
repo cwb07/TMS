@@ -4,7 +4,7 @@ import pool from "../config/db.js"
 const appRnumberRegex = /^[0-9]+$/
 
 // app acronym length must be 1-50 characters
-const appAcronymRegex = /^[a-zA-Z0-9]{1,50}$/
+const appAcronymRegex = /^[a-zA-Z0-9\s]{1,50}$/
 
 const createApplication = async (req, res) => {
   const { app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body

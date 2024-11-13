@@ -4,26 +4,11 @@
   import { enhance } from "$app/forms"
   import { page } from "$app/stores"
   import axios from "axios"
+  import { formatDateToDisplay } from "$lib/utils.js"
 
   export let form
 
-  // create plan form
-  let planName = ""
-  let planStartDate = ""
-  let planEndDate = ""
-  let planColor = "#FFFFFF"
-
-  // create task form
-  let taskCreator = ""
-  let taskCreationDate = ""
-  let taskState = ""
-  let taskName = ""
-  let taskOwner = ""
-  let taskDescription = ""
-  let taskPlan = ""
-  let taskPlanStartDate = ""
-  let taskPlanEndDate = ""
-
+  // initialization
   onMount(async () => {
     document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
       planName = ""
@@ -37,11 +22,7 @@
     })
 
     document.getElementById("createTaskModal").addEventListener("hide.bs.modal", function (event) {
-      taskCreator = ""
-      taskCreationDate = ""
-      taskState = ""
       taskName = ""
-      taskOwner = ""
       taskDescription = ""
       taskPlan = ""
 
@@ -51,8 +32,19 @@
     })
   })
 
-  $: if (form?.resetCreatePlanForm) {
-    bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
+  let appName = ""
+  const taskStateHeaders = ["open", "todo", "doing", "done", "closed"]
+
+  onMount(() => {
+    if (!sessionStorage.getItem("app")) {
+      goto("/task_management")
+    } else {
+      appName = sessionStorage.getItem("app")
+    }
+  })
+
+  const getTasksByStatus = taskStateHeader => {
+    return tasks.filter(task => task.taskState === taskStateHeader)
   }
 
   // load existing app details
@@ -68,46 +60,42 @@
     }
   ]
 
-  let appName = ""
+  // create plan form
+  let planName = ""
+  let planStartDate = ""
+  let planEndDate = ""
+  let planColor = "#FFFFFF"
 
-  const taskStateHeaders = ["open", "todo", "doing", "done", "closed"]
-
-  onMount(() => {
-    if (!sessionStorage.getItem("app")) {
-      goto("/task_management")
-    } else {
-      appName = sessionStorage.getItem("app")
-    }
-  })
-
-  const getTasksByStatus = taskStateHeader => {
-    return tasks.filter(task => task.taskState === taskStateHeader)
+  $: if (form?.resetCreatePlanForm) {
+    bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
   }
 
-  let listOfPlans = []
+  // create task form
+  let taskCreationDate = formatDateToDisplay(new Date())
+  let taskName = ""
+  let taskDescription = ""
+  let taskPlan = ""
+  let taskPlanStartDate = ""
+  let taskPlanEndDate = ""
+
+  $: if (form?.resetCreateTaskForm) {
+    bootstrap.Modal.getInstance(document.getElementById("createTaskModal")).hide()
+  }
 
   // when user selects a plan, display the start and end date of the plan
   $: if (taskPlan) {
     const selectedPlan = listOfPlans.find(plan => plan.plan_mvp_name === taskPlan)
-    const formattedStartDate = new Date(selectedPlan.plan_startdate).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    })
-    taskPlanStartDate = formattedStartDate
-
-    const formattedEndDate = new Date(selectedPlan.plan_enddate).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    })
-    taskPlanEndDate = formattedEndDate
+    taskPlanStartDate = formatDateToDisplay(selectedPlan.plan_startdate)
+    taskPlanEndDate = formatDateToDisplay(selectedPlan.plan_enddate)
   } else {
     taskPlanStartDate = ""
     taskPlanEndDate = ""
   }
 
+  let listOfPlans = []
+
   const handleCreateTask = async () => {
+    // load available plans on click of create task
     try {
       const response = await axios.post(
         `http://localhost:3000/getAllPlansInApp`,
@@ -257,89 +245,106 @@
 <div class="modal" id="createTaskModal">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5">Create Task</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Creator</div>
-                <div class="col-md-9">
-                  <input type="hidden" name="creator" bind:value={taskCreator} />
-                  {$page.data.username}
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Creation Date</div>
-                <div class="col-md-9">
-                  <input type="hidden" name="creationdate" bind:value={taskCreationDate} />
-                  {new Date().toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                  })}
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Status</div>
-                <div class="col-md-9">
-                  <input type="hidden" name="state" bind:value={taskState} />
-                  Open
-                </div>
-              </div>
-              <div class="row align-items-center mb-3">
-                <div class="col-md-3" style="text-align: right">Task Name*</div>
-                <div class="col-md-9">
-                  <input id="taskname" name="taskname" class="form-control" bind:value={taskName} />
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Task Owner</div>
-                <div class="col-md-9">
-                  <input type="hidden" name="owner" bind:value={taskOwner} />
-                  {$page.data.username}
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Description</div>
-                <div class="col-md-9">
-                  <textarea rows="4" id="description" name="description" class="form-control" bind:value={taskDescription}></textarea>
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Plan Name</div>
-                <div class="col-md-9">
-                  <select class="form-select" name="taskplan" bind:value={taskPlan}>
-                    <option></option>
-                    {#each listOfPlans as plan}
-                      <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
-                    {/each}
-                  </select>
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Plan Start Date</div>
-                <div class="col-md-9">
-                  {taskPlanStartDate}
-                </div>
-              </div>
-              <div class="row align-items-center mb-2">
-                <div class="col-md-3" style="text-align: right">Plan End Date</div>
-                <div class="col-md-9">
-                  {taskPlanEndDate}
+      <form
+        method="POST"
+        action="?/createTask"
+        use:enhance={() => {
+          return async ({ update }) => {
+            update({ reset: false })
+          }
+        }}
+      >
+        <input type="hidden" name="appname" bind:value={appName} />
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Task Details</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {#if form?.errorMessage}
+            <div class="row mb-2">
+              <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                  Error: {form?.errorMessage}
                 </div>
               </div>
             </div>
-            <div class="col-md-6"><textarea disabled id="description" name="description" class="form-control" style="height: 100%"></textarea></div>
+          {/if}
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Creator</div>
+                  <div class="col-md-9">
+                    <input type="hidden" name="creator" bind:value={$page.data.username} />
+                    {$page.data.username}
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Creation Date</div>
+                  <div class="col-md-9">
+                    <input type="hidden" name="creationdate" bind:value={taskCreationDate} />
+                    {taskCreationDate}
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Status</div>
+                  <div class="col-md-9">Open</div>
+                </div>
+                <div class="row align-items-center mb-3">
+                  <div class="col-md-3" style="text-align: right">Task Name*</div>
+                  <div class="col-md-9">
+                    <input id="taskname" name="taskname" class="form-control" bind:value={taskName} />
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Task Owner</div>
+                  <div class="col-md-9">
+                    <input type="hidden" name="owner" bind:value={$page.data.username} />
+                    {$page.data.username}
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Description</div>
+                  <div class="col-md-9">
+                    <textarea rows="4" id="description" name="description" class="form-control" bind:value={taskDescription}></textarea>
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Plan Name</div>
+                  <div class="col-md-9">
+                    <select class="form-select" name="taskplan" bind:value={taskPlan}>
+                      <option></option>
+                      {#each listOfPlans as plan}
+                        <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
+                      {/each}
+                    </select>
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Plan Start Date</div>
+                  <div class="col-md-9">
+                    {taskPlanStartDate}
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-md-3" style="text-align: right">Plan End Date</div>
+                  <div class="col-md-9">
+                    {taskPlanEndDate}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h5>Logs</h5>
+                <textarea disabled id="description" name="description" class="form-control" style="min-height: 370px;"></textarea>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Create</button>
-      </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Create</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

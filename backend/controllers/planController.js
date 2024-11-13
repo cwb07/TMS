@@ -1,7 +1,7 @@
 import pool from "../config/db.js"
 
 // plan mvp name length must be 1-255 characters
-const planMvpRegex = /^[a-zA-Z0-9]{1,255}$/
+const planMvpRegex = /^[a-zA-Z0-9\s]{1,255}$/
 
 const createPlan = async (req, res) => {
   const { plan_app_acronym, plan_startdate, plan_enddate, plan_color } = req.body
