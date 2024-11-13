@@ -151,6 +151,7 @@
 
   $: if (form?.resetUpdateTaskForm) {
     selectedTaskNotes = form?.notes
+    selectedTaskOwner = $page.data.username
     enterLog = ""
     fetchPlansAndTasks()
   }

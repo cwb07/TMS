@@ -82,6 +82,10 @@ const updateTask = async (req, res) => {
       await appendNotesToTask(task_id, username, task_state, task_notes)
     }
 
+    // update task owner
+    const updateOwnerQuery = `UPDATE task SET task_owner = ? WHERE task_id = ?`
+    await connection.query(updateOwnerQuery, [username, task_id])
+
     // get updated task notes from db
     const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
     const [results] = await connection.query(getNotesQuery, [task_id])
