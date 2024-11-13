@@ -8,57 +8,81 @@
 
   export let form
 
+  let appName = ""
+  let listOfTasks = []
+  let listOfPlans = []
+
   // initialization
   onMount(async () => {
-    document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
-      planName = ""
-      planStartDate = ""
-      planEndDate = ""
-      planColor = "#FFFFFF"
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-
-    document.getElementById("createTaskModal").addEventListener("hide.bs.modal", function (event) {
-      taskName = ""
-      taskDescription = ""
-      taskPlan = ""
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-  })
-
-  let appName = ""
-  const taskStateHeaders = ["open", "todo", "doing", "done", "closed"]
-
-  onMount(() => {
     if (!sessionStorage.getItem("app")) {
       goto("/task_management")
     } else {
       appName = sessionStorage.getItem("app")
+
+      fetchPlansAndTasks()
+
+      document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
+        planName = ""
+        planStartDate = ""
+        planEndDate = ""
+        planColor = "#FFFFFF"
+
+        if (form?.errorMessage) {
+          form.errorMessage = ""
+        }
+      })
+
+      document.getElementById("createTaskModal").addEventListener("hide.bs.modal", function (event) {
+        taskName = ""
+        taskDescription = ""
+        taskPlan = ""
+
+        if (form?.errorMessage) {
+          form.errorMessage = ""
+        }
+      })
     }
   })
 
-  const getTasksByStatus = taskStateHeader => {
-    return tasks.filter(task => task.taskState === taskStateHeader)
+  const fetchPlansAndTasks = async () => {
+    try {
+      // load list of plans
+      const planResponse = await axios.post(
+        `http://localhost:3000/getAllPlansInApp`,
+        { plan_app_acronym: appName },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true
+        }
+      )
+
+      // load list of tasks
+      const taskResponse = await axios.post(
+        `http://localhost:3000/getAllTasksInApp`,
+        { task_app_acronym: appName },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true
+        }
+      )
+
+      if (planResponse.data.success && taskResponse.data.success) {
+        listOfPlans = planResponse.data.data
+        listOfTasks = taskResponse.data.data.map(task => ({
+          ...task,
+          task_color: listOfPlans.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || "#FFFFFF"
+        }))
+      }
+    } catch (err) {
+      goto("/task_management")
+    }
   }
 
-  // load existing app details
-  let tasks = [
-    {
-      taskId: 1,
-      planName: "Plan 1",
-      taskName: "Sample Task 1",
-      taskDescription: "This is a sample task taskDescription",
-      taskState: "open",
-      taskOwner: "John",
-      taskPlanColor: "#33FF57"
-    }
-  ]
+  const taskStateHeaders = ["open", "todo", "doing", "done", "closed"]
+
+  $: getTasksByStatus = taskStateHeader => {
+    return listOfTasks.filter(task => task.task_state === taskStateHeader)
+  }
 
   // create plan form
   let planName = ""
@@ -68,6 +92,7 @@
 
   $: if (form?.resetCreatePlanForm) {
     bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
+    fetchPlansAndTasks()
   }
 
   // create task form
@@ -80,6 +105,7 @@
 
   $: if (form?.resetCreateTaskForm) {
     bootstrap.Modal.getInstance(document.getElementById("createTaskModal")).hide()
+    fetchPlansAndTasks()
   }
 
   // when user selects a plan, display the start and end date of the plan
@@ -91,28 +117,6 @@
     taskPlanStartDate = ""
     taskPlanEndDate = ""
   }
-
-  let listOfPlans = []
-
-  const handleCreateTask = async () => {
-    // load available plans on click of create task
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/getAllPlansInApp`,
-        { plan_app_acronym: appName },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true
-        }
-      )
-
-      if (response.data.success) {
-        listOfPlans = response.data.data
-      }
-    } catch (err) {
-      location.reload()
-    }
-  }
 </script>
 
 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
@@ -120,7 +124,7 @@
     <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createPlanModal">Create Plan</button>
   {/if}
   {#if $page.data.isPL}
-    <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createTaskModal" on:click={handleCreateTask}>Create Task</button>
+    <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createTaskModal">Create Task</button>
   {/if}
   <div style="flex: 1; text-align: center; margin-right: 300px">
     <h2>{appName}</h2>
@@ -148,20 +152,18 @@
             {#each getTasksByStatus(taskStateHeader) as task}
               <div class="card mb-3">
                 <div class="card-header">
-                  <h6 class="mb-0">{task.taskName}</h6>
+                  <h6 class="mb-0">{task.task_name}</h6>
                 </div>
                 <div class="card-body">
-                  <p class="card-text">{task.taskDescription}</p>
+                  <p class="card-text">{task.task_description}</p>
                 </div>
                 <div class="card-footer">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <span class="badge">
-                        {task.planName}
-                      </span>
+                      <span class="badge" style="background-color: {task.task_color}">{task.task_plan}</span>
                     </div>
                     <div>
-                      <span class="badge bg-secondary">{task.taskOwner}</span>
+                      <span class="badge bg-secondary">{task.task_owner}</span>
                     </div>
                   </div>
                 </div>

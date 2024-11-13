@@ -4,6 +4,7 @@ import { error } from "@sveltejs/kit"
 export const load = async ({ request }) => {
   try {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+
     if (response.data.success) {
       return {
         username: response.data.data.username,

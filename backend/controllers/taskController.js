@@ -20,7 +20,7 @@ const createTask = async (req, res) => {
     const task_notes = `
     **********
     TASK CREATED
-    User: ${task_creator}, Date: ${task_createdate}, State: Open
+    User: ${task_creator}, Date: ${new Date(task_createdate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}, State: Open
     `
 
     const insertQuery = `INSERT INTO task (task_id, task_name, task_plan, task_app_acronym, task_description, task_state, task_creator, task_owner, task_createdate, task_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`

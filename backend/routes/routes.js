@@ -33,6 +33,6 @@ router.route("/createPlan").post(isLoggedIn, checkUserAccess("pm"), createPlan)
 
 // to check user rights later
 router.route("/createTask").post(isLoggedIn, createTask)
-router.route("/getAllTasksInApp").get(isLoggedIn, getAllTasksInApp)
+router.route("/getAllTasksInApp").post(isLoggedIn, getAllTasksInApp)
 
 export default router
