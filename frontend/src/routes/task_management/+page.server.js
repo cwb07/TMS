@@ -1,5 +1,6 @@
 import axios from "axios"
 import { error } from "@sveltejs/kit"
+import { redirect } from "@sveltejs/kit"
 
 export const load = async ({ request }) => {
   try {
@@ -92,5 +93,11 @@ export const actions = {
         error(500, { message: "Internal server error" })
       }
     }
+  },
+  viewApp: async ({ request, cookies }) => {
+    const form = await request.formData()
+    const appName = form.get("appname")
+    cookies.set("app", appName, { path: "/", httpOnly: true })
+    redirect(302, "/task_management/kanban")
   }
 }

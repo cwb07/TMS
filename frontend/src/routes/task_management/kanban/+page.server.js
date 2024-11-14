@@ -1,16 +1,35 @@
 import axios from "axios"
 import { error } from "@sveltejs/kit"
 
-export const load = async ({ request }) => {
+export const load = async ({ request, locals, event }) => {
+  const appName = locals.app
+  let defaultColor = "#6C757D"
+
   try {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+    const planResponse = await axios.post(`http://localhost:3000/getAllPlansInApp`, { plan_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+    const taskResponse = await axios.post(`http://localhost:3000/getAllTasksInApp`, { task_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
-    if (response.data.success) {
+    if (response.data.success && planResponse.data.success && taskResponse.data.success) {
+      const plansList = planResponse.data.data
+
+      for (let state in taskResponse.data.data) {
+        let tasksList = taskResponse.data.data[state].map(task => ({
+          ...task,
+          task_color: plansList.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor
+        }))
+
+        taskResponse.data.data[state] = tasksList
+      }
+
       return {
         username: response.data.data.username,
         isPM: response.data.data.isPM,
         isPL: response.data.data.isPL,
-        isAdmin: response.data.data.isAdmin
+        isAdmin: response.data.data.isAdmin,
+        plansList: planResponse.data.data,
+        tasksList: taskResponse.data.data,
+        appname: appName
       }
     }
   } catch (err) {
@@ -95,7 +114,7 @@ export const actions = {
       const response = await axios.post(`http://localhost:3000/updateTask`, { task_id, prev_task_plan, task_plan, task_notes, username, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
-        return { taskSuccessMessage: response.data.message, resetUpdateTaskForm: true, notes: response.data.notes }
+        return { taskSuccessMessage: response.data.message, resetUpdateTaskForm: true, notes: response.data.notes, plan: response.data.plan }
       }
     } catch (err) {
       if (err.response.status === 401) {

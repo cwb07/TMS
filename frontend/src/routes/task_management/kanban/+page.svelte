@@ -8,20 +8,14 @@
 
   export let form
 
-  let appName = ""
-  let listOfTasks = []
-  let listOfPlans = []
+  let appName = $page.data.appname || ""
   let defaultColor = "#6C757D"
 
   // initialization
   onMount(async () => {
-    if (!sessionStorage.getItem("app")) {
+    if (!appName) {
       goto("/task_management")
     } else {
-      appName = sessionStorage.getItem("app")
-
-      fetchPlansAndTasks()
-
       document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
         planName = ""
         planStartDate = ""
@@ -45,46 +39,6 @@
     }
   })
 
-  const fetchPlansAndTasks = async () => {
-    try {
-      // load list of plans
-      const planResponse = await axios.post(
-        `http://localhost:3000/getAllPlansInApp`,
-        { plan_app_acronym: appName },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true
-        }
-      )
-
-      // load list of tasks
-      const taskResponse = await axios.post(
-        `http://localhost:3000/getAllTasksInApp`,
-        { task_app_acronym: appName },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true
-        }
-      )
-
-      if (planResponse.data.success && taskResponse.data.success) {
-        listOfPlans = planResponse.data.data
-        listOfTasks = taskResponse.data.data.map(task => ({
-          ...task,
-          task_color: listOfPlans.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor
-        }))
-      }
-    } catch (err) {
-      goto("/task_management")
-    }
-  }
-
-  const taskStateHeaders = ["Open", "Todo", "Doing", "Done", "Closed"]
-
-  $: getTasksByStatus = taskStateHeader => {
-    return listOfTasks.filter(task => task.task_state === taskStateHeader)
-  }
-
   // create plan form
   let planName = ""
   let planStartDate = ""
@@ -93,7 +47,6 @@
 
   $: if (form?.resetCreatePlanForm) {
     bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
-    fetchPlansAndTasks()
   }
 
   // create task form
@@ -106,12 +59,11 @@
 
   $: if (form?.resetCreateTaskForm) {
     bootstrap.Modal.getInstance(document.getElementById("createTaskModel")).hide()
-    fetchPlansAndTasks()
   }
 
   // when user selects a plan, display the start and end date of the plan
   $: if (taskPlan) {
-    const selectedPlan = listOfPlans.find(plan => plan.plan_mvp_name === taskPlan)
+    const selectedPlan = $page.data.plansList.find(plan => plan.plan_mvp_name === taskPlan)
     taskPlanStartDate = formatDateToDisplay(selectedPlan.plan_startdate)
     taskPlanEndDate = formatDateToDisplay(selectedPlan.plan_enddate)
   } else {
@@ -152,8 +104,8 @@
   $: if (form?.resetUpdateTaskForm) {
     selectedTaskNotes = form?.notes
     selectedTaskOwner = $page.data.username
+    selectedTaskPlan = form?.plan
     enterLog = ""
-    fetchPlansAndTasks()
   }
 </script>
 
@@ -180,14 +132,14 @@
     </div>
   {/if}
   <div class="row flex-nowrap overflow-auto" style="gap: 0.5rem;">
-    {#each taskStateHeaders as taskStateHeader}
+    {#each Object.entries($page.data.tasksList) as [state, tasks]}
       <div class="col" style="min-width: 300px;">
         <div class="card">
           <div class="card-header text-capitalize">
-            <h5 class="mb-0">{taskStateHeader}</h5>
+            <h5 class="mb-0">{state}</h5>
           </div>
           <div class="card-body" style="min-height: 500px;">
-            {#each getTasksByStatus(taskStateHeader) as task}
+            {#each tasks as task}
               <div class="card mb-3" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#viewTaskModel">
                 <a href="/" on:click={event => viewTask(event, task)} class="stretched-link" aria-label="view-task"></a>
                 <div class="card-header">
@@ -355,7 +307,7 @@
                   <div class="col-md-9">
                     <select class="form-select" name="taskplan" bind:value={taskPlan}>
                       <option></option>
-                      {#each listOfPlans as plan}
+                      {#each $page.data.plansList as plan}
                         <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
                       {/each}
                     </select>
@@ -476,7 +428,7 @@
                   <div class="col-md-9">
                     <select class="form-select" name="taskplan" bind:value={taskPlan}>
                       <option></option>
-                      {#each listOfPlans as plan}
+                      {#each $page.data.plansList as plan}
                         <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
                       {/each}
                     </select>

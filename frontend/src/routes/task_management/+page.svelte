@@ -5,11 +5,6 @@
   import { goto } from "$app/navigation"
   import { formatDateToDisplay } from "$lib/utils.js"
 
-  const handleRedirectToView = application => {
-    sessionStorage.setItem("app", application.app_acronym)
-    goto(`/task_management/kanban`)
-  }
-
   export let form
 
   // create app form
@@ -149,9 +144,12 @@
               </div>
             </div>
           </div>
-          <div class="card-footer">
-            <button type="submit" class="btn btn-primary btn-sm w-100" on:click={() => handleRedirectToView(application)}>View</button>
-          </div>
+          <form method="POST" action="?/viewApp" use:enhance>
+            <div class="card-footer">
+              <input type="hidden" name="appname" value={application.app_acronym} />
+              <button type="submit" class="btn btn-primary btn-sm w-100">View</button>
+            </div>
+          </form>
         </div>
       </div>
     {/each}
