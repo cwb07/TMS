@@ -109,6 +109,26 @@
       selectedTaskState = "Todo"
       form.resetPromoteTask2TodoForm = false
     }
+
+    if (form?.resetPromoteTask2DoingForm) {
+      selectedTaskState = "Doing"
+      form.resetPromoteTask2DoingForm = false
+    }
+
+    if (form?.resetPromoteTask2DoneForm) {
+      selectedTaskState = "Done"
+      form.resetPromoteTask2DoneForm = false
+    }
+
+    if (form?.resetDemoteTask2DoingForm) {
+      selectedTaskState = "Doing"
+      form.resetDemoteTask2DoingForm = false
+    }
+
+    if (form?.resetPromoteTask2ClosedForm) {
+      selectedTaskState = "Closed"
+      form.resetPromoteTask2ClosedForm = false
+    }
   }
 </script>
 
@@ -429,12 +449,17 @@
                 <div class="row align-items-center mb-2">
                   <div class="col-md-3" style="text-align: right">Plan Name</div>
                   <div class="col-md-9">
-                    <select class="form-select" name="taskplan" bind:value={taskPlan}>
-                      <option></option>
-                      {#each $page.data.plansList as plan}
-                        <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
-                      {/each}
-                    </select>
+                    {#if selectedTaskState === "Open" || selectedTaskState === "Done"}
+                      <select class="form-select" name="taskplan" bind:value={taskPlan}>
+                        <option></option>
+                        {#each $page.data.plansList as plan}
+                          <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
+                        {/each}
+                      </select>
+                    {:else}
+                      <input type="hidden" name="taskplan" bind:value={selectedTaskPlan} />
+                      {selectedTaskPlan}
+                    {/if}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
@@ -458,21 +483,39 @@
                 </row>
                 <row>
                   <div class="col-md-12">
-                    <textarea disabled id="description" name="description" class="form-control" style="min-height: 300px;">{selectedTaskNotes}</textarea>
+                    <textarea disabled id="description" name="description" class="form-control" style="min-height: {selectedTaskState !== 'Closed' ? '300px' : '370px'};">{selectedTaskNotes}</textarea>
                   </div>
                 </row>
-                <row>
-                  <div class="col-md-12 mt-3">
-                    <textarea id="notes" name="notes" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
-                  </div>
-                </row>
+                {#if selectedTaskState !== "Closed"}
+                  <row>
+                    <div class="col-md-12 mt-3">
+                      <textarea id="notes" name="notes" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
+                    </div>
+                  </row>
+                {/if}
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success" formaction="?/promoteTask2Todo" data-bs-dismiss="modal">Release</button>
-          <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
+          {#if selectedTaskState !== "Closed"}
+            {#if selectedTaskState === "Open"}
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Todo" data-bs-dismiss="modal">Release</button>
+            {:else if selectedTaskState === "Todo"}
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Doing" data-bs-dismiss="modal">Assign</button>
+            {:else if selectedTaskState === "Doing"}
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Done" data-bs-dismiss="modal">Review</button>
+              <button type="submit" class="btn btn-danger" formaction="?/demoteTask2Todo" data-bs-dismiss="modal">Unassign</button>
+            {:else}
+              {#if selectedTaskPlan === taskPlan}
+                <button type="submit" class="btn btn-success" formaction="?/promoteTask2Closed" data-bs-dismiss="modal">Approve</button>
+              {/if}
+              <button type="submit" class="btn btn-danger" formaction="?/demoteTask2Doing" data-bs-dismiss="modal">Reject</button>
+            {/if}
+            {#if selectedTaskPlan === taskPlan}
+              <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
+            {/if}
+          {/if}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>

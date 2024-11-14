@@ -1,23 +1,162 @@
 import pool from "../config/db.js"
 
-const promoteTask2Todo = async (req, res) => {
+const promoteTask2Closed = async (req, res) => {
   const { task_id, username } = req.body
 
   const connection = await pool.getConnection()
 
   try {
-    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Closed", task_owner = ? WHERE task_id = ?`
     await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Todo", "Task released to Todo.")
+    await appendNotesToTask(connection, task_id, username, "Closed", "Task closed.")
 
     // get updated task notes from db
     const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
     const [results] = await connection.query(getNotesQuery, [task_id])
     const updatedNotes = results[0].task_notes
 
-    return res.json({ success: true, message: "Task released to Todo", notes: updatedNotes })
+    await connection.commit()
+    return res.json({ success: true, message: "Task closed", notes: updatedNotes })
   } catch (err) {
+    await connection.rollback()
+    return res.status(500).json({ success: false, message: "Unable to close task", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+const demoteTask2Doing = async (req, res) => {
+  const { task_id, username } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Doing", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Doing", "Task review rejected.")
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    await connection.commit()
+    return res.json({ success: true, message: "Task review rejected", notes: updatedNotes })
+  } catch (err) {
+    await connection.rollback()
+    return res.status(500).json({ success: false, message: "Unable to reject task", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+const promoteTask2Done = async (req, res) => {
+  const { task_id, username } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Done", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Done", "Task submitted for review.")
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    await connection.commit()
+    return res.json({ success: true, message: "Task submitted for review", notes: updatedNotes })
+  } catch (err) {
+    await connection.rollback()
+    return res.status(500).json({ success: false, message: "Unable to submit task for review", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+const demoteTask2Todo = async (req, res) => {
+  const { task_id, username } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Todo", "Task unassigned.")
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    await connection.commit()
+    return res.json({ success: true, message: "Task unassigned", notes: updatedNotes })
+  } catch (err) {
+    await connection.rollback()
+    return res.status(500).json({ success: false, message: "Unable to unassign task to Todo", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+const promoteTask2Todo = async (req, res) => {
+  const { task_id, username } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Todo", "Task released.")
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    await connection.commit()
+    return res.json({ success: true, message: "Task released", notes: updatedNotes })
+  } catch (err) {
+    await connection.rollback()
     return res.status(500).json({ success: false, message: "Unable to release task to Todo", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+const promoteTask2Doing = async (req, res) => {
+  const { task_id, username, assignee } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    await connection.beginTransaction()
+
+    const updateStateQuery = `UPDATE task SET task_state = "Doing", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [assignee ? assignee : username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Doing", `Task assigned to ${assignee ? assignee : username}.`)
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    await connection.commit()
+    return res.json({ success: true, message: `Task assigned to ${assignee ? assignee : username}`, notes: updatedNotes })
+  } catch (err) {
+    await connection.rollback()
+    return res.status(500).json({ success: false, message: "Unable to assign task", stack: err.stack })
   } finally {
     connection.release()
   }
@@ -48,7 +187,7 @@ const createTask = async (req, res) => {
     await connection.query(insertQuery, [task_id, task_name, task_plan, task_app_acronym, task_description, "Open", task_creator, task_owner, task_createdate, task_notes])
 
     await connection.commit()
-    return res.json({ success: true, message: "Task created successfully" })
+    return res.json({ success: true, message: "Task created" })
   } catch (err) {
     await connection.rollback()
     return res.status(500).json({ success: false, message: "Unable to create task", stack: err.stack })
@@ -88,7 +227,7 @@ const saveTask = async (req, res) => {
     const updatedNotes = results[0].task_notes
 
     await connection.commit()
-    return res.json({ success: true, message: "Task updated successfully", notes: updatedNotes, plan: newPlan })
+    return res.json({ success: true, message: "Task saved", notes: updatedNotes, plan: newPlan })
   } catch (err) {
     await connection.rollback()
     return res.status(500).json({ success: false, message: "Unable to update task", stack: err.stack })
@@ -114,7 +253,7 @@ const getTaskbyState = async (state, app) => {
 const getAllTasksInApp = async (req, res) => {
   const { task_app_acronym } = req.body
 
-  const states = ["Open", "Todo", "Doing", "Done", "Close"]
+  const states = ["Open", "Todo", "Doing", "Done", "Closed"]
   const tasksByState = {}
 
   for (const state of states) {
@@ -157,4 +296,4 @@ const appendNotesToTask = async (connection, task_id, username, state, notes) =>
   }
 }
 
-export { createTask, getAllTasksInApp, saveTask, promoteTask2Todo }
+export { createTask, getAllTasksInApp, saveTask, promoteTask2Todo, promoteTask2Doing, demoteTask2Todo, promoteTask2Done, demoteTask2Doing, promoteTask2Closed }

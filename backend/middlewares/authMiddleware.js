@@ -13,6 +13,7 @@ const isLoggedIn = async (req, res, next) => {
 
       if (decoded.ip !== req.ip || decoded.browser != req.headers["user-agent"]) {
         res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+        res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
         return res.status(401).json({ success: false, message: "Your session is not valid with this IP address" })
       }
 
@@ -21,6 +22,7 @@ const isLoggedIn = async (req, res, next) => {
 
       if (results.length === 0 || results[0].accountstatus !== "Active") {
         res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+        res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
 
         // no user found or user not active
         return res.status(401).json({ success: false, message: "Unauthorized access" })
@@ -30,6 +32,7 @@ const isLoggedIn = async (req, res, next) => {
       }
     } catch (err) {
       res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+      res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
 
       if (err instanceof jwt.TokenExpiredError) {
         // token expired
@@ -84,6 +87,7 @@ const checkUserAccess =
       next()
     } else {
       res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+      res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
       return res.status(403).json({ success: false, message: "Unauthorized access" })
     }
   }
