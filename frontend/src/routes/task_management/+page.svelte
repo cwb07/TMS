@@ -2,7 +2,6 @@
   import { page } from "$app/stores"
   import { enhance } from "$app/forms"
   import { onMount } from "svelte"
-  import { goto } from "$app/navigation"
   import { formatDateToDisplay } from "$lib/utils.js"
 
   export let form
@@ -20,7 +19,7 @@
   let permitCreate = ""
 
   onMount(async () => {
-    document.getElementById("createAppModal").addEventListener("hide.bs.modal", function (event) {
+    document.getElementById("createAppModal").addEventListener("show.bs.modal", function (event) {
       name = ""
       rNumber = ""
       description = ""
@@ -37,7 +36,7 @@
       }
     })
 
-    document.getElementById("editAppModal").addEventListener("hide.bs.modal", function (event) {
+    document.getElementById("editAppModal").addEventListener("show.bs.modal", function (event) {
       editName = ""
       editRnumber = ""
       editDescription = ""
@@ -57,6 +56,7 @@
 
   $: if (form?.resetCreateAppForm) {
     bootstrap.Modal.getInstance(document.getElementById("createAppModal")).hide()
+    form.resetCreateAppForm = false
   }
 
   // edit app form
@@ -92,6 +92,7 @@
 
   $: if (form?.resetEditAppForm) {
     bootstrap.Modal.getInstance(document.getElementById("editAppModal")).hide()
+    form.resetEditAppForm = false
   }
 </script>
 

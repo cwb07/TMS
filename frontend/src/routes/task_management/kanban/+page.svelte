@@ -1,9 +1,7 @@
 <script>
   import { onMount } from "svelte"
-  import { goto } from "$app/navigation"
   import { enhance } from "$app/forms"
   import { page } from "$app/stores"
-  import axios from "axios"
   import { formatDateToDisplay } from "$lib/utils.js"
 
   export let form
@@ -13,30 +11,26 @@
 
   // initialization
   onMount(async () => {
-    if (!appName) {
-      goto("/task_management")
-    } else {
-      document.getElementById("createPlanModal").addEventListener("hide.bs.modal", function (event) {
-        planName = ""
-        planStartDate = ""
-        planEndDate = ""
-        planColor = defaultColor
+    document.getElementById("createPlanModal").addEventListener("show.bs.modal", function (event) {
+      planName = ""
+      planStartDate = ""
+      planEndDate = ""
+      planColor = defaultColor
 
-        if (form?.errorMessage) {
-          form.errorMessage = ""
-        }
-      })
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
 
-      document.getElementById("createTaskModel").addEventListener("hide.bs.modal", function (event) {
-        taskName = ""
-        taskDescription = ""
-        taskPlan = ""
+    document.getElementById("createTaskModel").addEventListener("show.bs.modal", function (event) {
+      taskName = ""
+      taskDescription = ""
+      taskPlan = ""
 
-        if (form?.errorMessage) {
-          form.errorMessage = ""
-        }
-      })
-    }
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
   })
 
   // create plan form
@@ -47,6 +41,7 @@
 
   $: if (form?.resetCreatePlanForm) {
     bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
+    form.resetCreatePlanForm = false
   }
 
   // create task form
@@ -59,6 +54,7 @@
 
   $: if (form?.resetCreateTaskForm) {
     bootstrap.Modal.getInstance(document.getElementById("createTaskModel")).hide()
+    form.resetCreateTaskForm = false
   }
 
   // when user selects a plan, display the start and end date of the plan
@@ -91,21 +87,28 @@
     selectedTaskName = task.task_name
     selectedTaskOwner = task.task_owner
     selectedTaskDescription = task.task_description
-    selectedTaskPlan = task.task_plan
-    taskPlan = task.task_plan
     selectedTaskNotes = task.task_notes
     selectedTaskId = task.task_id
+    selectedTaskPlan = task.task_plan
+    enterLog = ""
+    taskPlan = task.task_plan
 
-    if (form) {
+    if (form?.taskSuccessMessage) {
       form.taskSuccessMessage = ""
     }
   }
 
-  $: if (form?.resetUpdateTaskForm) {
+  $: if (form?.resetSaveTaskForm) {
     selectedTaskNotes = form?.notes
     selectedTaskOwner = $page.data.username
     selectedTaskPlan = form?.plan
     enterLog = ""
+    form.resetSaveTaskForm = false
+
+    if (form?.resetPromoteTask2TodoForm) {
+      selectedTaskState = "Todo"
+      form.resetPromoteTask2TodoForm = false
+    }
   }
 </script>
 
@@ -468,8 +471,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Release</button>
-          <button type="submit" class="btn btn-primary" formaction="?/updateTask">Save</button>
+          <button type="submit" class="btn btn-success" formaction="?/promoteTask2Todo" data-bs-dismiss="modal">Release</button>
+          <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>

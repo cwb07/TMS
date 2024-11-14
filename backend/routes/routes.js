@@ -3,7 +3,7 @@ import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
 import { createApplication, getAllApplications, editApplication } from "../controllers/applicationController.js"
 import { createPlan, getAllPlansInApp } from "../controllers/planController.js"
-import { createTask, getAllTasksInApp, updateTask } from "../controllers/taskController.js"
+import { createTask, getAllTasksInApp, saveTask, promoteTask2Todo } from "../controllers/taskController.js"
 
 import express from "express"
 
@@ -34,6 +34,7 @@ router.route("/createPlan").post(isLoggedIn, checkUserAccess("pm"), createPlan)
 // to check user rights later
 router.route("/createTask").post(isLoggedIn, createTask)
 router.route("/getAllTasksInApp").post(isLoggedIn, getAllTasksInApp)
-router.route("/updateTask").post(isLoggedIn, updateTask)
+router.route("/saveTask").post(isLoggedIn, saveTask)
+router.route("/promoteTask2Todo").post(isLoggedIn, promoteTask2Todo)
 
 export default router

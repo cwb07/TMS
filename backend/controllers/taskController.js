@@ -1,5 +1,28 @@
 import pool from "../config/db.js"
 
+const promoteTask2Todo = async (req, res) => {
+  const { task_id, username } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
+    await connection.query(updateStateQuery, [username, task_id])
+    await appendNotesToTask(connection, task_id, username, "Todo", "Task released to Todo.")
+
+    // get updated task notes from db
+    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
+    const [results] = await connection.query(getNotesQuery, [task_id])
+    const updatedNotes = results[0].task_notes
+
+    return res.json({ success: true, message: "Task released to Todo", notes: updatedNotes })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to release task to Todo", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
 const createTask = async (req, res) => {
   const { task_plan, task_app_acronym, task_description, task_creator, task_owner, task_createdate } = req.body
   let { task_name } = req.body
@@ -34,7 +57,7 @@ const createTask = async (req, res) => {
   }
 }
 
-const updateTask = async (req, res) => {
+const saveTask = async (req, res) => {
   const { task_id, prev_task_plan, task_plan, task_notes, username, task_state } = req.body
 
   const connection = await pool.getConnection()
@@ -126,7 +149,6 @@ const appendNotesToTask = async (connection, task_id, username, state, notes) =>
   try {
     const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
     const [results] = await connection.query(getNotesQuery, [task_id])
-
     const updatedNotes = `${auditStampString(username, state)}\n${notes}\n${results[0].task_notes}`
     const updateNotesQuery = `UPDATE task SET task_notes = ? WHERE task_id = ?`
     await connection.query(updateNotesQuery, [updatedNotes, task_id])
@@ -135,4 +157,4 @@ const appendNotesToTask = async (connection, task_id, username, state, notes) =>
   }
 }
 
-export { createTask, getAllTasksInApp, updateTask }
+export { createTask, getAllTasksInApp, saveTask, promoteTask2Todo }

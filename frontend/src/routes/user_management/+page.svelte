@@ -15,6 +15,7 @@
 
   $: if (form?.resetCreateGroupForm) {
     groupName = ""
+    form.resetCreateGroupForm = false
   }
 
   // user form fields
@@ -31,6 +32,7 @@
     selectedGroups = []
     accountStatus = "Active"
     document.getElementById("username").focus()
+    form.resetCreateUserForm = false
   }
 
   // edit user form fields
@@ -61,6 +63,7 @@
 
   $: if (form?.resetEditUserForm) {
     cancelEdit()
+    form.resetEditUserForm = false
   }
 
   const cancelEdit = () => {

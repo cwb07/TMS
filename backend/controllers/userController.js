@@ -53,6 +53,7 @@ const login = async (req, res) => {
 // Logout user & clear cookie
 const logout = (req, res) => {
   res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+  res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
   return res.json({ success: true, message: "Logged out successfully" })
 }
 

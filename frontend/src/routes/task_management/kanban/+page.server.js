@@ -1,9 +1,14 @@
 import axios from "axios"
 import { error } from "@sveltejs/kit"
+import { redirect } from "@sveltejs/kit"
 
-export const load = async ({ request, locals, event }) => {
+export const load = async ({ request, locals }) => {
   const appName = locals.app
   let defaultColor = "#6C757D"
+
+  if (!appName) {
+    redirect(302, "/task_management")
+  }
 
   try {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
@@ -100,7 +105,7 @@ export const actions = {
       }
     }
   },
-  updateTask: async ({ request }) => {
+  saveTask: async ({ request }) => {
     const form = await request.formData()
 
     const task_id = form.get("taskid")
@@ -111,10 +116,37 @@ export const actions = {
     const task_state = form.get("taskstate")
 
     try {
-      const response = await axios.post(`http://localhost:3000/updateTask`, { task_id, prev_task_plan, task_plan, task_notes, username, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/saveTask`, { task_id, prev_task_plan, task_plan, task_notes, username, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
-        return { taskSuccessMessage: response.data.message, resetUpdateTaskForm: true, notes: response.data.notes, plan: response.data.plan }
+        return { taskSuccessMessage: response.data.message, resetSaveTaskForm: true, notes: response.data.notes, plan: response.data.plan }
+      }
+    } catch (err) {
+      if (err.response.status === 401) {
+        error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403) {
+        error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else {
+        error(500, { message: "Internal server error" })
+      }
+    }
+  },
+  promoteTask2Todo: async ({ request }) => {
+    const form = await request.formData()
+
+    const task_id = form.get("taskid")
+    const prev_task_plan = form.get("prevtaskplan")
+    const task_plan = form.get("taskplan")
+    const task_notes = form.get("notes")
+    const username = form.get("username")
+    const task_state = form.get("taskstate")
+
+    try {
+      const response = await axios.post(`http://localhost:3000/saveTask`, { task_id, prev_task_plan, task_plan, task_notes, username, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const promoteResponse = await axios.post(`http://localhost:3000/promoteTask2Todo`, { task_id, username }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+
+      if (response.data.success) {
+        return { successMessage: promoteResponse.data.message, resetSaveTaskForm: true, resetPromoteTask2TodoForm: true, notes: promoteResponse.data.notes, plan: response.data.plan }
       }
     } catch (err) {
       if (err.response.status === 401) {
