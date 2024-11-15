@@ -1,162 +1,121 @@
 import pool from "../config/db.js"
+const saveTask = async (req, res) => {
+  const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
 
-const promoteTask2Closed = async (req, res) => {
-  const { task_id, username } = req.body
+  let newLog = task_notes
+
+  if (enterLog) {
+    newLog = auditStampString(req.user.username, task_state) + `\n${enterLog}` + `\n${task_notes}`
+  }
 
   const connection = await pool.getConnection()
 
   try {
-    await connection.beginTransaction()
+    // if task_state different from task_state in db, res error
+    const getTaskQuery = `SELECT task_state FROM task WHERE task_id = ?`
+    const [task] = await pool.query(getTaskQuery, [task_id])
 
-    const updateStateQuery = `UPDATE task SET task_state = "Closed", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Closed", "Task closed.")
+    if (task[0].task_state !== task_state) {
+      return res.json({ success: false, message: "Task state was changed to by another user. Please refresh. " })
+    }
 
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task closed", notes: updatedNotes })
+    const updateTaskQuery = `UPDATE task SET task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
+    await pool.query(updateTaskQuery, [task_plan, newLog, req.user.username, task_id])
+    return res.json({ success: true, message: "Task saved", newNotes: newLog })
   } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to close task", stack: err.stack })
+    return res.status(500).json({ success: false, message: "Unable to save task", stack: err.stack })
   } finally {
     connection.release()
   }
 }
 
-const demoteTask2Doing = async (req, res) => {
-  const { task_id, username } = req.body
+const promoteTask = async (req, res) => {
+  const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
+  let newLog = task_notes
+
+  const nextStates = {
+    Open: "Todo",
+    Todo: "Doing",
+    Doing: "Done",
+    Done: "Closed"
+  }
+
+  const logMessage = {
+    Open: "Task released.",
+    Todo: `Task assigned to ${req.user.username}.`,
+    Doing: `Task submitted for review.`,
+    Done: "Task closed."
+  }
+
+  if (enterLog) {
+    newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}\n` + auditStampString(req.user.username, task_state) + `\n${enterLog}` + `\n${task_notes}`
+  } else {
+    newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}` + `\n${task_notes}`
+  }
 
   const connection = await pool.getConnection()
 
   try {
-    await connection.beginTransaction()
+    // if task_state different from task_state in db, res error
+    const getTaskQuery = `SELECT task_state FROM task WHERE task_id = ?`
+    const [task] = await pool.query(getTaskQuery, [task_id])
 
-    const updateStateQuery = `UPDATE task SET task_state = "Doing", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Doing", "Task review rejected.")
+    if (task[0].task_state !== task_state) {
+      return res.json({ success: false, message: "Task state was changed to by another user. Please refresh. " })
+    }
 
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task review rejected", notes: updatedNotes })
+    const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
+    await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, req.user.username, task_id])
+    return res.json({ success: true, message: `Task ${logMessage[task_state]}`, newNotes: newLog })
   } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to reject task", stack: err.stack })
+    return res.status(500).json({ success: false, message: "Unable to promote task", stack: err.stack })
   } finally {
     connection.release()
   }
 }
 
-const promoteTask2Done = async (req, res) => {
-  const { task_id, username } = req.body
+const demoteTask = async (req, res) => {
+  const { task_id, task_plan, task_notes, enterLog, task_state, task_owner } = req.body
+  let newLog = task_notes
 
-  const connection = await pool.getConnection()
-
-  try {
-    await connection.beginTransaction()
-
-    const updateStateQuery = `UPDATE task SET task_state = "Done", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Done", "Task submitted for review.")
-
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task submitted for review", notes: updatedNotes })
-  } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to submit task for review", stack: err.stack })
-  } finally {
-    connection.release()
+  const nextStates = {
+    Doing: "Todo",
+    Done: "Doing"
   }
-}
 
-const demoteTask2Todo = async (req, res) => {
-  const { task_id, username } = req.body
-
-  const connection = await pool.getConnection()
-
-  try {
-    await connection.beginTransaction()
-
-    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Todo", "Task unassigned.")
-
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task unassigned", notes: updatedNotes })
-  } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to unassign task to Todo", stack: err.stack })
-  } finally {
-    connection.release()
+  const logMessage = {
+    Doing: `Task unassigned.`,
+    Done: `Task review rejected. Task assigned back to ${task_owner}.`
   }
-}
 
-const promoteTask2Todo = async (req, res) => {
-  const { task_id, username } = req.body
-
-  const connection = await pool.getConnection()
-
-  try {
-    await connection.beginTransaction()
-
-    const updateStateQuery = `UPDATE task SET task_state = "Todo", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Todo", "Task released.")
-
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task released", notes: updatedNotes })
-  } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to release task to Todo", stack: err.stack })
-  } finally {
-    connection.release()
+  if (enterLog) {
+    newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}\n` + auditStampString(req.user.username, task_state) + `\n${enterLog}` + `\n${task_notes}`
+  } else {
+    newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}` + `\n${task_notes}`
   }
-}
 
-const promoteTask2Doing = async (req, res) => {
-  const { task_id, username, assignee } = req.body
+  let newOwner = req.user.username
+
+  if (task_owner) {
+    newOwner = task_owner
+  }
 
   const connection = await pool.getConnection()
 
   try {
-    await connection.beginTransaction()
+    // if task_state different from task_state in db, res error
+    const getTaskQuery = `SELECT task_state FROM task WHERE task_id = ?`
+    const [task] = await pool.query(getTaskQuery, [task_id])
 
-    const updateStateQuery = `UPDATE task SET task_state = "Doing", task_owner = ? WHERE task_id = ?`
-    await connection.query(updateStateQuery, [assignee ? assignee : username, task_id])
-    await appendNotesToTask(connection, task_id, username, "Doing", `Task assigned to ${assignee ? assignee : username}.`)
+    if (task[0].task_state !== task_state) {
+      return res.json({ success: false, message: "Task state was changed to by another user. Please refresh. " })
+    }
 
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: `Task assigned to ${assignee ? assignee : username}`, notes: updatedNotes })
+    const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
+    await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, newOwner, task_id])
+    return res.json({ success: true, message: `Task ${logMessage[task_state]}`, newNotes: newLog, newOwner: newOwner })
   } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to assign task", stack: err.stack })
+    return res.status(500).json({ success: false, message: "Unable to demote task", stack: err.stack })
   } finally {
     connection.release()
   }
@@ -191,46 +150,6 @@ const createTask = async (req, res) => {
   } catch (err) {
     await connection.rollback()
     return res.status(500).json({ success: false, message: "Unable to create task", stack: err.stack })
-  } finally {
-    connection.release()
-  }
-}
-
-const saveTask = async (req, res) => {
-  const { task_id, prev_task_plan, task_plan, task_notes, username, task_state } = req.body
-
-  const connection = await pool.getConnection()
-
-  try {
-    await connection.beginTransaction()
-
-    let newPlan = prev_task_plan
-
-    if (prev_task_plan !== task_plan) {
-      await appendNotesToTask(connection, task_id, username, task_state, task_plan ? `Plan updated to ${task_plan}.` : `Plan removed.`)
-      const updatePlanQuery = `UPDATE task SET task_plan = ? WHERE task_id = ?`
-      await connection.query(updatePlanQuery, [task_plan, task_id])
-      newPlan = task_plan
-    }
-
-    if (task_notes) {
-      await appendNotesToTask(connection, task_id, username, task_state, task_notes)
-    }
-
-    // update task owner
-    const updateOwnerQuery = `UPDATE task SET task_owner = ? WHERE task_id = ?`
-    await connection.query(updateOwnerQuery, [username, task_id])
-
-    // get updated task notes from db
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = results[0].task_notes
-
-    await connection.commit()
-    return res.json({ success: true, message: "Task saved", notes: updatedNotes, plan: newPlan })
-  } catch (err) {
-    await connection.rollback()
-    return res.status(500).json({ success: false, message: "Unable to update task", stack: err.stack })
   } finally {
     connection.release()
   }
@@ -284,16 +203,4 @@ const auditStampString = (creator, state) => {
   return `******************\n[User: ${creator}, State: ${capitalizedState}, Date: ${convertLogsToDateTime(new Date())}]`
 }
 
-const appendNotesToTask = async (connection, task_id, username, state, notes) => {
-  try {
-    const getNotesQuery = `SELECT task_notes FROM task WHERE task_id = ?`
-    const [results] = await connection.query(getNotesQuery, [task_id])
-    const updatedNotes = `${auditStampString(username, state)}\n${notes}\n${results[0].task_notes}`
-    const updateNotesQuery = `UPDATE task SET task_notes = ? WHERE task_id = ?`
-    await connection.query(updateNotesQuery, [updatedNotes, task_id])
-  } catch (err) {
-    return res.status(500).json({ success: false, message: "Unable to update task notes", stack: err.stack })
-  }
-}
-
-export { createTask, getAllTasksInApp, saveTask, promoteTask2Todo, promoteTask2Doing, demoteTask2Todo, promoteTask2Done, demoteTask2Doing, promoteTask2Closed }
+export { createTask, getAllTasksInApp, saveTask, promoteTask, demoteTask }

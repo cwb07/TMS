@@ -9,30 +9,6 @@
   let appName = $page.data.appname || ""
   let defaultColor = "#6C757D"
 
-  // initialization
-  onMount(async () => {
-    document.getElementById("createPlanModal").addEventListener("show.bs.modal", function (event) {
-      planName = ""
-      planStartDate = ""
-      planEndDate = ""
-      planColor = defaultColor
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-
-    document.getElementById("createTaskModel").addEventListener("show.bs.modal", function (event) {
-      taskName = ""
-      taskDescription = ""
-      taskPlan = ""
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-  })
-
   // create plan form
   let planName = ""
   let planStartDate = ""
@@ -67,29 +43,31 @@
     taskPlanEndDate = ""
   }
 
-  let selectedTaskState = ""
   let selectedTaskCreator = ""
   let selectedTaskCreationDate = ""
+  let selectedTaskState = ""
   let selectedTaskName = ""
   let selectedTaskOwner = ""
   let selectedTaskDescription = ""
-  let selectedTaskNotes = ""
-  let selectedTaskId = ""
   let selectedTaskPlan = ""
+  let selectedTaskNotes = ""
+
+  let selectedTaskId = ""
   let enterLog = ""
 
   const viewTask = (event, task) => {
     event.preventDefault()
 
-    selectedTaskState = task.task_state
     selectedTaskCreator = task.task_creator
     selectedTaskCreationDate = formatDateToDisplay(task.task_createdate)
+    selectedTaskState = task.task_state
     selectedTaskName = task.task_name
     selectedTaskOwner = task.task_owner
     selectedTaskDescription = task.task_description
-    selectedTaskNotes = task.task_notes
-    selectedTaskId = task.task_id
     selectedTaskPlan = task.task_plan
+    selectedTaskNotes = task.task_notes
+
+    selectedTaskId = task.task_id
     enterLog = ""
     taskPlan = task.task_plan
 
@@ -98,38 +76,43 @@
     }
   }
 
-  $: if (form?.resetSaveTaskForm) {
-    selectedTaskNotes = form?.notes
+  $: if (form?.resetSaveTaskForm || form?.resetPromoteTaskForm) {
+    selectedTaskNotes = form?.newNotes
     selectedTaskOwner = $page.data.username
-    selectedTaskPlan = form?.plan
     enterLog = ""
     form.resetSaveTaskForm = false
-
-    if (form?.resetPromoteTask2TodoForm) {
-      selectedTaskState = "Todo"
-      form.resetPromoteTask2TodoForm = false
-    }
-
-    if (form?.resetPromoteTask2DoingForm) {
-      selectedTaskState = "Doing"
-      form.resetPromoteTask2DoingForm = false
-    }
-
-    if (form?.resetPromoteTask2DoneForm) {
-      selectedTaskState = "Done"
-      form.resetPromoteTask2DoneForm = false
-    }
-
-    if (form?.resetDemoteTask2DoingForm) {
-      selectedTaskState = "Doing"
-      form.resetDemoteTask2DoingForm = false
-    }
-
-    if (form?.resetPromoteTask2ClosedForm) {
-      selectedTaskState = "Closed"
-      form.resetPromoteTask2ClosedForm = false
-    }
+    form.resetPromoteTaskForm = false
   }
+
+  $: if (form?.resetDemoteTaskForm) {
+    selectedTaskNotes = form?.newNotes
+    selectedTaskOwner = form?.newOwner ? form.newOwner : $page.data.username
+    enterLog = ""
+    form.resetDemoteTaskForm = false
+  }
+
+  onMount(async () => {
+    document.getElementById("createPlanModal").addEventListener("show.bs.modal", function (event) {
+      planName = ""
+      planStartDate = ""
+      planEndDate = ""
+      planColor = defaultColor
+
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
+
+    document.getElementById("createTaskModel").addEventListener("show.bs.modal", function (event) {
+      taskName = ""
+      taskDescription = ""
+      taskPlan = ""
+
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
+  })
 </script>
 
 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
@@ -379,8 +362,6 @@
       >
         <input type="hidden" name="appname" bind:value={appName} />
         <input type="hidden" name="taskid" bind:value={selectedTaskId} />
-        <input type="hidden" name="username" bind:value={$page.data.username} />
-        <input type="hidden" name="prevtaskplan" bind:value={selectedTaskPlan} />
         <div class="modal-header">
           <h1 class="modal-title fs-5">Task Details</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -483,13 +464,14 @@
                 </row>
                 <row>
                   <div class="col-md-12">
-                    <textarea disabled id="description" name="description" class="form-control" style="min-height: {selectedTaskState !== 'Closed' ? '300px' : '370px'};">{selectedTaskNotes}</textarea>
+                    <input type="hidden" id="tasknotes" name="tasknotes" bind:value={selectedTaskNotes} />
+                    <textarea bind:value={selectedTaskNotes} disabled class="form-control" style="min-height: {selectedTaskState !== 'Closed' ? '300px' : '370px'};"></textarea>
                   </div>
                 </row>
                 {#if selectedTaskState !== "Closed"}
                   <row>
                     <div class="col-md-12 mt-3">
-                      <textarea id="notes" name="notes" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
+                      <textarea id="enterlog" name="enterlog" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
                     </div>
                   </row>
                 {/if}
@@ -500,19 +482,19 @@
         <div class="modal-footer">
           {#if selectedTaskState !== "Closed"}
             {#if selectedTaskState === "Open"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Todo" data-bs-dismiss="modal">Release</button>
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Release</button>
             {:else if selectedTaskState === "Todo"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Doing" data-bs-dismiss="modal">Assign</button>
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Assign</button>
             {:else if selectedTaskState === "Doing"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask2Done" data-bs-dismiss="modal">Review</button>
-              <button type="submit" class="btn btn-danger" formaction="?/demoteTask2Todo" data-bs-dismiss="modal">Unassign</button>
+              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Review</button>
+              <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Unassign</button>
             {:else}
               {#if selectedTaskPlan === taskPlan}
-                <button type="submit" class="btn btn-success" formaction="?/promoteTask2Closed" data-bs-dismiss="modal">Approve</button>
+                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Approve</button>
               {/if}
-              <button type="submit" class="btn btn-danger" formaction="?/demoteTask2Doing" data-bs-dismiss="modal">Reject</button>
+              <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Reject</button>
             {/if}
-            {#if selectedTaskPlan === taskPlan}
+            {#if selectedTaskPlan === taskPlan || selectedTaskState === "Open"}
               <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
             {/if}
           {/if}

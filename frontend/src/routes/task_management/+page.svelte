@@ -18,42 +18,6 @@
   let permitDone = ""
   let permitCreate = ""
 
-  onMount(async () => {
-    document.getElementById("createAppModal").addEventListener("show.bs.modal", function (event) {
-      name = ""
-      rNumber = ""
-      description = ""
-      startDate = ""
-      endDate = ""
-      permitOpen = ""
-      permitTodo = ""
-      permitDoing = ""
-      permitDone = ""
-      permitCreate = ""
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-
-    document.getElementById("editAppModal").addEventListener("show.bs.modal", function (event) {
-      editName = ""
-      editRnumber = ""
-      editDescription = ""
-      editStartDate = ""
-      editEndDate = ""
-      editPermitOpen = ""
-      editPermitTodo = ""
-      editPermitDoing = ""
-      editPermitDone = ""
-      editPermitCreate = ""
-
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-  })
-
   $: if (form?.resetCreateAppForm) {
     bootstrap.Modal.getInstance(document.getElementById("createAppModal")).hide()
     form.resetCreateAppForm = false
@@ -94,6 +58,42 @@
     bootstrap.Modal.getInstance(document.getElementById("editAppModal")).hide()
     form.resetEditAppForm = false
   }
+
+  onMount(async () => {
+    document.getElementById("createAppModal").addEventListener("show.bs.modal", function (event) {
+      name = ""
+      rNumber = ""
+      description = ""
+      startDate = ""
+      endDate = ""
+      permitOpen = ""
+      permitTodo = ""
+      permitDoing = ""
+      permitDone = ""
+      permitCreate = ""
+
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
+
+    document.getElementById("editAppModal").addEventListener("show.bs.modal", function (event) {
+      editName = ""
+      editRnumber = ""
+      editDescription = ""
+      editStartDate = ""
+      editEndDate = ""
+      editPermitOpen = ""
+      editPermitTodo = ""
+      editPermitDoing = ""
+      editPermitDone = ""
+      editPermitCreate = ""
+
+      if (form?.errorMessage) {
+        form.errorMessage = ""
+      }
+    })
+  })
 </script>
 
 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
@@ -154,6 +154,127 @@
         </div>
       </div>
     {/each}
+  </div>
+</div>
+
+<!-- Create App Modal -->
+<div class="modal" id="createAppModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form
+        method="POST"
+        action="?/createApp"
+        use:enhance={() => {
+          return async ({ update }) => {
+            update({ reset: false })
+          }
+        }}
+      >
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Create App</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {#if form?.errorMessage}
+            <div class="row mb-2">
+              <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                  Error: {form?.errorMessage}
+                </div>
+              </div>
+            </div>
+          {/if}
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Name*</div>
+            <div class="col-md-9">
+              <input id="name" name="name" class="form-control" bind:value={name} />
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">RNumber*</div>
+            <div class="col-md-9">
+              <input id="rnumber" name="rnumber" class="form-control" type="number" bind:value={rNumber} />
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Description</div>
+            <div class="col-md-9">
+              <textarea rows="4" id="description" name="description" class="form-control" bind:value={description}></textarea>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Start Date*</div>
+            <div class="col-md-9">
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startDate} />
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">End Date*</div>
+            <div class="col-md-9">
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={endDate} />
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Open</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitopen" bind:value={permitOpen}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Todo</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permittodo" bind:value={permitTodo}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Doing</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitdoing" bind:value={permitDoing}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Done</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitdone" bind:value={permitDone}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Create</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary col">Create</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -274,127 +395,6 @@
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary col">Update</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Create App Modal -->
-<div class="modal" id="createAppModal">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <form
-        method="POST"
-        action="?/createApp"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false })
-          }
-        }}
-      >
-        <div class="modal-header">
-          <h1 class="modal-title fs-5">Create App</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {#if form?.errorMessage}
-            <div class="row mb-2">
-              <div class="col-12">
-                <div class="alert alert-danger" role="alert">
-                  Error: {form?.errorMessage}
-                </div>
-              </div>
-            </div>
-          {/if}
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Name*</div>
-            <div class="col-md-9">
-              <input id="name" name="name" class="form-control" bind:value={name} />
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">RNumber*</div>
-            <div class="col-md-9">
-              <input id="rnumber" name="rnumber" class="form-control" type="number" bind:value={rNumber} />
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Description</div>
-            <div class="col-md-9">
-              <textarea rows="4" id="description" name="description" class="form-control" bind:value={description}></textarea>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Start Date*</div>
-            <div class="col-md-9">
-              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startDate} />
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">End Date*</div>
-            <div class="col-md-9">
-              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={endDate} />
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Open</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitopen" bind:value={permitOpen}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Todo</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permittodo" bind:value={permitTodo}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Doing</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitdoing" bind:value={permitDoing}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Done</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitdone" bind:value={permitDone}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Create</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary col">Create</button>
         </div>
       </form>
     </div>
