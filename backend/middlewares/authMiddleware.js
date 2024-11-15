@@ -92,4 +92,59 @@ const checkUserAccess =
     }
   }
 
-export { checkUserAccess, isLoggedIn, checkGroup }
+const checkTaskStatePermit = async (req, res, next) => {
+  let { task_state } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    const query = `SELECT app_permit_create, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done 
+                   FROM application WHERE app_acronym = ?`
+    const [results] = await connection.query(query, [req.cookies.app])
+
+    const statePermitMap = {
+      Create: results[0].app_permit_create,
+      Open: results[0].app_permit_open,
+      Todo: results[0].app_permit_todolist,
+      Doing: results[0].app_permit_doing,
+      Done: results[0].app_permit_done
+    }
+
+    // hardcoded PL and PM
+    const isPL = await checkGroup(req.user.username, "pl")
+    const isPM = await checkGroup(req.user.username, "pm")
+
+    if (!task_state) {
+      task_state = "Create"
+      if (isPL) {
+        next()
+        return
+      }
+    } else {
+      if (task_state === "Done" && isPL) {
+        next()
+        return
+      }
+
+      if (task_state === "Open" && isPM) {
+        next()
+        return
+      }
+    }
+
+    // normal users permission adhere to permitlist
+    const hasPermission = await checkGroup(req.user.username, statePermitMap[task_state])
+
+    if (!hasPermission) {
+      return res.status(403).json({ success: false, message: `You do not have permission to perform this action`, reload: true })
+    }
+
+    next()
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Error checking state permissions", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+export { checkUserAccess, isLoggedIn, checkGroup, checkTaskStatePermit }

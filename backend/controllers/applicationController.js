@@ -1,4 +1,5 @@
 import pool from "../config/db.js"
+import { checkGroup } from "../middlewares/authMiddleware.js"
 
 // app rnumber must be positive INT
 const appRnumberRegex = /^[0-9]+$/
@@ -129,4 +130,26 @@ const getAllApplications = async (req, res) => {
   }
 }
 
-export { createApplication, getAllApplications, editApplication }
+const getAppPermissions = async (req, res) => {
+  const { app_acronym } = req.body
+
+  const connection = await pool.getConnection()
+
+  try {
+    const query = `SELECT app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create FROM application WHERE app_acronym = ?`
+    const [results] = await connection.query(query, [app_acronym])
+
+    const permissions = results[0]
+    for (const permitGroup in permissions) {
+      permissions[permitGroup] = await checkGroup(req.user.username, permissions[permitGroup])
+    }
+
+    return res.json({ success: true, message: "App permissions retrieved", data: permissions })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to retrieve app permissions", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
+export { createApplication, getAllApplications, editApplication, getAppPermissions }

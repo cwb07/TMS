@@ -55,6 +55,8 @@
   let selectedTaskId = ""
   let enterLog = ""
 
+  let viewOnlyTask = false
+
   const viewTask = (event, task) => {
     event.preventDefault()
 
@@ -70,6 +72,26 @@
     selectedTaskId = task.task_id
     enterLog = ""
     taskPlan = task.task_plan
+
+    const map = {
+      Open: $page.data.permissionsList.app_permit_open,
+      Todo: $page.data.permissionsList.app_permit_todolist,
+      Doing: $page.data.permissionsList.app_permit_doing,
+      Done: $page.data.permissionsList.app_permit_done,
+      Closed: $page.data.permissionsList.app_permit_create
+    }
+
+    // hardcoded pl and pm groups
+    if (($page.data.isPL && selectedTaskState == "Done") || ($page.data.isPM && selectedTaskState == "Open")) {
+      viewOnlyTask = false
+    } else {
+      // other users adhere to permitlist settings
+      if (!map[selectedTaskState]) {
+        viewOnlyTask = true
+      } else {
+        viewOnlyTask = false
+      }
+    }
 
     if (form?.taskSuccessMessage) {
       form.taskSuccessMessage = ""
@@ -119,7 +141,7 @@
   {#if $page.data.isPM}
     <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createPlanModal">Create Plan</button>
   {/if}
-  {#if $page.data.isPL}
+  {#if $page.data.isPL || $page.data.permissionsList.app_permit_create}
     <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createTaskModel">Create Task</button>
   {/if}
   <div style="flex: 1; text-align: center; margin-right: 300px">
@@ -430,7 +452,7 @@
                 <div class="row align-items-center mb-2">
                   <div class="col-md-3" style="text-align: right">Plan Name</div>
                   <div class="col-md-9">
-                    {#if selectedTaskState === "Open" || selectedTaskState === "Done"}
+                    {#if (selectedTaskState === "Open" || selectedTaskState === "Done") && !viewOnlyTask}
                       <select class="form-select" name="taskplan" bind:value={taskPlan}>
                         <option></option>
                         {#each $page.data.plansList as plan}
@@ -465,10 +487,10 @@
                 <row>
                   <div class="col-md-12">
                     <input type="hidden" id="tasknotes" name="tasknotes" bind:value={selectedTaskNotes} />
-                    <textarea bind:value={selectedTaskNotes} disabled class="form-control" style="min-height: {selectedTaskState !== 'Closed' ? '300px' : '370px'};"></textarea>
+                    <textarea bind:value={selectedTaskNotes} disabled class="form-control" style="min-height: {selectedTaskState !== 'Closed' && !viewOnlyTask ? '300px' : '370px'};"></textarea>
                   </div>
                 </row>
-                {#if selectedTaskState !== "Closed"}
+                {#if selectedTaskState !== "Closed" && !viewOnlyTask}
                   <row>
                     <div class="col-md-12 mt-3">
                       <textarea id="enterlog" name="enterlog" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
@@ -480,22 +502,24 @@
           </div>
         </div>
         <div class="modal-footer">
-          {#if selectedTaskState !== "Closed"}
-            {#if selectedTaskState === "Open"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Release</button>
-            {:else if selectedTaskState === "Todo"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Assign</button>
-            {:else if selectedTaskState === "Doing"}
-              <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Review</button>
-              <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Unassign</button>
-            {:else}
-              {#if selectedTaskPlan === taskPlan}
-                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Approve</button>
+          {#if !viewOnlyTask}
+            {#if selectedTaskState !== "Closed"}
+              {#if selectedTaskState === "Open"}
+                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Release</button>
+              {:else if selectedTaskState === "Todo"}
+                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Assign</button>
+              {:else if selectedTaskState === "Doing"}
+                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Review</button>
+                <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Unassign</button>
+              {:else}
+                {#if selectedTaskPlan === taskPlan}
+                  <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Approve</button>
+                {/if}
+                <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Reject</button>
               {/if}
-              <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Reject</button>
-            {/if}
-            {#if selectedTaskPlan === taskPlan || selectedTaskState === "Open"}
-              <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
+              {#if selectedTaskPlan === taskPlan || selectedTaskState === "Open"}
+                <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
+              {/if}
             {/if}
           {/if}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

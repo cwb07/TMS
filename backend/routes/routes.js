@@ -1,7 +1,7 @@
-import { checkUserAccess, isLoggedIn } from "../middlewares/authMiddleware.js"
+import { checkUserAccess, isLoggedIn, checkTaskStatePermit } from "../middlewares/authMiddleware.js"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
-import { createApplication, getAllApplications, editApplication } from "../controllers/applicationController.js"
+import { createApplication, getAllApplications, editApplication, getAppPermissions } from "../controllers/applicationController.js"
 import { createPlan, getAllPlansInApp } from "../controllers/planController.js"
 import { promoteTask, createTask, getAllTasksInApp, saveTask, demoteTask } from "../controllers/taskController.js"
 
@@ -24,6 +24,7 @@ router.route("/updateProfile").put(isLoggedIn, updateProfile)
 router.route("/getAllApplications").get(isLoggedIn, getAllApplications)
 router.route("/getAllPlansInApp").post(isLoggedIn, getAllPlansInApp)
 router.route("/getAllTasksInApp").post(isLoggedIn, getAllTasksInApp)
+router.route("/getAppPermissions").post(isLoggedIn, getAppPermissions)
 
 // pl
 router.route("/createApplication").post(isLoggedIn, checkUserAccess("pl"), createApplication)
@@ -32,10 +33,10 @@ router.route("/editApplication").post(isLoggedIn, checkUserAccess("pl"), editApp
 // pm
 router.route("/createPlan").post(isLoggedIn, checkUserAccess("pm"), createPlan)
 
-// to check user rights later
-router.route("/createTask").post(isLoggedIn, createTask)
-router.route("/saveTask").post(isLoggedIn, saveTask)
-router.route("/promoteTask").post(isLoggedIn, promoteTask)
-router.route("/demoteTask").post(isLoggedIn, demoteTask)
+// task based access for each app
+router.route("/createTask").post(isLoggedIn, checkTaskStatePermit, createTask)
+router.route("/saveTask").post(isLoggedIn, checkTaskStatePermit, saveTask)
+router.route("/promoteTask").post(isLoggedIn, checkTaskStatePermit, promoteTask)
+router.route("/demoteTask").post(isLoggedIn, checkTaskStatePermit, demoteTask)
 
 export default router

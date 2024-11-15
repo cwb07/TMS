@@ -14,6 +14,7 @@ export const load = async ({ request, locals }) => {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const planResponse = await axios.post(`http://localhost:3000/getAllPlansInApp`, { plan_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const taskResponse = await axios.post(`http://localhost:3000/getAllTasksInApp`, { task_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+    const appResponse = await axios.post(`http://localhost:3000/getAppPermissions`, { app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
     if (response.data.success && planResponse.data.success && taskResponse.data.success) {
       const plansList = planResponse.data.data
@@ -34,6 +35,7 @@ export const load = async ({ request, locals }) => {
         isAdmin: response.data.data.isAdmin,
         plansList: planResponse.data.data,
         tasksList: taskResponse.data.data,
+        permissionsList: appResponse.data.data,
         appname: appName
       }
     }
@@ -96,6 +98,8 @@ export const actions = {
     } catch (err) {
       if (err.response.status === 401) {
         error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403 && err.response.data.reload) {
+        error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
       } else {
@@ -123,6 +127,10 @@ export const actions = {
     } catch (err) {
       if (err.response.status === 401) {
         error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403 && err.response.data.reload) {
+        error(403, { message: err.response.data.message, reload: true })
+      } else if (err.response.status === 403) {
+        error(403, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -148,6 +156,10 @@ export const actions = {
     } catch (err) {
       if (err.response.status === 401) {
         error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403 && err.response.data.reload) {
+        error(403, { message: err.response.data.message, reload: true })
+      } else if (err.response.status === 403) {
+        error(403, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -174,6 +186,10 @@ export const actions = {
     } catch (err) {
       if (err.response.status === 401) {
         error(401, { message: err.response.data.message, redirectToLogin: true })
+      } else if (err.response.status === 403 && err.response.data.reload) {
+        error(403, { message: err.response.data.message, reload: true })
+      } else if (err.response.status === 403) {
+        error(403, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }

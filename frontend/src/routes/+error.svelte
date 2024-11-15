@@ -24,6 +24,8 @@
           goto("/login")
         } else if ($page.error.redirectToTMS) {
           goto("/task_management")
+        } else if ($page.error.reload) {
+          location.reload()
         }
       }
     }, 1000)
@@ -32,6 +34,6 @@
 
 <h1>{$page.error.message}</h1>
 
-{#if $page.error.redirectToLogin || $page.error.redirectToTMS}
+{#if $page.error.redirectToLogin || $page.error.redirectToTMS || $page.error.reload}
   <p>Redirecting in {countdown}s...</p>
 {/if}
