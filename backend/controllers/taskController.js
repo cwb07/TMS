@@ -1,4 +1,8 @@
+import dotenv from "dotenv"
 import pool from "../config/db.js"
+import transporter from "../config/nodemailer.js"
+
+dotenv.config()
 
 const saveTask = async (req, res) => {
   const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
@@ -66,6 +70,32 @@ const promoteTask = async (req, res) => {
 
     const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
     await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, req.user.username, task_id])
+
+    if (task_state === "Doing") {
+      const getPermitGroup = `SELECT app_permit_done FROM application WHERE app_acronym = ?`
+      const [permitGroup] = await pool.query(getPermitGroup, [req.cookies.app])
+
+      const getListOfEmails = `SELECT GROUP_CONCAT(email SEPARATOR ', ') as emails FROM accounts WHERE username IN (SELECT username FROM usergroup WHERE user_group = ?)`
+      const [results] = await pool.query(getListOfEmails, [permitGroup[0].app_permit_done])
+
+      transporter.sendMail({
+        from: process.env.MAILER_FROM,
+        to: results[0].emails,
+        subject: `Task Pending Review: ${task_id}`,
+        text: `Dear Team,\n\nA task in the Task Management System is pending review.\nPlease login to the system to review the task.\n\nTask ID: ${task_id}\n\nRegards,\nTask Management System`,
+        html: `
+            <p>Dear Team,</p>
+            <p>A task in the Task Management System is pending review.<br>Please login to the system to review the task.</p>
+            <p>Task ID: <b>${task_id}</b></p>
+            <p>Regards,<br>Task Management System</p>
+        `
+      }).then(() => {
+        console.log('Email sent successfully')
+      }).catch((error) => {
+        console.log('Error sending email:', error)
+      })
+    }
+
     return res.json({ success: true, message: `Task ${logMessage[task_state]}`, newNotes: newLog })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to promote task", stack: err.stack })
@@ -186,14 +216,14 @@ const getAllTasksInApp = async (req, res) => {
 // helper functions
 const convertLogsToDateTime = datetime => {
   return datetime.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true
-    })?.replace("am", "AM").replace("pm", "PM")
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  })?.replace("am", "AM").replace("pm", "PM")
 }
 
 const auditStampString = (creator, state) => {
