@@ -2,7 +2,6 @@ import pool from "../config/db.js"
 
 const saveTask = async (req, res) => {
   const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
-
   let newLog = task_notes
 
   if (enterLog) {
@@ -186,17 +185,15 @@ const getAllTasksInApp = async (req, res) => {
 
 // helper functions
 const convertLogsToDateTime = datetime => {
-  return datetime
-    .toLocaleString("en-GB", {
+  return datetime.toLocaleString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
       hour12: true
-    })
-    ?.replace("am", "AM")
-    .replace("pm", "PM")
+    })?.replace("am", "AM").replace("pm", "PM")
 }
 
 const auditStampString = (creator, state) => {

@@ -1,5 +1,5 @@
-import pool from "../config/db.js"
 import { checkGroup } from "../middlewares/authMiddleware.js"
+import pool from "../config/db.js"
 
 // app rnumber must be positive INT
 const appRnumberRegex = /^[0-9]+$/
@@ -34,7 +34,7 @@ const createApplication = async (req, res) => {
         return res.json({ success: false, message: "App Rnumber is mandatory" })
       }
 
-      if (!appRnumberRegex.test(app_rnumber)) {
+      if (!appRnumberRegex.test(app_rnumber) || app_rnumber <= 0) {
         return res.json({ success: false, message: "App Rnumber must be a positive integer" })
       }
 
@@ -140,11 +140,12 @@ const getAppPermissions = async (req, res) => {
     const [results] = await connection.query(query, [app_acronym])
 
     const permissions = results[0]
+
     for (const permitGroup in permissions) {
       permissions[permitGroup] = await checkGroup(req.user.username, permissions[permitGroup])
     }
 
-    return res.json({ success: true, message: "App permissions retrieved", data: permissions })
+    return res.json({ success: true, message: "App permissions retrieved1", data: permissions })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to retrieve app permissions", stack: err.stack })
   } finally {

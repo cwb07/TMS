@@ -1,9 +1,9 @@
-import { checkUserAccess, isLoggedIn, checkTaskStatePermit } from "../middlewares/authMiddleware.js"
+import { checkTaskStatePermit, checkUserAccess, isLoggedIn } from "../middlewares/authMiddleware.js"
+import { createApplication, editApplication, getAllApplications, getAppPermissions } from "../controllers/applicationController.js"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
-import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
-import { createApplication, getAllApplications, editApplication, getAppPermissions } from "../controllers/applicationController.js"
 import { createPlan, getAllPlansInApp } from "../controllers/planController.js"
-import { promoteTask, createTask, getAllTasksInApp, saveTask, demoteTask } from "../controllers/taskController.js"
+import { createTask, demoteTask, getAllTasksInApp, promoteTask, saveTask } from "../controllers/taskController.js"
+import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
 
 import express from "express"
 

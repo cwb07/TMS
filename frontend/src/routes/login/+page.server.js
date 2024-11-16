@@ -8,8 +8,8 @@ export const actions = {
     const password = form.get("password")
 
     try {
-      const response = await axios.post("http://localhost:3000/login", 
-        { username, password }, 
+      const response = await axios.post("http://localhost:3000/login",
+        { username, password },
         { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {

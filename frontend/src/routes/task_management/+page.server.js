@@ -1,6 +1,6 @@
+import { error, redirect } from "@sveltejs/kit"
+
 import axios from "axios"
-import { error } from "@sveltejs/kit"
-import { redirect } from "@sveltejs/kit"
 
 export const load = async ({ request }) => {
   try {
@@ -8,7 +8,7 @@ export const load = async ({ request }) => {
     const applicationResponse = await axios.get(`http://localhost:3000/getAllApplications`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const groupResponse = await axios.get(`http://localhost:3000/getAllGroups`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
-    if (response.data.success && applicationResponse.data.success) {
+    if (response.data.success && applicationResponse.data.success && groupResponse.data.success) {
       return {
         username: response.data.data.username,
         isAdmin: response.data.data.isAdmin,

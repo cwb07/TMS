@@ -71,26 +71,24 @@ const checkGroup = async (username, groupname) => {
   }
 }
 
-const checkUserAccess =
-  (...groups) =>
-  async (req, res, next) => {
-    let isAuthorized = true
+const checkUserAccess = (...groups) => async (req, res, next) => {
+  let isAuthorized = true
 
-    for (let group of groups) {
-      if (!(await checkGroup(req.user.username, group))) {
-        isAuthorized = false
-        break
-      }
-    }
-
-    if (isAuthorized) {
-      next()
-    } else {
-      res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
-      res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
-      return res.status(403).json({ success: false, message: "Unauthorized access" })
+  for (let group of groups) {
+    if (!(await checkGroup(req.user.username, group))) {
+      isAuthorized = false
+      break
     }
   }
+
+  if (isAuthorized) {
+    next()
+  } else {
+    res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) })
+    res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
+    return res.status(403).json({ success: false, message: "Unauthorized access" })
+  }
+}
 
 const checkTaskStatePermit = async (req, res, next) => {
   let { task_state } = req.body
@@ -98,8 +96,7 @@ const checkTaskStatePermit = async (req, res, next) => {
   const connection = await pool.getConnection()
 
   try {
-    const query = `SELECT app_permit_create, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done 
-                   FROM application WHERE app_acronym = ?`
+    const query = `SELECT app_permit_create, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done FROM application WHERE app_acronym = ?`
     const [results] = await connection.query(query, [req.cookies.app])
 
     const statePermitMap = {
@@ -110,29 +107,10 @@ const checkTaskStatePermit = async (req, res, next) => {
       Done: results[0].app_permit_done
     }
 
-    // hardcoded PL and PM
-    const isPL = await checkGroup(req.user.username, "pl")
-    const isPM = await checkGroup(req.user.username, "pm")
-
     if (!task_state) {
       task_state = "Create"
-      if (isPL) {
-        next()
-        return
-      }
-    } else {
-      if (task_state === "Done" && isPL) {
-        next()
-        return
-      }
-
-      if (task_state === "Open" && isPM) {
-        next()
-        return
-      }
     }
 
-    // normal users permission adhere to permitlist
     const hasPermission = await checkGroup(req.user.username, statePermitMap[task_state])
 
     if (!hasPermission) {

@@ -1,6 +1,6 @@
+import { error, redirect } from "@sveltejs/kit"
+
 import axios from "axios"
-import { error } from "@sveltejs/kit"
-import { redirect } from "@sveltejs/kit"
 
 export const load = async ({ request, locals }) => {
   const appName = locals.app
@@ -16,22 +16,17 @@ export const load = async ({ request, locals }) => {
     const taskResponse = await axios.post(`http://localhost:3000/getAllTasksInApp`, { task_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const appResponse = await axios.post(`http://localhost:3000/getAppPermissions`, { app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
-    if (response.data.success && planResponse.data.success && taskResponse.data.success) {
+    if (response.data.success && planResponse.data.success && taskResponse.data.success && appResponse.data.success) {
       const plansList = planResponse.data.data
 
       for (let state in taskResponse.data.data) {
-        let tasksList = taskResponse.data.data[state].map(task => ({
-          ...task,
-          task_color: plansList.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor
-        }))
-
+        let tasksList = taskResponse.data.data[state].map(task => ({...task, task_color: plansList.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor}))
         taskResponse.data.data[state] = tasksList
       }
 
       return {
         username: response.data.data.username,
         isPM: response.data.data.isPM,
-        isPL: response.data.data.isPL,
         isAdmin: response.data.data.isAdmin,
         plansList: planResponse.data.data,
         tasksList: taskResponse.data.data,

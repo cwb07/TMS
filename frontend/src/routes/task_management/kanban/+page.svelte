@@ -1,148 +1,161 @@
 <script>
-  import { onMount } from "svelte"
-  import { enhance } from "$app/forms"
-  import { page } from "$app/stores"
-  import { formatDateToDisplay } from "$lib/utils.js"
+  import { onMount } from "svelte";
+  import { enhance } from "$app/forms";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+  import { formatDateToDisplay } from "$lib/utils.js";
 
-  export let form
+  export let form;
 
-  let appName = $page.data.appname || ""
-  let defaultColor = "#6C757D"
+  let appName = $page.data.appname || "";
+  let defaultColor = "#6C757D";
 
   // create plan form
-  let planName = ""
-  let planStartDate = ""
-  let planEndDate = ""
-  let planColor = defaultColor
+  let planName = "";
+  let planStartDate = "";
+  let planEndDate = "";
+  let planColor = defaultColor;
 
   $: if (form?.resetCreatePlanForm) {
-    bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide()
-    form.resetCreatePlanForm = false
+    bootstrap.Modal.getInstance(document.getElementById("createPlanModal")).hide();
+    form.resetCreatePlanForm = false;
   }
 
   // create task form
-  let taskCreationDate = formatDateToDisplay(new Date())
-  let taskName = ""
-  let taskDescription = ""
-  let taskPlan = ""
-  let taskPlanStartDate = ""
-  let taskPlanEndDate = ""
+  let taskCreationDate = formatDateToDisplay(new Date());
+  let taskName = "";
+  let taskDescription = "";
+  let taskPlan = "";
+  let taskPlanStartDate = "";
+  let taskPlanEndDate = "";
 
   $: if (form?.resetCreateTaskForm) {
-    bootstrap.Modal.getInstance(document.getElementById("createTaskModel")).hide()
-    form.resetCreateTaskForm = false
+    bootstrap.Modal.getInstance(document.getElementById("createTaskModel")).hide();
+    form.resetCreateTaskForm = false;
   }
 
   // when user selects a plan, display the start and end date of the plan
   $: if (taskPlan) {
-    const selectedPlan = $page.data.plansList.find(plan => plan.plan_mvp_name === taskPlan)
-    taskPlanStartDate = formatDateToDisplay(selectedPlan.plan_startdate)
-    taskPlanEndDate = formatDateToDisplay(selectedPlan.plan_enddate)
+    const selectedPlan = $page.data.plansList.find(
+      (plan) => plan.plan_mvp_name === taskPlan
+    );
+    taskPlanStartDate = formatDateToDisplay(selectedPlan.plan_startdate);
+    taskPlanEndDate = formatDateToDisplay(selectedPlan.plan_enddate);
   } else {
-    taskPlanStartDate = ""
-    taskPlanEndDate = ""
+    taskPlanStartDate = "";
+    taskPlanEndDate = "";
   }
 
-  let selectedTaskCreator = ""
-  let selectedTaskCreationDate = ""
-  let selectedTaskState = ""
-  let selectedTaskName = ""
-  let selectedTaskOwner = ""
-  let selectedTaskDescription = ""
-  let selectedTaskPlan = ""
-  let selectedTaskNotes = ""
+  let selectedTaskCreator = "";
+  let selectedTaskCreationDate = "";
+  let selectedTaskState = "";
+  let selectedTaskName = "";
+  let selectedTaskOwner = "";
+  let selectedTaskDescription = "";
+  let selectedTaskPlan = "";
+  let selectedTaskNotes = "";
 
-  let selectedTaskId = ""
-  let enterLog = ""
+  let selectedTaskId = "";
+  let enterLog = "";
 
-  let viewOnlyTask = false
+  let viewOnlyTask = false;
 
   const viewTask = (event, task) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    selectedTaskCreator = task.task_creator
-    selectedTaskCreationDate = formatDateToDisplay(task.task_createdate)
-    selectedTaskState = task.task_state
-    selectedTaskName = task.task_name
-    selectedTaskOwner = task.task_owner
-    selectedTaskDescription = task.task_description
-    selectedTaskPlan = task.task_plan
-    selectedTaskNotes = task.task_notes
+    selectedTaskCreator = task.task_creator;
+    selectedTaskCreationDate = formatDateToDisplay(task.task_createdate);
+    selectedTaskState = task.task_state;
+    selectedTaskName = task.task_name;
+    selectedTaskOwner = task.task_owner;
+    selectedTaskDescription = task.task_description;
+    selectedTaskPlan = task.task_plan;
+    selectedTaskNotes = task.task_notes;
 
-    selectedTaskId = task.task_id
-    enterLog = ""
-    taskPlan = task.task_plan
+    selectedTaskId = task.task_id;
+    enterLog = "";
+    taskPlan = task.task_plan;
 
     const map = {
       Open: $page.data.permissionsList.app_permit_open,
       Todo: $page.data.permissionsList.app_permit_todolist,
       Doing: $page.data.permissionsList.app_permit_doing,
       Done: $page.data.permissionsList.app_permit_done,
-      Closed: $page.data.permissionsList.app_permit_create
-    }
+      Closed: $page.data.permissionsList.app_permit_create,
+    };
 
-    // hardcoded pl and pm groups
-    if (($page.data.isPL && selectedTaskState == "Done") || ($page.data.isPM && selectedTaskState == "Open")) {
-      viewOnlyTask = false
+    if (!map[selectedTaskState]) {
+      viewOnlyTask = true;
     } else {
-      // other users adhere to permitlist settings
-      if (!map[selectedTaskState]) {
-        viewOnlyTask = true
-      } else {
-        viewOnlyTask = false
-      }
+      viewOnlyTask = false;
     }
 
     if (form?.taskSuccessMessage) {
-      form.taskSuccessMessage = ""
+      form.taskSuccessMessage = "";
     }
-  }
+  };
 
   $: if (form?.resetSaveTaskForm || form?.resetPromoteTaskForm) {
-    selectedTaskNotes = form?.newNotes
-    selectedTaskOwner = $page.data.username
-    enterLog = ""
-    form.resetSaveTaskForm = false
-    form.resetPromoteTaskForm = false
+    selectedTaskNotes = form?.newNotes;
+    selectedTaskOwner = $page.data.username;
+    enterLog = "";
+    form.resetSaveTaskForm = false;
+    form.resetPromoteTaskForm = false;
   }
 
   $: if (form?.resetDemoteTaskForm) {
-    selectedTaskNotes = form?.newNotes
-    selectedTaskOwner = form?.newOwner ? form.newOwner : $page.data.username
-    enterLog = ""
-    form.resetDemoteTaskForm = false
+    selectedTaskNotes = form?.newNotes;
+    selectedTaskOwner = form?.newOwner ? form.newOwner : $page.data.username;
+    enterLog = "";
+    form.resetDemoteTaskForm = false;
   }
 
   onMount(async () => {
-    document.getElementById("createPlanModal").addEventListener("show.bs.modal", function (event) {
-      planName = ""
-      planStartDate = ""
-      planEndDate = ""
-      planColor = defaultColor
+    if (!$page.data.appname) {
+      goto("/task_management");
+    }
 
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
+    document.getElementById("createPlanModal").addEventListener("show.bs.modal", function (event) {
+        planName = "";
+        planStartDate = "";
+        planEndDate = "";
+        planColor = defaultColor;
+
+        if (form?.errorMessage) {
+            form.errorMessage = "";
+        }
+    });
 
     document.getElementById("createTaskModel").addEventListener("show.bs.modal", function (event) {
-      taskName = ""
-      taskDescription = ""
-      taskPlan = ""
+        taskName = "";
+        taskDescription = "";
+        taskPlan = "";
 
-      if (form?.errorMessage) {
-        form.errorMessage = ""
-      }
-    })
-  })
+        if (form?.errorMessage) {
+            form.errorMessage = "";
+        }
+    });
+  });
 </script>
 
 <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
   {#if $page.data.isPM}
-    <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createPlanModal">Create Plan</button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      style="margin-left: 20px"
+      data-bs-toggle="modal"
+      data-bs-target="#createPlanModal">Create Plan</button
+    >
   {/if}
-  {#if $page.data.isPL || $page.data.permissionsList.app_permit_create}
-    <button type="submit" class="btn btn-primary" style="margin-left: 20px" data-bs-toggle="modal" data-bs-target="#createTaskModel">Create Task</button>
+  {#if $page.data.permissionsList.app_permit_create}
+    <button
+      type="submit"
+      class="btn btn-primary"
+      style="margin-left: 20px"
+      data-bs-toggle="modal"
+      data-bs-target="#createTaskModel">Create Task</button
+    >
   {/if}
   <div style="flex: 1; text-align: center; margin-right: 300px">
     <h2>{appName}</h2>
@@ -168,18 +181,34 @@
           </div>
           <div class="card-body" style="min-height: 500px;">
             {#each tasks as task}
-              <div class="card mb-3" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#viewTaskModel">
-                <a href="/" on:click={event => viewTask(event, task)} class="stretched-link" aria-label="view-task"></a>
+              <div
+                class="card mb-3"
+                style="cursor: pointer"
+                data-bs-toggle="modal"
+                data-bs-target="#viewTaskModel"
+              >
+                <a
+                  href="/"
+                  on:click={(event) => viewTask(event, task)}
+                  class="stretched-link"
+                  aria-label="view-task"
+                ></a>
                 <div class="card-header">
-                  <h6 class="mb-0">{task.task_name}</h6>
+                  <h6 class="mb-0">{task.task_id}</h6>
                 </div>
                 <div class="card-body">
                   <p class="card-text">{task.task_description}</p>
                 </div>
                 <div class="card-footer">
-                  <div class="d-flex justify-content-between align-items-center">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
                     <div>
-                      <span class="badge" style="background-color: {task.task_color}">{task.task_plan}</span>
+                      <span
+                        class="badge"
+                        style="background-color: {task.task_color}"
+                        >{task.task_plan}</span
+                      >
                     </div>
                     <div>
                       <span class="badge bg-secondary">{task.task_owner}</span>
@@ -204,13 +233,18 @@
         action="?/createPlan"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false })
-          }
+            update({ reset: false });
+          };
         }}
       >
         <div class="modal-header">
           <h1 class="modal-title fs-5">Create Plan</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           {#if form?.errorMessage}
@@ -232,25 +266,49 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Plan Name*</div>
             <div class="col-md-9">
-              <input id="planname" name="planname" class="form-control" bind:value={planName} />
+              <input
+                id="planname"
+                name="planname"
+                class="form-control"
+                bind:value={planName}
+              />
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={planStartDate} />
+              <input
+                id="startdate"
+                name="startdate"
+                class="form-control"
+                type="date"
+                bind:value={planStartDate}
+              />
             </div>
           </div>
           <div class="row align-items-center mb-3">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={planEndDate} />
+              <input
+                id="enddate"
+                name="enddate"
+                class="form-control"
+                type="date"
+                bind:value={planEndDate}
+              />
             </div>
           </div>
           <div class="row align-items-center">
             <div class="col-md-3" style="text-align: right">Color*</div>
             <div class="col-md-2">
-              <input id="color" name="color" class="form-control" type="color" style="height: 40px;" bind:value={planColor} />
+              <input
+                id="color"
+                name="color"
+                class="form-control"
+                type="color"
+                style="height: 40px;"
+                bind:value={planColor}
+              />
             </div>
           </div>
         </div>
@@ -271,14 +329,19 @@
         action="?/createTask"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false })
-          }
+            update({ reset: false });
+          };
         }}
       >
         <input type="hidden" name="appname" bind:value={appName} />
         <div class="modal-header">
           <h1 class="modal-title fs-5">Task Details</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           {#if form?.errorMessage}
@@ -296,14 +359,24 @@
                 <div class="row align-items-center mb-2">
                   <div class="col-md-3" style="text-align: right">Creator</div>
                   <div class="col-md-9">
-                    <input type="hidden" name="creator" bind:value={$page.data.username} />
+                    <input
+                      type="hidden"
+                      name="creator"
+                      bind:value={$page.data.username}
+                    />
                     {$page.data.username}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Creation Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Creation Date
+                  </div>
                   <div class="col-md-9">
-                    <input type="hidden" name="creationdate" bind:value={taskCreationDate} />
+                    <input
+                      type="hidden"
+                      name="creationdate"
+                      bind:value={taskCreationDate}
+                    />
                     {taskCreationDate}
                   </div>
                 </div>
@@ -312,43 +385,76 @@
                   <div class="col-md-9">Open</div>
                 </div>
                 <div class="row align-items-center mb-3">
-                  <div class="col-md-3" style="text-align: right">Task Name*</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Task Name*
+                  </div>
                   <div class="col-md-9">
-                    <input id="taskname" name="taskname" class="form-control" bind:value={taskName} />
+                    <input
+                      id="taskname"
+                      name="taskname"
+                      class="form-control"
+                      bind:value={taskName}
+                    />
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Task Owner</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Task Owner
+                  </div>
                   <div class="col-md-9">
-                    <input type="hidden" name="owner" bind:value={$page.data.username} />
+                    <input
+                      type="hidden"
+                      name="owner"
+                      bind:value={$page.data.username}
+                    />
                     {$page.data.username}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Description</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Description
+                  </div>
                   <div class="col-md-9">
-                    <textarea rows="4" id="description" name="description" class="form-control" bind:value={taskDescription}></textarea>
+                    <textarea
+                      rows="4"
+                      id="description"
+                      name="description"
+                      class="form-control"
+                      bind:value={taskDescription}
+                    ></textarea>
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan Name</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan Name
+                  </div>
                   <div class="col-md-9">
-                    <select class="form-select" name="taskplan" bind:value={taskPlan}>
+                    <select
+                      class="form-select"
+                      name="taskplan"
+                      bind:value={taskPlan}
+                    >
                       <option></option>
                       {#each $page.data.plansList as plan}
-                        <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
+                        <option value={plan.plan_mvp_name}
+                          >{plan.plan_mvp_name}</option
+                        >
                       {/each}
                     </select>
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan Start Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan Start Date
+                  </div>
                   <div class="col-md-9">
                     {taskPlanStartDate}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan End Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan End Date
+                  </div>
                   <div class="col-md-9">
                     {taskPlanEndDate}
                   </div>
@@ -356,14 +462,24 @@
               </div>
               <div class="col-md-6">
                 <h5>Logs</h5>
-                <textarea disabled id="description" name="description" class="form-control" style="min-height: 370px;"></textarea>
+                <textarea
+                  disabled
+                  id="description"
+                  name="description"
+                  class="form-control"
+                  style="min-height: 370px;"
+                ></textarea>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Create</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">Cancel</button
+          >
         </div>
       </form>
     </div>
@@ -378,15 +494,20 @@
         method="POST"
         use:enhance={() => {
           return async ({ update }) => {
-            update({ reset: false })
-          }
+            update({ reset: false });
+          };
         }}
       >
         <input type="hidden" name="appname" bind:value={appName} />
         <input type="hidden" name="taskid" bind:value={selectedTaskId} />
         <div class="modal-header">
           <h1 class="modal-title fs-5">Task Details</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           {#if form?.taskSuccessMessage}
@@ -413,66 +534,119 @@
                 <div class="row align-items-center mb-2">
                   <div class="col-md-3" style="text-align: right">Creator</div>
                   <div class="col-md-9">
-                    <input type="hidden" name="creator" bind:value={selectedTaskCreator} />
+                    <input
+                      type="hidden"
+                      name="creator"
+                      bind:value={selectedTaskCreator}
+                    />
                     {selectedTaskCreator}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Creation Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Creation Date
+                  </div>
                   <div class="col-md-9">
-                    <input type="hidden" name="creationdate" bind:value={selectedTaskCreationDate} />
+                    <input
+                      type="hidden"
+                      name="creationdate"
+                      bind:value={selectedTaskCreationDate}
+                    />
                     {selectedTaskCreationDate}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
                   <div class="col-md-3" style="text-align: right">Status</div>
-                  <input type="hidden" name="taskstate" bind:value={selectedTaskState} />
-                  <div class="col-md-9 text-capitalize">{selectedTaskState}</div>
+                  <input
+                    type="hidden"
+                    name="taskstate"
+                    bind:value={selectedTaskState}
+                  />
+                  <div class="col-md-9 text-capitalize">
+                    {selectedTaskState}
+                  </div>
                 </div>
                 <div class="row align-items-center mb-3">
-                  <div class="col-md-3" style="text-align: right">Task Name</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Task Name
+                  </div>
                   <div class="col-md-9">
-                    <input type="hidden" name="taskname" bind:value={selectedTaskName} />
+                    <input
+                      type="hidden"
+                      name="taskname"
+                      bind:value={selectedTaskName}
+                    />
                     {selectedTaskName}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Task Owner</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Task Owner
+                  </div>
                   <div class="col-md-9">
-                    <input type="hidden" name="owner" bind:value={selectedTaskOwner} />
+                    <input
+                      type="hidden"
+                      name="owner"
+                      bind:value={selectedTaskOwner}
+                    />
                     {selectedTaskOwner}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Description</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Description
+                  </div>
                   <div class="col-md-9">
-                    <textarea rows="4" disabled id="description" name="description" class="form-control" bind:value={selectedTaskDescription}></textarea>
+                    <textarea
+                      rows="4"
+                      disabled
+                      id="description"
+                      name="description"
+                      class="form-control"
+                      bind:value={selectedTaskDescription}
+                    ></textarea>
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan Name</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan Name
+                  </div>
                   <div class="col-md-9">
                     {#if (selectedTaskState === "Open" || selectedTaskState === "Done") && !viewOnlyTask}
-                      <select class="form-select" name="taskplan" bind:value={taskPlan}>
+                      <select
+                        class="form-select"
+                        name="taskplan"
+                        bind:value={taskPlan}
+                      >
                         <option></option>
                         {#each $page.data.plansList as plan}
-                          <option value={plan.plan_mvp_name}>{plan.plan_mvp_name}</option>
+                          <option value={plan.plan_mvp_name}
+                            >{plan.plan_mvp_name}</option
+                          >
                         {/each}
                       </select>
                     {:else}
-                      <input type="hidden" name="taskplan" bind:value={selectedTaskPlan} />
+                      <input
+                        type="hidden"
+                        name="taskplan"
+                        bind:value={selectedTaskPlan}
+                      />
                       {selectedTaskPlan}
                     {/if}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan Start Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan Start Date
+                  </div>
                   <div class="col-md-9">
                     {taskPlanStartDate}
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
-                  <div class="col-md-3" style="text-align: right">Plan End Date</div>
+                  <div class="col-md-3" style="text-align: right">
+                    Plan End Date
+                  </div>
                   <div class="col-md-9">
                     {taskPlanEndDate}
                   </div>
@@ -486,14 +660,33 @@
                 </row>
                 <row>
                   <div class="col-md-12">
-                    <input type="hidden" id="tasknotes" name="tasknotes" bind:value={selectedTaskNotes} />
-                    <textarea bind:value={selectedTaskNotes} disabled class="form-control" style="min-height: {selectedTaskState !== 'Closed' && !viewOnlyTask ? '300px' : '370px'};"></textarea>
+                    <input
+                      type="hidden"
+                      id="tasknotes"
+                      name="tasknotes"
+                      bind:value={selectedTaskNotes}
+                    />
+                    <textarea
+                      bind:value={selectedTaskNotes}
+                      disabled
+                      class="form-control"
+                      style="min-height: {selectedTaskState !== 'Closed' &&
+                      !viewOnlyTask
+                        ? '300px'
+                        : '370px'};"
+                    ></textarea>
                   </div>
                 </row>
                 {#if selectedTaskState !== "Closed" && !viewOnlyTask}
                   <row>
                     <div class="col-md-12 mt-3">
-                      <textarea id="enterlog" name="enterlog" class="form-control" placeholder="Enter log" bind:value={enterLog}></textarea>
+                      <textarea
+                        id="enterlog"
+                        name="enterlog"
+                        class="form-control"
+                        placeholder="Enter log"
+                        bind:value={enterLog}
+                      ></textarea>
                     </div>
                   </row>
                 {/if}
@@ -505,24 +698,62 @@
           {#if !viewOnlyTask}
             {#if selectedTaskState !== "Closed"}
               {#if selectedTaskState === "Open"}
-                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Release</button>
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  formaction="?/promoteTask"
+                  data-bs-dismiss="modal">Release</button
+                >
               {:else if selectedTaskState === "Todo"}
-                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Assign</button>
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  formaction="?/promoteTask"
+                  data-bs-dismiss="modal">Assign</button
+                >
               {:else if selectedTaskState === "Doing"}
-                <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Review</button>
-                <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Unassign</button>
+                <button
+                  type="submit"
+                  class="btn btn-success"
+                  formaction="?/promoteTask"
+                  data-bs-dismiss="modal">Review</button
+                >
+                <button
+                  type="submit"
+                  class="btn btn-danger"
+                  formaction="?/demoteTask"
+                  data-bs-dismiss="modal">Unassign</button
+                >
               {:else}
                 {#if selectedTaskPlan === taskPlan}
-                  <button type="submit" class="btn btn-success" formaction="?/promoteTask" data-bs-dismiss="modal">Approve</button>
+                  <button
+                    type="submit"
+                    class="btn btn-success"
+                    formaction="?/promoteTask"
+                    data-bs-dismiss="modal">Approve</button
+                  >
                 {/if}
-                <button type="submit" class="btn btn-danger" formaction="?/demoteTask" data-bs-dismiss="modal">Reject</button>
+                <button
+                  type="submit"
+                  class="btn btn-danger"
+                  formaction="?/demoteTask"
+                  data-bs-dismiss="modal">Reject</button
+                >
               {/if}
               {#if selectedTaskPlan === taskPlan || selectedTaskState === "Open"}
-                <button type="submit" class="btn btn-primary" formaction="?/saveTask">Save</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  formaction="?/saveTask">Save</button
+                >
               {/if}
             {/if}
           {/if}
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal">Cancel</button
+          >
         </div>
       </form>
     </div>
