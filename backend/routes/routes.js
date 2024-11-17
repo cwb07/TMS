@@ -37,7 +37,7 @@ router.route("/createPlan").post(isLoggedIn, checkUserAccess("pm"), createPlan)
 router.route("/createTask").post(isLoggedIn, checkTaskStatePermit, createTask)
 router.route("/saveTask").post(isLoggedIn, checkTaskStatePermit, saveTask)
 router.route("/promoteTask").post(isLoggedIn, checkTaskStatePermit, promoteTask)
-router.route("/demoteTask").post(isLoggedIn, checkTaskStatePermit, demoteTask)
 router.route("/promoteTask2Done").post(isLoggedIn, checkTaskStatePermit, promoteTask2Done)
+router.route("/demoteTask").post(isLoggedIn, checkTaskStatePermit, demoteTask)
 
 export default router
