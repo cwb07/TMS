@@ -40,10 +40,6 @@ const createPlan = async (req, res) => {
         return res.json({ success: false, message: "App start date must be before app end date" })
       }
 
-      if (!plan_color) {
-        return res.json({ success: false, message: "Plan color is mandatory" })
-      }
-
       const insertQuery = `INSERT INTO plan(plan_mvp_name, plan_app_acronym, plan_startdate, plan_enddate, plan_color) VALUES (?, ?, ?, ?, ?)`
       await connection.query(insertQuery, [plan_mvp_name, plan_app_acronym, plan_startdate, plan_enddate, plan_color])
       return res.json({ success: true, message: "Plan created" })
