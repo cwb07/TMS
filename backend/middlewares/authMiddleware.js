@@ -91,13 +91,13 @@ const checkUserAccess = (...groups) => async (req, res, next) => {
 }
 
 const checkTaskStatePermit = async (req, res, next) => {
-  let { task_state } = req.body
+  let { task_state, task_app_acronym } = req.body
 
   const connection = await pool.getConnection()
 
   try {
     const query = `SELECT app_permit_create, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done FROM application WHERE app_acronym = ?`
-    const [results] = await connection.query(query, [req.cookies.app])
+    const [results] = await connection.query(query, [task_app_acronym])
 
     const statePermitMap = {
       Create: results[0].app_permit_create,

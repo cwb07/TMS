@@ -33,21 +33,74 @@ const saveTask = async (req, res) => {
   }
 }
 
+const promoteTask2Done = async (req, res) => {
+  const { task_app_acronym, task_id, task_plan, task_notes, enterLog, task_state } = req.body
+  let newLog;
+
+  if (enterLog) {
+    newLog = auditStampString(req.user.username, task_state) + `\nTask submitted for review.\n` + auditStampString(req.user.username, task_state) + `\n${enterLog}` + `\n${task_notes}`
+  } else {
+    newLog = auditStampString(req.user.username, task_state) + `\nTask submitted for review.` + `\n${task_notes}`
+  }
+
+  const connection = await pool.getConnection()
+
+  try {
+    // if task_state different from task_state in db, res error
+    const getTaskQuery = `SELECT task_state FROM task WHERE task_id = ?`
+    const [task] = await pool.query(getTaskQuery, [task_id])
+
+    if (task[0].task_state !== task_state) {
+      return res.json({ success: false, message: "Task state was changed to by another user. Please refresh. " })
+    }
+
+    const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
+    await pool.query(updateTaskQuery, ["Done", task_plan, newLog, req.user.username, task_id])
+
+    const getPermitGroup = `SELECT app_permit_done FROM application WHERE app_acronym = ?`
+    const [permitGroup] = await pool.query(getPermitGroup, [task_app_acronym])
+
+    const getListOfEmails = `SELECT GROUP_CONCAT(email SEPARATOR ', ') as emails FROM accounts WHERE username IN (SELECT username FROM usergroup WHERE user_group = ?)`
+    const [results] = await pool.query(getListOfEmails, [permitGroup[0].app_permit_done])
+
+    transporter.sendMail({
+      from: process.env.MAILER_FROM,
+      to: results[0].emails,
+      subject: `Task Pending Review: ${task_id}`,
+      text: `Dear Team,\n\nA task in the Task Management System is pending review.\nPlease login to the system to review the task.\n\nTask ID: ${task_id}\n\nRegards,\nTask Management System`,
+      html: `
+            <p>Dear Team,</p>
+            <p>A task in the Task Management System is pending review.<br>Please login to the system to review the task.</p>
+            <p>Task ID: <b>${task_id}</b></p>
+            <p>Regards,<br>Task Management System</p>
+            `
+    }).then(() => {
+      console.log('Email sent successfully')
+    }).catch((error) => {
+      console.log('Error sending email:', error)
+    })
+
+    return res.json({ success: true, message: 'Task submitted for review.', newNotes: newLog })
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Unable to promote task", stack: err.stack })
+  } finally {
+    connection.release()
+  }
+}
+
 const promoteTask = async (req, res) => {
   const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
-  let newLog = task_notes
+  let newLog;
 
   const nextStates = {
     Open: "Todo",
     Todo: "Doing",
-    Doing: "Done",
     Done: "Closed"
   }
 
   const logMessage = {
     Open: "Task released.",
     Todo: `Task assigned to ${req.user.username}.`,
-    Doing: `Task submitted for review.`,
     Done: "Task closed."
   }
 
@@ -70,33 +123,7 @@ const promoteTask = async (req, res) => {
 
     const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
     await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, req.user.username, task_id])
-
-    if (task_state === "Doing") {
-      const getPermitGroup = `SELECT app_permit_done FROM application WHERE app_acronym = ?`
-      const [permitGroup] = await pool.query(getPermitGroup, [req.cookies.app])
-
-      const getListOfEmails = `SELECT GROUP_CONCAT(email SEPARATOR ', ') as emails FROM accounts WHERE username IN (SELECT username FROM usergroup WHERE user_group = ?)`
-      const [results] = await pool.query(getListOfEmails, [permitGroup[0].app_permit_done])
-
-      transporter.sendMail({
-        from: process.env.MAILER_FROM,
-        to: results[0].emails,
-        subject: `Task Pending Review: ${task_id}`,
-        text: `Dear Team,\n\nA task in the Task Management System is pending review.\nPlease login to the system to review the task.\n\nTask ID: ${task_id}\n\nRegards,\nTask Management System`,
-        html: `
-            <p>Dear Team,</p>
-            <p>A task in the Task Management System is pending review.<br>Please login to the system to review the task.</p>
-            <p>Task ID: <b>${task_id}</b></p>
-            <p>Regards,<br>Task Management System</p>
-        `
-      }).then(() => {
-        console.log('Email sent successfully')
-      }).catch((error) => {
-        console.log('Error sending email:', error)
-      })
-    }
-
-    return res.json({ success: true, message: `Task ${logMessage[task_state]}`, newNotes: newLog })
+    return res.json({ success: true, message: `${logMessage[task_state]}`, newNotes: newLog })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to promote task", stack: err.stack })
   } finally {
@@ -106,7 +133,7 @@ const promoteTask = async (req, res) => {
 
 const demoteTask = async (req, res) => {
   const { task_id, task_plan, task_notes, enterLog, task_state, task_owner } = req.body
-  let newLog = task_notes
+  let newLog;
 
   const nextStates = {
     Doing: "Todo",
@@ -143,7 +170,7 @@ const demoteTask = async (req, res) => {
 
     const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
     await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, newOwner, task_id])
-    return res.json({ success: true, message: `Task ${logMessage[task_state]}`, newNotes: newLog, newOwner: newOwner })
+    return res.json({ success: true, message: `${logMessage[task_state]}`, newNotes: newLog, newOwner: newOwner })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to demote task", stack: err.stack })
   } finally {
@@ -215,7 +242,7 @@ const getAllTasksInApp = async (req, res) => {
 
 // helper functions
 const convertLogsToDateTime = datetime => {
-  return datetime.toLocaleString("en-GB", {
+  let formattedDateTime = datetime.toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -224,6 +251,8 @@ const convertLogsToDateTime = datetime => {
     second: "2-digit",
     hour12: true
   })?.replace("am", "AM").replace("pm", "PM")
+
+  return formattedDateTime.replace(/00:/, '12:');
 }
 
 const auditStampString = (creator, state) => {
@@ -231,4 +260,4 @@ const auditStampString = (creator, state) => {
   return `******************\n[User: ${creator}, State: ${capitalizedState}, Date: ${convertLogsToDateTime(new Date())}]`
 }
 
-export { createTask, getAllTasksInApp, saveTask, promoteTask, demoteTask }
+export { createTask, getAllTasksInApp, saveTask, promoteTask, demoteTask, promoteTask2Done }

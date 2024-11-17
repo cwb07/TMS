@@ -21,29 +21,16 @@
                 Error: {form?.errorMessage}
               </div>
             {/if}
-            <form
-              method="POST"
-              use:enhance={() => {
-                return async ({ update }) => {
-                  update({ reset: false });
-                };
-              }}
-            >
+            <form method="POST" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
               <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input id="username" name="username" class="form-control" />
               </div>
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  name="password"
-                  class="form-control"
-                />
+                <input id="password" type="password" name="password" class="form-control" />
               </div>
-              <button type="submit" class="btn btn-primary w-100">Log In</button
-              >
+              <button type="submit" class="btn btn-primary w-100">Log In</button>
             </form>
           </div>
         </div>

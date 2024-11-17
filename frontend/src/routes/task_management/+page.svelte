@@ -96,20 +96,12 @@
   });
 </script>
 
-<div
-  style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px"
->
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px">
   <div style="flex: 1; text-align: center;">
     <h2>APPLICATIONS</h2>
   </div>
   {#if $page.data.isPL}
-    <button
-      type="submit"
-      class="btn btn-primary"
-      style="margin-right: 20px;"
-      data-bs-toggle="modal"
-      data-bs-target="#createAppModal">Create App</button
-    >
+    <button type="submit" class="btn btn-primary" style="margin-right: 20px;" data-bs-toggle="modal" data-bs-target="#createAppModal">Create App</button>
   {/if}
 </div>
 
@@ -129,14 +121,7 @@
       <div class="col">
         <div class="card h-100" style="position: relative">
           {#if $page.data.isPL}
-            <button
-              on:click={() => editApp(application)}
-              class="bi bi-pencil-square btn btn-sm edit-btn"
-              type="submit"
-              aria-label="edit-btn"
-              data-bs-toggle="modal"
-              data-bs-target="#editAppModal"
-            ></button>
+            <button on:click={() => editApp(application)} class="bi bi-pencil-square btn btn-sm edit-btn" type="submit" aria-label="edit-btn" data-bs-toggle="modal" data-bs-target="#editAppModal"></button>
           {/if}
           <div class="card-body">
             <div class="row">
@@ -170,14 +155,8 @@
           </div>
           <form method="POST" action="?/viewApp" use:enhance>
             <div class="card-footer">
-              <input
-                type="hidden"
-                name="appname"
-                value={application.app_acronym}
-              />
-              <button type="submit" class="btn btn-primary btn-sm w-100"
-                >View</button
-              >
+              <input type="hidden" name="appname" value={application.app_acronym} />
+              <button type="submit" class="btn btn-primary btn-sm w-100">View</button>
             </div>
           </form>
         </div>
@@ -190,23 +169,10 @@
 <div class="modal" id="createAppModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form
-        method="POST"
-        action="?/createApp"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false });
-          };
-        }}
-      >
+      <form method="POST" action="?/createApp" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
         <div class="modal-header">
           <h1 class="modal-title fs-5">Create App</h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           {#if form?.errorMessage}
@@ -221,70 +187,37 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Name*</div>
             <div class="col-md-9">
-              <input
-                id="name"
-                name="name"
-                class="form-control"
-                bind:value={name}
-              />
+              <input id="name" name="name" class="form-control" bind:value={name}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">RNumber*</div>
             <div class="col-md-9">
-              <input
-                id="rnumber"
-                name="rnumber"
-                class="form-control"
-                type="number"
-                bind:value={rNumber}
-              />
+              <input id="rnumber" name="rnumber" class="form-control" type="number" bind:value={rNumber}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Description</div>
             <div class="col-md-9">
-              <textarea
-                rows="4"
-                id="description"
-                name="description"
-                class="form-control"
-                bind:value={description}
-              ></textarea>
+              <textarea rows="4" id="description" name="description" class="form-control" bind:value={description}></textarea>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input
-                id="startdate"
-                name="startdate"
-                class="form-control"
-                type="date"
-                bind:value={startDate}
-              />
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={startDate}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input
-                id="enddate"
-                name="enddate"
-                class="form-control"
-                type="date"
-                bind:value={endDate}
-              />
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={endDate}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Open</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitopen"
-                bind:value={permitOpen}
-              >
+              <select class="form-select" name="permitopen" bind:value={permitOpen}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -295,11 +228,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Todo</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permittodo"
-                bind:value={permitTodo}
-              >
+              <select class="form-select" name="permittodo" bind:value={permitTodo}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -310,11 +239,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Doing</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitdoing"
-                bind:value={permitDoing}
-              >
+              <select class="form-select" name="permitdoing" bind:value={permitDoing}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -325,11 +250,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Done</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitdone"
-                bind:value={permitDone}
-              >
+              <select class="form-select" name="permitdone" bind:value={permitDone}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -340,11 +261,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Create</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitcreate"
-                bind:value={permitCreate}
-              >
+              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -365,23 +282,10 @@
 <div class="modal" id="editAppModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form
-        method="POST"
-        action="?/editApp"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false });
-          };
-        }}
-      >
+      <form method="POST" action="?/editApp" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
         <div class="modal-header">
           <h1 class="modal-title fs-5">Edit App</h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           {#if form?.errorMessage}
@@ -397,12 +301,7 @@
             <div class="col-md-3" style="text-align: right">Name*</div>
             <div class="col-md-9">
               <input type="hidden" name="prevname" value={prevEditName} />
-              <input
-                id="name"
-                name="name"
-                class="form-control"
-                bind:value={editName}
-              />
+              <input id="name" name="name" class="form-control" bind:value={editName}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -415,47 +314,25 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Description</div>
             <div class="col-md-9">
-              <textarea
-                rows="4"
-                id="description"
-                name="description"
-                class="form-control"
-                bind:value={editDescription}
-              ></textarea>
+              <textarea rows="4" id="description" name="description" class="form-control" bind:value={editDescription}></textarea>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Start Date*</div>
             <div class="col-md-9">
-              <input
-                id="startdate"
-                name="startdate"
-                class="form-control"
-                type="date"
-                bind:value={editStartDate}
-              />
+              <input id="startdate" name="startdate" class="form-control" type="date" bind:value={editStartDate}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
-              <input
-                id="enddate"
-                name="enddate"
-                class="form-control"
-                type="date"
-                bind:value={editEndDate}
-              />
+              <input id="enddate" name="enddate" class="form-control" type="date" bind:value={editEndDate}/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Open</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitopen"
-                bind:value={editPermitOpen}
-              >
+              <select class="form-select" name="permitopen" bind:value={editPermitOpen}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option value={group}>{group}</option>
@@ -466,11 +343,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Todo</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permittodo"
-                bind:value={editPermitTodo}
-              >
+              <select class="form-select" name="permittodo" bind:value={editPermitTodo}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -481,11 +354,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Doing</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitdoing"
-                bind:value={editPermitDoing}
-              >
+              <select class="form-select" name="permitdoing" bind:value={editPermitDoing}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -496,11 +365,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Done</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitdone"
-                bind:value={editPermitDone}
-              >
+              <select class="form-select" name="permitdone" bind:value={editPermitDone}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>
@@ -511,11 +376,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Permit Create</div>
             <div class="col-md-9">
-              <select
-                class="form-select"
-                name="permitcreate"
-                bind:value={editPermitCreate}
-              >
+              <select class="form-select" name="permitcreate" bind:value={editPermitCreate}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>

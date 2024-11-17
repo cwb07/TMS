@@ -118,33 +118,15 @@
   <div class="row">
     <div class="col-8"></div>
     <div class="col-4">
-      <form
-        method="POST"
-        action="?/createGroup"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false });
-          };
-        }}
-      >
+      <form method="POST" action="?/createGroup" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
         <table class="table table-bordered text-center">
           <tbody>
             <tr>
               <th class="col-3">
-                <input
-                  id="groupname"
-                  type="text"
-                  class="form-control"
-                  placeholder="Group Name"
-                  name="groupname"
-                  maxlength="50"
-                  bind:value={groupName}
-                />
+                <input id="groupname" type="text" class="form-control" placeholder="Group Name" name="groupname" maxlength="50" bind:value={groupName}/>
               </th>
-              <th class="col-1"
-                ><button type="submit" class="btn btn-primary w-100"
-                  >Create Group</button
-                >
+              <th class="col-1">
+                <button type="submit" class="btn btn-primary w-100">Create Group</button>
               </th>
             </tr>
           </tbody>
@@ -156,47 +138,18 @@
   <!-- Create User Table -->
   <div class="row">
     <div class="col-12">
-      <form
-        method="POST"
-        action="?/createUser"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false });
-          };
-        }}
-      >
+      <form method="POST" action="?/createUser" use:enhance={() => { return async ({ update }) => { update({ reset: false });};}}>
         <table class="table table-bordered text-center">
           <tbody>
             <tr>
               <th class="col-2">
-                <input
-                  id="username"
-                  type="text"
-                  class="form-control"
-                  name="username"
-                  placeholder="Username*"
-                  maxlength="50"
-                  bind:value={username}
-                />
+                <input id="username" type="text" class="form-control" name="username" placeholder="Username*" maxlength="50" bind:value={username}/>
               </th>
               <th class="col-2">
-                <input
-                  type="text"
-                  class="form-control"
-                  name="email"
-                  placeholder="Email (optional)"
-                  bind:value={email}
-                />
+                <input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={email}/>
               </th>
               <th class="col-2">
-                <input
-                  type="password"
-                  class="form-control"
-                  name="password"
-                  placeholder="Password*"
-                  maxlength="10"
-                  bind:value={password}
-                />
+                <input type="password" class="form-control" name="password" placeholder="Password*" maxlength="10" bind:value={password}/>
               </th>
               <th class="col-2">
                 <MultiSelect
@@ -213,19 +166,13 @@
                 </MultiSelect>
               </th>
               <th class="col-1">
-                <select
-                  class="form-select"
-                  name="accountstatus"
-                  bind:value={accountStatus}
-                >
+                <select class="form-select" name="accountstatus" bind:value={accountStatus}>
                   <option default value="Active">Active</option>
                   <option value="Disabled">Disabled</option>
                 </select>
               </th>
               <th class="col-1">
-                <button type="submit" class="btn btn-primary w-100"
-                  >Create User</button
-                >
+                <button type="submit" class="btn btn-primary w-100">Create User</button>
               </th>
             </tr>
           </tbody>
@@ -237,19 +184,8 @@
   <!-- Edit User Table -->
   <div class="row">
     <div class="col-12">
-      <form
-        method="POST"
-        action="?/editUser"
-        use:enhance={() => {
-          return async ({ update }) => {
-            update({ reset: false });
-          };
-        }}
-      >
-        <table
-          class="table text-center table-bordered table-sm"
-          class:table-hover={!editUsername}
-        >
+      <form method="POST" action="?/editUser" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
+        <table class="table text-center table-bordered table-sm" class:table-hover={!editUsername}>
           <thead class="table-light">
             <tr>
               <th class="col-2">Username</th>
@@ -265,32 +201,15 @@
               {#if editUsername && editUsername == user.username}
                 <tr class="table-primary">
                   <td>
-                    <input
-                      type="hidden"
-                      name="username"
-                      value={user.username}
-                    />
+                    <input type="hidden" name="username" value={user.username}/>
                     {user.username}
                   </td>
-                  <td
-                    ><input
-                      type="text"
-                      class="form-control"
-                      name="email"
-                      placeholder="Email (optional)"
-                      bind:value={editEmail}
-                    /></td
-                  >
-                  <td
-                    ><input
-                      type="password"
-                      class="form-control"
-                      name="password"
-                      placeholder="Password"
-                      maxlength="10"
-                      bind:value={editPassword}
-                    /></td
-                  >
+                  <td>
+                    <input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={editEmail}/>
+                  </td>
+                  <td>
+                    <input type="password" class="form-control" name="password" placeholder="Password" maxlength="10" bind:value={editPassword}/>
+                  </td>
                   <td style="width: 300px">
                     <MultiSelect
                       class="multi-select-input"
@@ -307,30 +226,18 @@
                   </td>
                   <td>
                     {#if editUsername === "admin"}
-                      <input
-                        type="hidden"
-                        name="accountstatus"
-                        value={editAccountstatus}
-                      />
+                      <input type="hidden" name="accountstatus" value={editAccountstatus}/>
                       {editAccountstatus}
                     {:else}
-                      <select
-                        class="form-select"
-                        name="accountstatus"
-                        bind:value={editAccountstatus}
-                      >
+                      <select class="form-select" name="accountstatus" bind:value={editAccountstatus}>
                         <option default value="Active">Active</option>
                         <option value="Disabled">Disabled</option>
                       </select>
                     {/if}
                   </td>
-                  <td
-                    ><button type="submit" class="btn btn-success">Save</button>
-                    <button
-                      type="button"
-                      on:click={() => cancelEdit()}
-                      class="btn btn-danger"
-                    >
+                  <td>
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" on:click={() => cancelEdit()} class="btn btn-danger">
                       Cancel
                     </button>
                   </td>
@@ -343,13 +250,7 @@
                   <td>{user.user_group}</td>
                   <td>{user.accountstatus}</td>
                   <td>
-                    <button
-                      type="button"
-                      on:click={() => editRow(user)}
-                      class="btn btn-primary"
-                    >
-                      Edit
-                    </button>
+                    <button type="button" on:click={() => editRow(user)} class="btn btn-primary">Edit</button>
                   </td>
                 </tr>
               {/if}
