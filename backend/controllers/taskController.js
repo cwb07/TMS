@@ -153,7 +153,8 @@ const demoteTask = async (req, res) => {
 
   let newOwner = req.user.username
 
-  if (task_owner) {
+  // if task rejected, unassign it back to prev task_owner
+  if (task_state === "Done") {
     newOwner = task_owner
   }
 
@@ -230,17 +231,15 @@ const getTaskbyState = async (req, res) => {
 
 // helper functions
 const convertLogsToDateTime = datetime => {
-  let formattedDateTime = datetime.toLocaleString("en-GB", {
+  return datetime.toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: true
+    hourCycle: "h12"
   })?.replace("am", "AM").replace("pm", "PM")
-
-  return formattedDateTime.replace(/00:/, '12:');
 }
 
 const auditStampString = (creator, state) => {
