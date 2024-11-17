@@ -2,7 +2,7 @@ import { checkTaskStatePermit, checkUserAccess, isLoggedIn } from "../middleware
 import { createApplication, editApplication, getAllApplications, getAppPermissions } from "../controllers/applicationController.js"
 import { createGroup, getAllGroups } from "../controllers/groupController.js"
 import { createPlan, getAllPlansInApp } from "../controllers/planController.js"
-import { createTask, demoteTask, getAllTasksInApp, promoteTask, promoteTask2Done, saveTask } from "../controllers/taskController.js"
+import { createTask, demoteTask, getTaskbyState, promoteTask, promoteTask2Done, saveTask } from "../controllers/taskController.js"
 import { createUser, editUser, getAllUsers, getUser, login, logout, updateProfile } from "../controllers/userController.js"
 
 import express from "express"
@@ -23,8 +23,8 @@ router.route("/getAllGroups").get(isLoggedIn, getAllGroups)
 router.route("/updateProfile").put(isLoggedIn, updateProfile)
 router.route("/getAllApplications").get(isLoggedIn, getAllApplications)
 router.route("/getAllPlansInApp").post(isLoggedIn, getAllPlansInApp)
-router.route("/getAllTasksInApp").post(isLoggedIn, getAllTasksInApp)
 router.route("/getAppPermissions").post(isLoggedIn, getAppPermissions)
+router.route("/getTaskbyState").post(isLoggedIn, getTaskbyState)
 
 // pl
 router.route("/createApplication").post(isLoggedIn, checkUserAccess("pl"), createApplication)

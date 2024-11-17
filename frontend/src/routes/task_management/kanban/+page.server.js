@@ -13,15 +13,24 @@ export const load = async ({ request, locals }) => {
   try {
     const response = await axios.get(`http://localhost:3000/getUser`, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const planResponse = await axios.post(`http://localhost:3000/getAllPlansInApp`, { plan_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
-    const taskResponse = await axios.post(`http://localhost:3000/getAllTasksInApp`, { task_app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
     const appResponse = await axios.post(`http://localhost:3000/getAppPermissions`, { app_acronym: appName }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+
+    // get list of tasks by state
+    const states = ["Open", "Todo", "Doing", "Done", "Closed"]
+    const tasksByState = {}
+    let taskResponse;
+
+    for (const state of states) {
+      taskResponse = await axios.post(`http://localhost:3000/getTaskbyState`, { task_app_acronym: appName, task_state: state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      tasksByState[state] = taskResponse.data.data
+    }
 
     if (response.data.success && planResponse.data.success && taskResponse.data.success && appResponse.data.success) {
       const plansList = planResponse.data.data
 
-      for (let state in taskResponse.data.data) {
-        let tasksList = taskResponse.data.data[state].map(task => ({ ...task, task_color: plansList.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor }))
-        taskResponse.data.data[state] = tasksList
+      for (let state in tasksByState) {
+        let tasksList = tasksByState[state].map(task => ({ ...task, task_color: plansList.find(plan => plan.plan_mvp_name === task.task_plan)?.plan_color || defaultColor }))
+        tasksByState[state] = tasksList
       }
 
       return {
@@ -29,7 +38,7 @@ export const load = async ({ request, locals }) => {
         isPM: response.data.data.isPM,
         isAdmin: response.data.data.isAdmin,
         plansList: planResponse.data.data,
-        tasksList: taskResponse.data.data,
+        tasksList: tasksByState,
         permissionsList: appResponse.data.data,
         appname: appName
       }

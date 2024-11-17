@@ -212,32 +212,20 @@ const createTask = async (req, res) => {
   }
 }
 
-const getTaskbyState = async (state, app) => {
+const getTaskbyState = async (req, res) => { 
+  const { task_state, task_app_acronym } = req.body
+
   const connection = await pool.getConnection()
 
   try {
     const query = `SELECT * FROM task WHERE task_state = ? AND task_app_acronym = ?`
-    const [results] = await connection.query(query, [state, app])
-    return results
+    const [result] = await connection.query(query, [task_state, task_app_acronym])
+    return res.json({ success: true, message: "Tasks retrieved", data: result })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to retrieve tasks by state", stack: err.stack })
   } finally {
     connection.release()
   }
-}
-
-const getAllTasksInApp = async (req, res) => {
-  const { task_app_acronym } = req.body
-
-  const states = ["Open", "Todo", "Doing", "Done", "Closed"]
-  const tasksByState = {}
-
-  for (const state of states) {
-    const tasks = await getTaskbyState(state, task_app_acronym)
-    tasksByState[state] = tasks
-  }
-
-  return res.json({ success: true, message: "Tasks retrieved", data: tasksByState })
 }
 
 // helper functions
@@ -260,4 +248,4 @@ const auditStampString = (creator, state) => {
   return `******************\n[User: ${creator}, State: ${capitalizedState}, Date: ${convertLogsToDateTime(new Date())}]`
 }
 
-export { createTask, getAllTasksInApp, saveTask, promoteTask, demoteTask, promoteTask2Done }
+export { getTaskbyState, createTask, saveTask, promoteTask, demoteTask, promoteTask2Done }
