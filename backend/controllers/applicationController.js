@@ -27,7 +27,7 @@ const createApplication = async (req, res) => {
     if (results.length === 0) {
       //application is unique
       if (!appAcronymRegex.test(app_acronym)) {
-        return res.json({ success: false, message: "App name must be alphanumeric have a maximum of 50 characters" })
+        return res.json({ success: false, message: "App name must be alphanumeric and have a maximum of 50 characters" })
       }
 
       if (!app_rnumber) {
