@@ -145,7 +145,7 @@ const getAppPermissions = async (req, res) => {
       permissions[permitGroup] = await checkGroup(req.user.username, permissions[permitGroup])
     }
 
-    return res.json({ success: true, message: "App permissions retrieved1", data: permissions })
+    return res.json({ success: true, message: "App permissions retrieved", data: permissions })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to retrieve app permissions", stack: err.stack })
   } finally {
