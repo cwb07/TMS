@@ -47,6 +47,7 @@ const isLoggedIn = async (req, res, next) => {
       connection.release()
     }
   } else {
+    res.cookie("app", "", { httpOnly: true, expires: new Date(0) })
     return res.status(401).json({ success: false, message: "Login first to access this resource" })
   }
 }
