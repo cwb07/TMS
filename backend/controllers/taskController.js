@@ -139,7 +139,7 @@ const promoteTask = async (req, res) => {
 }
 
 const demoteTask = async (req, res) => {
-  const { task_id, task_plan, task_notes, enterLog, task_state, task_owner } = req.body
+  const { task_id, task_plan, task_notes, enterLog, task_state } = req.body
   let newLog;
 
   const nextStates = {
@@ -149,20 +149,13 @@ const demoteTask = async (req, res) => {
 
   const logMessage = {
     Doing: `Task unassigned.`,
-    Done: `Task review rejected. Task assigned back to ${task_owner}.`
+    Done: `Task review rejected.`
   }
 
   if (enterLog) {
     newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}\n` + auditStampString(req.user.username, task_state) + `\n${enterLog}` + `\n${task_notes}`
   } else {
     newLog = auditStampString(req.user.username, task_state) + `\n${logMessage[task_state]}` + `\n${task_notes}`
-  }
-
-  let newOwner = req.user.username
-
-  // if task rejected, unassign it back to prev task_owner
-  if (task_state === "Done") {
-    newOwner = task_owner
   }
 
   const connection = await pool.getConnection()
@@ -177,8 +170,8 @@ const demoteTask = async (req, res) => {
     }
 
     const updateTaskQuery = `UPDATE task SET task_state = ?, task_plan = ?, task_notes = ?, task_owner = ? WHERE task_id = ?`
-    await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, newOwner, task_id])
-    return res.json({ success: true, message: `${logMessage[task_state]}`, newNotes: newLog, newOwner: newOwner })
+    await pool.query(updateTaskQuery, [nextStates[task_state], task_plan, newLog, req.user.username, task_id])
+    return res.json({ success: true, message: `${logMessage[task_state]}`, newNotes: newLog })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to demote task", stack: err.stack })
   } finally {

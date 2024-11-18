@@ -95,18 +95,12 @@
     }
   };
 
-  $: if (form?.resetSaveTaskForm || form?.resetPromoteTaskForm) {
+  $: if (form?.resetSaveTaskForm || form?.resetPromoteTaskForm || form?.resetDemoteTaskForm) {
     selectedTaskNotes = form?.newNotes;
     selectedTaskOwner = $page.data.username;
     enterLog = "";
     form.resetSaveTaskForm = false;
     form.resetPromoteTaskForm = false;
-  }
-
-  $: if (form?.resetDemoteTaskForm) {
-    selectedTaskNotes = form?.newNotes;
-    selectedTaskOwner = form?.newOwner ? form.newOwner : $page.data.username;
-    enterLog = "";
     form.resetDemoteTaskForm = false;
   }
 

@@ -209,14 +209,13 @@ export const actions = {
     const task_notes = form.get("tasknotes")
     const enterLog = form.get("enterlog")
     const task_state = form.get("taskstate")
-    const task_owner = form.get("owner")
     const task_app_acronym = form.get("appname")
 
     try {
-      const response = await axios.post(`http://localhost:3000/demoteTask`, { task_app_acronym, task_id, task_plan, task_notes, enterLog, task_state, task_owner }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/demoteTask`, { task_app_acronym, task_id, task_plan, task_notes, enterLog, task_state }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
-        return { taskSuccessMessage: response.data.message, resetDemoteTaskForm: true, newNotes: response.data.newNotes, newOwner: response.data.newOwner }
+        return { taskSuccessMessage: response.data.message, resetDemoteTaskForm: true, newNotes: response.data.newNotes}
       } else {
         return { successMessage: "", errorMessage: response.data.message }
       }
