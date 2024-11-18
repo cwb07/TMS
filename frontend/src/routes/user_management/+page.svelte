@@ -205,7 +205,7 @@
                     {user.username}
                   </td>
                   <td>
-                    <input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={editEmail}/>
+                    <input type="text" class="form-control" name="email" placeholder="Email (optional)" bind:value={editEmail} maxlength="100"/>
                   </td>
                   <td>
                     <input type="password" class="form-control" name="password" placeholder="Password" maxlength="10" bind:value={editPassword}/>

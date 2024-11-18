@@ -36,7 +36,7 @@ const createPlan = async (req, res) => {
       }
 
       // plan start date must be before app end date
-      if (plan_startdate >= plan_enddate) {
+      if (plan_startdate > plan_enddate) {
         return res.json({ success: false, message: "App start date must be before app end date" })
       }
 

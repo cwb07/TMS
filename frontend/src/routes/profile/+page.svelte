@@ -50,11 +50,11 @@
             <input type="hidden" name="username" value={$page.data.username} />
             <div class="mb-3">
               <label for="email" class="form-label">New Email</label>
-              <input id="email" name="email" class="form-control" bind:value={email} />
+              <input id="email" name="email" class="form-control" bind:value={email} maxlength="100"/>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">New Password</label>
-              <input id="password" type="password" name="password" class="form-control" bind:value={password} />
+              <input id="password" type="password" name="password" class="form-control" bind:value={password} maxlength="255"/>
             </div>
             <button type="submit" class="btn btn-primary w-100">Update</button>
           </form>

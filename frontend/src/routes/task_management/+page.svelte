@@ -169,7 +169,7 @@
 <div class="modal" id="createAppModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form method="POST" action="?/createApp" use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
+      <form method="POST" action="?/createApp" novalidate use:enhance={() => { return async ({ update }) => { update({ reset: false }); }; }}>
         <div class="modal-header">
           <h1 class="modal-title fs-5">Create App</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -187,7 +187,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Name*</div>
             <div class="col-md-9">
-              <input id="name" name="name" class="form-control" bind:value={name}/>
+              <input id="name" name="name" class="form-control" bind:value={name} maxlength="50"/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -212,6 +212,17 @@
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
               <input id="enddate" name="enddate" class="form-control" type="date" bind:value={endDate}/>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Create</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -258,17 +269,6 @@
               </select>
             </div>
           </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Create</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitcreate" bind:value={permitCreate}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary col">Create</button>
@@ -301,7 +301,7 @@
             <div class="col-md-3" style="text-align: right">Name*</div>
             <div class="col-md-9">
               <input type="hidden" name="prevname" value={prevEditName} />
-              <input id="name" name="name" class="form-control" bind:value={editName}/>
+              <input id="name" name="name" class="form-control" bind:value={editName} maxlength="50"/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -327,6 +327,17 @@
             <div class="col-md-3" style="text-align: right">End Date*</div>
             <div class="col-md-9">
               <input id="enddate" name="enddate" class="form-control" type="date" bind:value={editEndDate}/>
+            </div>
+          </div>
+          <div class="row align-items-center mb-2">
+            <div class="col-md-3" style="text-align: right">Permit Create</div>
+            <div class="col-md-9">
+              <select class="form-select" name="permitcreate" bind:value={editPermitCreate}>
+                <option></option>
+                {#each $page.data.groupsList as group}
+                  <option>{group}</option>
+                {/each}
+              </select>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -366,17 +377,6 @@
             <div class="col-md-3" style="text-align: right">Permit Done</div>
             <div class="col-md-9">
               <select class="form-select" name="permitdone" bind:value={editPermitDone}>
-                <option></option>
-                {#each $page.data.groupsList as group}
-                  <option>{group}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="row align-items-center mb-2">
-            <div class="col-md-3" style="text-align: right">Permit Create</div>
-            <div class="col-md-9">
-              <select class="form-select" name="permitcreate" bind:value={editPermitCreate}>
                 <option></option>
                 {#each $page.data.groupsList as group}
                   <option>{group}</option>

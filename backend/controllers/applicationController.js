@@ -2,7 +2,7 @@ import { checkGroup } from "../middlewares/authMiddleware.js"
 import pool from "../config/db.js"
 
 // app rnumber must be positive INT
-const appRnumberRegex = /^[0-9]+$/
+const appRnumberRegex = /^\d+$/
 
 // app acronym length must be 1-50 characters
 const appAcronymRegex = /^[a-zA-Z0-9\s]{1,50}$/
@@ -47,7 +47,7 @@ const createApplication = async (req, res) => {
       }
 
       // app start date must be before app end date
-      if (app_startdate >= app_enddate) {
+      if (app_startdate > app_enddate) {
         return res.json({ success: false, message: "App start date must be before app end date" })
       }
 
@@ -101,7 +101,7 @@ const editApplication = async (req, res) => {
     }
 
     // app start date must be before app end date
-    if (app_startdate >= app_enddate) {
+    if (app_startdate > app_enddate) {
       return res.json({ success: false, message: "App start date must be before app end date" })
     }
 

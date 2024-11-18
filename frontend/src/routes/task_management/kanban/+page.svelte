@@ -225,7 +225,7 @@
           <div class="row align-items-center mb-2">
             <div class="col-md-3" style="text-align: right">Plan Name*</div>
             <div class="col-md-9">
-              <input id="planname" name="planname" class="form-control" bind:value={planName}/>
+              <input id="planname" name="planname" class="form-control" bind:value={planName} maxlength="255"/>
             </div>
           </div>
           <div class="row align-items-center mb-2">
@@ -303,7 +303,7 @@
                     Task Name*
                   </div>
                   <div class="col-md-9">
-                    <input id="taskname" name="taskname" class="form-control" bind:value={taskName}/>
+                    <input id="taskname" name="taskname" class="form-control" bind:value={taskName} maxlength="255"/>
                   </div>
                 </div>
                 <div class="row align-items-center mb-2">
