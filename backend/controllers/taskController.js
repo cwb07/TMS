@@ -180,7 +180,7 @@ const demoteTask = async (req, res) => {
 }
 
 const createTask = async (req, res) => {
-  const { task_plan, task_app_acronym, task_description, task_creator, task_owner, task_createdate } = req.body
+  const { task_plan, task_app_acronym, task_description, task_creator, task_owner } = req.body
   let { task_name } = req.body
 
   task_name = task_name.trim()
@@ -201,7 +201,7 @@ const createTask = async (req, res) => {
     const task_notes = `${auditStampString(task_creator, "Open")}\nTask Created.`
 
     const insertQuery = `INSERT INTO task (task_id, task_name, task_plan, task_app_acronym, task_description, task_state, task_creator, task_owner, task_createdate, task_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    await connection.query(insertQuery, [task_id, task_name, task_plan, task_app_acronym, task_description, "Open", task_creator, task_owner, task_createdate, task_notes])
+    await connection.query(insertQuery, [task_id, task_name, task_plan, task_app_acronym, task_description, "Open", task_creator, task_owner, new Date().toLocaleDateString("en-ca"), task_notes])
 
     await connection.commit()
     return res.json({ success: true, message: "Task created" })

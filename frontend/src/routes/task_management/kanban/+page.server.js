@@ -85,14 +85,13 @@ export const actions = {
 
     const task_app_acronym = form.get("appname")
     const task_creator = form.get("creator")
-    const task_createdate = new Date(form.get("creationdate")).toLocaleDateString("en-ca")
     const task_name = form.get("taskname")
     const task_owner = form.get("owner")
     const task_description = form.get("description")
     const task_plan = form.get("taskplan")
 
     try {
-      const response = await axios.post(`http://localhost:3000/createTask`, { task_name, task_plan, task_app_acronym, task_description, task_creator, task_owner, task_createdate }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/createTask`, { task_name, task_plan, task_app_acronym, task_description, task_creator, task_owner }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
         return { successMessage: response.data.message, resetCreateTaskForm: true }

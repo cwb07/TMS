@@ -134,7 +134,9 @@
               <div class="col-md-4" style="text-align: right">
                 <b>DESCRIPTION</b>
               </div>
-              <div class="col-md-7">{application.app_description}</div>
+              <div class="col-md-7">
+                <textarea bind:value={application.app_description} disabled class="form-control" style="min-height: 100px"></textarea>
+              </div>
             </div>
             <div class="row">
               <div class="col-md-4" style="text-align: right">
