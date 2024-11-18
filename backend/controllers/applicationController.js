@@ -65,7 +65,7 @@ const createApplication = async (req, res) => {
 }
 
 const editApplication = async (req, res) => {
-  const { prev_app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
+  const { prev_app_acronym, app_description, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create } = req.body
   let { app_acronym } = req.body
 
   app_acronym = app_acronym.trim()
@@ -105,8 +105,13 @@ const editApplication = async (req, res) => {
       return res.json({ success: false, message: "App start date must be before app end date" })
     }
 
-    const updateQuery = `UPDATE application SET app_acronym = ?, app_description = ?, app_rnumber = ?, app_startdate = ?, app_enddate = ?, app_permit_open = ?, app_permit_todolist = ?, app_permit_doing = ?, app_permit_done = ?, app_permit_create = ? WHERE app_acronym = ?`
-    await connection.query(updateQuery, [app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create, prev_app_acronym])
+    const updateQuery = `UPDATE application SET app_acronym = ?, app_description = ?, app_startdate = ?, app_enddate = ?, app_permit_open = ?, app_permit_todolist = ?, app_permit_doing = ?, app_permit_done = ?, app_permit_create = ? WHERE app_acronym = ?`
+    await connection.query(updateQuery, [app_acronym, app_description, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create, prev_app_acronym])
+    
+    // Update task_id in task table to reflect new app_acronym
+    const updateTaskQuery = `UPDATE task SET task_id = REPLACE(task_id, ?, ?) WHERE task_id LIKE ? AND task_app_acronym = ?`
+    await connection.query(updateTaskQuery, [`${prev_app_acronym}_`, `${app_acronym}_`, `${prev_app_acronym}_%`, app_acronym])
+
     return res.json({ success: true, message: "Application updated" })
   } catch (err) {
     return res.status(500).json({ success: false, message: "Unable to update application", stack: err.stack })

@@ -64,7 +64,6 @@ export const actions = {
 
     const prev_app_acronym = form.get("prevname")
     const app_acronym = form.get("name")
-    const app_rnumber = form.get("rnumber")
     const app_description = form.get("description")
     const app_startdate = form.get("startdate")
     const app_enddate = form.get("enddate")
@@ -75,7 +74,7 @@ export const actions = {
     const app_permit_create = form.get("permitcreate")
 
     try {
-      const response = await axios.post(`http://localhost:3000/editApplication`, { prev_app_acronym, app_acronym, app_description, app_rnumber, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
+      const response = await axios.post(`http://localhost:3000/editApplication`, { prev_app_acronym, app_acronym, app_description, app_startdate, app_enddate, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done, app_permit_create }, { headers: { "Content-Type": "application/json", "User-Agent": request.headers.get("User-Agent"), cookie: request.headers.get("cookie") } })
 
       if (response.data.success) {
         return { successMessage: response.data.message, resetEditAppForm: true }

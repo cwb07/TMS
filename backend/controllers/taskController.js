@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
+import nodemailer from 'nodemailer';
 import pool from "../config/db.js"
 import transporter from "../config/nodemailer.js"
-import nodemailer from 'nodemailer';
 
 dotenv.config()
 
@@ -194,14 +194,18 @@ const createTask = async (req, res) => {
   try {
     await connection.beginTransaction()
 
-    const getRNumberQuery = `SELECT task_id as count FROM task WHERE task_app_acronym = ?`
+    // get latest rnumber from application table
+    const getRNumberQuery = `SELECT app_rnumber FROM application WHERE app_acronym = ?`
     const [result] = await connection.query(getRNumberQuery, [task_app_acronym])
 
-    const task_id = `${task_app_acronym}_${result.length + 1}`
+    const task_id = `${task_app_acronym}_${result[0].app_rnumber + 1}`
     const task_notes = `${auditStampString(task_creator, "Open")}\nTask Created.`
 
     const insertQuery = `INSERT INTO task (task_id, task_name, task_plan, task_app_acronym, task_description, task_state, task_creator, task_owner, task_createdate, task_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     await connection.query(insertQuery, [task_id, task_name, task_plan, task_app_acronym, task_description, "Open", task_creator, task_owner, new Date().toLocaleDateString("en-ca"), task_notes])
+
+    const updateRNumberQuery = `UPDATE application SET app_rnumber = app_rnumber + 1 WHERE app_acronym = ?`
+    await connection.query(updateRNumberQuery, [task_app_acronym])
 
     await connection.commit()
     return res.json({ success: true, message: "Task created" })
