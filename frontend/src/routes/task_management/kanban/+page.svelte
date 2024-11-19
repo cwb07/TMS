@@ -93,6 +93,10 @@
     if (form?.taskSuccessMessage) {
       form.taskSuccessMessage = "";
     }
+
+    if (form?.errorMessage) {
+      form.errorMessage = "";
+    }
   };
 
   $: if (form?.resetSaveTaskForm || form?.resetPromoteTaskForm || form?.resetDemoteTaskForm) {

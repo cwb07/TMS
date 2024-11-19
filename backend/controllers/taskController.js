@@ -64,28 +64,30 @@ const promoteTask2Done = async (req, res) => {
     const getListOfEmails = `SELECT GROUP_CONCAT(email SEPARATOR ', ') as emails FROM accounts WHERE username IN (SELECT username FROM usergroup WHERE user_group = ?)`
     const [results] = await pool.query(getListOfEmails, [permitGroup[0].app_permit_done])
 
-    let message = {
-        from: process.env.MAILER_FROM,
-        to: results[0].emails,
-        subject: `Task Pending Review: ${task_id}`,
-        text: `Dear Team,\n\nA task in the Task Management System is pending review.\nPlease login to the system to review the task.\n\nTask ID: ${task_id}\n\nRegards,\nTask Management System`,
-        html: `
-              <p>Dear Team,</p>
-              <p>A task in the Task Management System is pending review.<br>Please login to the system to review the task.</p>
-              <p>Task ID: <b>${task_id}</b></p>
-              <p>Regards,<br>Task Management System</p>
-              `
-    };
+    if (results[0].emails) {
+      let message = {
+          from: process.env.MAILER_FROM,
+          to: results[0].emails,
+          subject: `Task Pending Review: ${task_id}`,
+          text: `Dear Team,\n\nA task in the Task Management System is pending review.\nPlease login to the system to review the task.\n\nTask ID: ${task_id}\n\nRegards,\nTask Management System`,
+          html: `
+                <p>Dear Team,</p>
+                <p>A task in the Task Management System is pending review.<br>Please login to the system to review the task.</p>
+                <p>Task ID: <b>${task_id}</b></p>
+                <p>Regards,<br>Task Management System</p>
+                `
+      };
 
-    transporter.sendMail(message, (err, info) => {
-      if (err) {
-          console.log('Error occurred. ' + err.message);
-          return process.exit(1);
-      }
-  
-      console.log('Message sent: %s', info.messageId);
-      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  });
+      transporter.sendMail(message, (err, info) => {
+        if (err) {
+            console.log('Error occurred. ' + err.message);
+            return process.exit(1);
+        }
+    
+        console.log('Message sent: %s', info.messageId);
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    });
+  }
 
     return res.json({ success: true, message: 'Task submitted for review.', newNotes: newLog })
   } catch (err) {
