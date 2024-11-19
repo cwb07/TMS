@@ -97,6 +97,14 @@ const checkTaskStatePermit = async (req, res, next) => {
   const connection = await pool.getConnection()
 
   try {
+    // check if app exists
+    const appQuery = `SELECT * FROM application WHERE app_acronym = ?`
+    const [appResults] = await connection.query(appQuery, [task_app_acronym])
+
+    if (appResults.length === 0) {
+      return res.status(404).json({ success: false, message: "App name has been changed. Reloading.", redirectToTMS: true})
+    }
+
     const query = `SELECT app_permit_create, app_permit_open, app_permit_todolist, app_permit_doing, app_permit_done FROM application WHERE app_acronym = ?`
     const [results] = await connection.query(query, [task_app_acronym])
 

@@ -46,6 +46,8 @@ export const load = async ({ request, locals }) => {
   } catch (err) {
     if (err.response.status === 401) {
       error(401, { message: err.response.data.message, redirectToLogin: true })
+    } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+      error(404, { message: err.response.data.message, redirectToTMS: true })
     } else {
       error(500, { message: "Internal server error" })
     }
@@ -75,6 +77,8 @@ export const actions = {
         error(401, { message: err.response.data.message, redirectToLogin: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -105,6 +109,8 @@ export const actions = {
         error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -135,6 +141,8 @@ export const actions = {
         error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -165,6 +173,8 @@ export const actions = {
         error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -195,6 +205,8 @@ export const actions = {
         error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }
@@ -225,6 +237,8 @@ export const actions = {
         error(403, { message: err.response.data.message, reload: true })
       } else if (err.response.status === 403) {
         error(403, { message: err.response.data.message, redirectToTMS: true })
+      } else if (err.response.status === 404 && err.response.data.redirectToTMS) {
+        error(404, { message: err.response.data.message, redirectToTMS: true })
       } else {
         error(500, { message: "Internal server error" })
       }

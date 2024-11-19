@@ -36,9 +36,7 @@
 
   // when user selects a plan, display the start and end date of the plan
   $: if (taskPlan) {
-    const selectedPlan = $page.data.plansList.find(
-      (plan) => plan.plan_mvp_name === taskPlan
-    );
+    const selectedPlan = $page.data.plansList.find((plan) => plan.plan_mvp_name === taskPlan);
     taskPlanStartDate = formatDateToDisplay(selectedPlan.plan_startdate);
     taskPlanEndDate = formatDateToDisplay(selectedPlan.plan_enddate);
   } else {

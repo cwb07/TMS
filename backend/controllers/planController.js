@@ -21,6 +21,14 @@ const createPlan = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
+    // check if app exists
+    const appQuery = `SELECT * FROM application WHERE app_acronym = ?`
+    const [appResults] = await connection.query(appQuery, [plan_app_acronym])
+
+    if (appResults.length === 0) {
+      return res.status(404).json({ success: false, message: "App name has been changed. Reloading.", redirectToTMS: true})
+    }
+
     const query = `SELECT * FROM plan WHERE plan_mvp_name = ? AND plan_app_acronym = ?`
     const [results] = await connection.query(query, [plan_mvp_name, plan_app_acronym])
 
@@ -57,6 +65,14 @@ const getAllPlansInApp = async (req, res) => {
   const connection = await pool.getConnection()
 
   try {
+    // check if app exists
+    const appQuery = `SELECT * FROM application WHERE app_acronym = ?`
+    const [appResults] = await connection.query(appQuery, [plan_app_acronym])
+
+    if (appResults.length === 0) {
+      return res.status(404).json({ success: false, message: "App name has been changed. Reloading.", redirectToTMS: true})
+    }
+    
     const query = `SELECT * FROM plan WHERE plan_app_acronym = ?`
     const [results] = await connection.query(query, [plan_app_acronym])
     return res.json({ success: true, message: "Plans retrieved", data: results })
