@@ -17,11 +17,11 @@ const CreateTask = async (req, res) => {
         return res.json({ MsgCode: MsgCode.INVALID_PAYLOAD_TYPE, message: "Invalid payload type" })
     }
 
+    const optionalKeys = ["task_description"]
     const mandatoryKeys = ["username", "password", "task_name", "task_plan", "task_app_acronym"]
 
-    // check if all keys are present in the payload and count is same
-    // dup keys is not checked as it will take on the latest key
-    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).length < mandatoryKeys.length) {
+    // check if all mandatory keys are present in the payload and if any key in req.body is not in mandatoryKeys or optionalKeys
+    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).some(key => !mandatoryKeys.includes(key) && !optionalKeys.includes(key))) {
         return res.json({ MsgCode: MsgCode.INVALID_KEYS, message: "Invalid keys" })
     }
 
@@ -143,9 +143,8 @@ const GetTaskbyState = async (req, res) => {
 
     const mandatoryKeys = ["username", "password", "task_state", "task_app_acronym"]
 
-    // check if all keys are present in the payload and count is same
-    // dup keys is not checked as it will take on the latest key
-    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).length < mandatoryKeys.length) {
+    // check if all keys are present in the payload and if any key in req.body is not in mandatoryKeys
+    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).some(key => !mandatoryKeys.includes(key))) {
         return res.json({ MsgCode: MsgCode.INVALID_KEYS, message: "Invalid keys" })
     }
 
@@ -228,11 +227,11 @@ const PromoteTask2Done = async (req, res) => {
         return res.json({ MsgCode: MsgCode.INVALID_PAYLOAD_TYPE, message: "Invalid payload type" })
     }
 
+    const optionalKeys = ["task_notes"]
     const mandatoryKeys = ["username", "password", "task_id"]
 
-    // check if all keys are present in the payload and count is same
-    // dup keys is not checked as it will take on the latest key
-    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).length < mandatoryKeys.length) {
+    // check if all mandatory keys are present in the payload and if any key in req.body is not in mandatoryKeys or optionalKeys
+    if (!mandatoryKeys.every(key => Object.keys(req.body).includes(key)) || Object.keys(req.body).some(key => !mandatoryKeys.includes(key) && !optionalKeys.includes(key))) {
         return res.json({ MsgCode: MsgCode.INVALID_KEYS, message: "Invalid keys" })
     }
 
