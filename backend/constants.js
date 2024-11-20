@@ -1,0 +1,14 @@
+const MsgCode = {
+    INVALID_URL: "U_001",
+    INVALID_KEYS: "P_001",
+    INVALID_PAYLOAD_TYPE: "P_002",
+    INVALID_CREDENTIALS: "I_001",
+    NOT_AUTHORIZED: "I_002",
+    INVALID_INPUT: "T_001",
+    NOT_FOUND: "T_002",
+    INVALID_STATE_CHANGE: "T_003",
+    INTERNAL_ERROR: "E_001",
+    SUCCESS: "S_001"
+}
+
+export default MsgCode
