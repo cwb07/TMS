@@ -6,6 +6,6 @@ const router = express.Router()
 
 router.route("/GetTaskbyState").post(GetTaskbyState)
 router.route("/CreateTask").post(CreateTask)
-router.route("/PromoteTask2Done").post(PromoteTask2Done)
+router.route("/PromoteTask2Done").put(PromoteTask2Done)
 
 export default router
