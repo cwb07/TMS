@@ -10,6 +10,12 @@ const app = express()
 
 app.use(express.json())
 
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError) {
+        res.json({ MsgCode: MsgCode.INTERNAL_ERROR })
+    }
+});
+
 app.use(routes)
 app.use((req, res) => {
     res.json({ MsgCode: MsgCode.INVALID_URL })
