@@ -12,7 +12,7 @@ app.use(express.json())
 
 app.use((err, req, res, next) => {
     if (err instanceof SyntaxError) {
-        res.json({ MsgCode: MsgCode.INTERNAL_ERROR })
+        res.json({ MsgCode: MsgCode.PAYLOAD_SYNTAX_ERROR })
     }
 });
 
