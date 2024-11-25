@@ -17,6 +17,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(routes)
+
 app.use((req, res) => {
     res.json({ MsgCode: MsgCode.INVALID_URL })
 })

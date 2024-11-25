@@ -319,7 +319,6 @@ const PromoteTask2Done = async (req, res) => {
             // TRANSACTION ERROR
             for (const key in req.body) {
                 if (typeof req.body[key] !== dataType[key] || req.body[key].length > dataLength[key]) {
-                    console.log("A")
                     return res.json({ MsgCode: MsgCode.INVALID_INPUT })
                 }
             }
@@ -327,7 +326,6 @@ const PromoteTask2Done = async (req, res) => {
             // check if mandatory fields are empty
             for (const key of mandatoryKeys) {
                 if (!req.body[key]) {
-                    console.log("B")
                     return res.json({ MsgCode: MsgCode.INVALID_INPUT })
                 }
             }
