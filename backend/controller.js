@@ -123,7 +123,7 @@ const CreateTask = async (req, res) => {
             await connection.query(updateRNumberQuery, [app_acronym])
 
             await connection.commit()
-            return res.json({ MsgCode: MsgCode.SUCCESS })
+            return res.json({ MsgCode: MsgCode.SUCCESS, TaskId: task_id })
         } catch (err) {
             await connection.rollback()
             return res.json({ MsgCode: MsgCode.INTERNAL_ERROR })
@@ -373,7 +373,7 @@ const PromoteTask2Done = async (req, res) => {
                 });
             }
 
-            return res.json({ MsgCode: MsgCode.SUCCESS })
+            return res.json({ MsgCode: MsgCode.SUCCESS, TaskId: task_id })
         }
     } catch (err) {
         return res.json({ MsgCode: MsgCode.INTERNAL_ERROR })
