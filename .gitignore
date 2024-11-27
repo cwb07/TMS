@@ -20,6 +20,6 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-.sha256
-.tar
-.tgz
+*.sha256
+*.tar
+*.tgz

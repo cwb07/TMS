@@ -1,3 +1,7 @@
-Dockerfile
-node_modules
-.env
+# ** matches any directory
+**/.env
+**/node_modules
+**/.git
+**/.gitignore
+**/Dockerfile
+**/.dockerignore
