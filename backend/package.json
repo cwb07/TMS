@@ -3,12 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
-  "author": "Wei Bing",
-  "license": "ISC",
-  "description": "",
-  "scripts": {
-    "dev": "nodemon server.js"
-  },
+  "author": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
