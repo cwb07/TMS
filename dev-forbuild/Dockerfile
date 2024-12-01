@@ -10,26 +10,29 @@ COPY 3api-1.0.0.tgz .
 RUN npm install 3api-1.0.0.tgz
 
 # copy all files in current directory to current WORKDIR
-# COPY . .
+COPY . .
+
+# compare the package.json in the tgz with the local package.json, if they are different, exit
+RUN cmp node_modules/3api/package.json package.json || exit -1
 
 # bring the node_modules from tgz out to root
-# compare the package.json in the tgz with the local package.json, if they are different, exit
-#RUN cmp node_modules/3api/package.json package.json || exit 1
+# move the contents of node_modules in the tgz to the root node_modules the local path
+RUN mv node_modules/3api/node_modules/* node_modules
 
-# # move the contents of node_modules in the tgz to the root node_modules the local path
-# RUN mv -f node_modules/tms-backend/node_modules/* node_modules
+# remove the 3api directory
+RUN rm -r node_modules/3api
 
-# # remove the tms-backend directory
-# RUN rm -rf node_modules/tms-backend
+# remove the tgz file
+RUN rm 3api-1.0.0.tgz
 
-# # remove the tgz file
-# RUN rm tms-backend-1.0.0.tgz
+# add a non-root user
+# -D means do not assign a password, -H means do not create a home directory
+# 755: owner rwx, group rx, others rx
+RUN adduser -D -H developer && \
+    chmod -R 755 /app
 
-# # owner rwx, group rx, others rx
-# RUN chmod -R 755 /app
-# USER node
+# change to non-root user
+USER developer
 
 # command to run the server when the container starts
-# CMD ["node", "server.js"]
-
-CMD ["sh"]
+CMD ["node", "server.js"]
