@@ -1,7 +1,42 @@
-# ** matches any directory
-**/.env
-**/node_modules
-**/.git
-**/.gitignore
-**/Dockerfile
-**/.dockerignore
+node_modules
+
+*.tar
+Dockerfile
+.dockerignore
+
+# Git files
+.git
+.gitignore
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (e.g., development-only configs)
+.env
+.env.local
+.env.*.local
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE settings
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Temporary files and directories
+tmp/
+temp/
+*.tmp
+*.backup
+*.bak

@@ -1,23 +1,23 @@
-# internet Dockerfile
+# internet facing Dockerfile
 # base image to use
-FROM node:22-alpine3.19
+FROM node:22-alpine
 
-# subsequent commands will run in this directory
-# sets the working directory for any RUN, CMD, ENTRYPOINT, COPY, and ADD
+# working directory where subsequent commands like RUN will run in
 WORKDIR /app
 
-# copy the package.json to the container
-COPY package.json .
-
-# install the dependencies
-RUN npm install
-
-# copy the rest of the application
+# copy all files in current directory to current WORKDIR
 COPY . .
 
-# owner rwx, group rx, others rx
-RUN chmod -R 755 /app
-USER node
+#install the dependencies
+# add a non-root user
+# -D means do not assign a password, -H means do not create a home directory
+# 755: owner rwx, group rx, others rx
+RUN npm install && \
+    adduser -D -H developer && \
+    chmod -R 755 /app
 
-# command to run the server when the container starts
+# change to non-root user
+USER developer
+
+#command to run the server when the container starts
 CMD ["node", "server.js"]
